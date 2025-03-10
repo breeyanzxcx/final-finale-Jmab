@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J-MAB Products</title>
+  <link rel="stylesheet" href="../CSS/product.css">
+  <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo-container">
+      <img src="../imahe/j-mab.png" alt="J-MAB Logo">
+      <span>J-MAB</span>
+    </div> 
+
+    <div class="nav-links">
+      <a id="hehe" href="./home.html">HOME</a>
+      <a id="hehe" href="./productPage.html?category=tires" class="active">PRODUCTS</a>
+      <a id="hehe" href="./about.html">ABOUT</a>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" placeholder="Search">
+      <button>
+        <img src="../imahe/search.png" alt="Search Icon">
+      </button>
+    </div>
+
+    <div class="action-icons">
+      <a href="../HTML/userCart.html">
+          <img src="../imahe/cart.png" alt="Cart Icon">
+      </a>
+      <a href="../HTML/">
+          <img src="../imahe/notifications.png" alt="Notification Icon">
+      </a>
+      
+      <div class="profile-button" onclick="toggleDropdown()">
+          <img src="../imahe/prof.png" alt="Profile Icon">
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="../HTML/profile.html">My Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="sidebar">
+      <h3>CATEGORIES</h3>
+      <a href="#" data-category="tires">TIRES</a>
+      <a href="#" data-category="batteries">BATTERIES</a>
+      <a href="#" data-category="oils">OILS</a>
+      <a href="#" data-category="lubricants">LUBRICANTS</a>
+      <br/>
+      <hr>
+
+      <h3>FILTER</h3>
+      <a href="#" id="sortLowHigh">PRICE: Low to High</a>
+      <a href="#" id="sortHighLow">PRICE: High to Low</a>
+    </div>
+
+    <div class="products">
+      <div class="tire-section">
+        <h3>Tire Section</h3>
+        <div class="item-container">
+          <!--DITO MAKAKARGA YUNG MGA ITEMS FROM DB-->
+        </div>
+      </div>
+
+      <div class="Battery-section">
+        <h3>Battery Section</h3>
+        <div class="item-container">
+          <!--DITO MAKAKARGA YUNG MGA ITEMS FROM DB-->
+        </div>
+      </div>
+
+      <div class="Lubricant-section">
+        <h3>Lubricant Section</h3>
+        <div class="item-container">
+          <!--DITO MAKAKARGA YUNG MGA ITEMS FROM DB-->
+        </div>
+      </div>
+
+      <div class="Oil-section">
+        <h3>Oil Section</h3>
+        <div class="item-container">
+          <!--DITO MAKAKARGA YUNG MGA ITEMS FROM DB-->
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="../JS/products.js"></script>
+<script src="../JS/logout.js"></script>
+</body>
+</html>

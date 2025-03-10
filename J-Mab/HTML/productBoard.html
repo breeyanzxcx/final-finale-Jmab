@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-MAB Product Page</title>
+    <link rel="stylesheet" href="../CSS/product_board.css">
+    <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main>
+        <button id="returnBtn">⬅ Return</button>
+
+        <div class="product-container">
+            <div class="product-grid">
+                <div class="product-image">
+                    <img src="" alt="Product Image" class="product-img">
+                </div>
+                <div class="product-details">
+                    <h1 id="product-name">Loading...</h1>
+                    <p class="brand" id="product-brand">Brand: Loading...</p>
+                   <div class="rating">★★★★★ 5 Star Ratings</div>
+                    <div class="price" id="product-price">₱0.00</div>
+                    <div class="size-selector">
+                        <label for="size">Select Sizes</label>
+                        <select id="size"></select>
+                    </div>
+                    <div class="description" id="product-description"></div>
+                    <div class="quantity">
+                        <button class="qty-btn">-</button>
+                        <input type="number" class="qty-input" value="1" min="1">
+                        <button class="qty-btn">+</button>
+                    </div>
+                    <div class="buttons">
+                        <button class="add-to-cart">ADD TO CART</button>
+                        <button class="buy-now">BUY NOW</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../JS/productBoard.js"></script>
+    <script src="../JS/returnbutton.js"></script>
+</body>
+</html>

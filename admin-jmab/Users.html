@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-Mab Admin</title>
+    <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            text-decoration: none;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            display: flex;
+            background-color: #DCD7C9;
+        }
+        
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 100%;
+            background: #02254B;
+            transition: all 0.3s ease;
+            color: white; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        #sidebar .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        #sidebar img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        #sidebar .admin-text {
+            font-weight: 500;
+            font-size: 18px;
+            color: #15DBa0;
+        }
+        
+        #sidebar hr {
+            border: none;
+            height: 2px;
+            background:  #15DBa0;
+            margin: 15px 0;
+        }
+        
+        #sidebar .side-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        #sidebar .side-menu li {
+            position: relative;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        
+        #sidebar .side-menu li a {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            padding: 12px 20px;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #sidebar .side-menu li a i {
+            margin-right: 15px;
+            width: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        #sidebar .side-menu li a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(21, 219, 160, 0.2);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+        
+        #sidebar .side-menu li a:hover::before,
+        #sidebar .side-menu li a.active::before {
+            left: 0;
+        }
+        
+        #sidebar .side-menu li a:hover,
+        #sidebar .side-menu li a.active {
+            color:  #15DBa0;
+        }
+        
+        #sidebar .side-menu li a:hover i,
+        #sidebar .side-menu li a.active i {
+            transform: scale(1.1);
+        }
+        
+        #sidebar .logout-container {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            padding: 0 15px;
+        }
+        
+        #sidebar .logout-container a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255,0,0,0.1);
+            color: #ff4d4d;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        #sidebar .logout-container a:hover {
+            background-color: rgba(255,0,0,0.2);
+            transform: translateY(-3px);
+        }
+
+        main {
+            margin-left: 190px; 
+            padding: 20px;
+            min-height: 100vh;
+            background-color: #DCD7C9;
+            color: black;
+            width: calc(100% - 200px);
+        }
+
+        #users-content {
+            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        #users-content h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        #customers-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #customers-table th, #customers-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #customers-table th {
+            background: #007bff;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        #customers-table tbody tr:hover {
+            background: #f1f1f1;
+        }
+
+        .action-btn {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .action-btn:hover {
+            background: #c82333;
+        }
+
+        #close-view-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+        
+        #close-view-btn:hover {
+            background: #c82333;
+        }
+
+        #transaction-view {
+            display: none; 
+            position: fixed; 
+            left: 50%; 
+            bottom: 18%;
+            transform: translate(-50%, -50%); 
+            width: 800px; 
+            height: 500px; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+            position: relative;
+        }
+
+        .view-btn {
+            background-color: #007bff; 
+            color: white; 
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease, transform 0.2s;
+        }
+        
+        .view-btn:hover {
+            background-color: #0056b3; 
+            transform: scale(1.05); 
+        }
+        
+        #sidebar .side-menu li a:hover, #sidebar .side-menu li a.active {
+            background-color: rgba(21, 219, 160, 0.2);
+            transition: background 0.3s ease, color 0.3s ease;
+            width: 95%;
+        }
+
+        #add-user-form {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #add-user-form input, #add-user-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #add-user-form button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #add-user-form button:hover {
+            background: #0056b3;
+        }
+
+        .remove-btn {
+            background-color: #dc3545; 
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease, transform 0.2s;
+        }
+        
+        .remove-btn:hover {
+            background-color: #c82333; 
+            transform: scale(1.05); 
+        }
+    </style>
+</head>
+<body>
+    <section id="sidebar">
+        <div class="logo-container">
+            <img src="../images/ICONS.png" class="logo" alt="Logo">
+            <p class="admin-text">Admin</p>
+        </div>
+        <hr>
+        <ul class="side-menu">
+            <li><a href="/JMAB/admin-jmab/dashboard.html"><i class="fas fa-gauge"></i><span>Dashboard</span></a></li>
+            <li><a href="/JMAB/admin-jmab/products.html"><i class="fas fa-box"></i><span>Products</span></a></li>
+            <li><a href="/JMAB/admin-jmab/orderConfirm.html"><i class="fas fa-shopping-cart"></i><span>Orders</span></a></li>
+            <li><a href="/JMAB/admin-jmab/customerTransaction.html"><i class="fas fa-user-circle"></i><span>Customers</span></a></li>
+            <li><a href="/JMAB/admin-jmab/Users.html" class="active"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
+        </ul>
+        <div class="logout-container">
+            <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+        </div>
+    </section>
+
+    <main>
+        <div id="users-content" class="content-section">
+            <form id="add-user-form">
+                <h1>Add an admin</h1>
+                <input type="text" id="first-name" placeholder="First Name" required>
+                <input type="text" id="last-name" placeholder="Last Name" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <select id="role" required>
+                    <option value="admin">Admin</option>
+                    <option value="customer">Customer</option>
+                </select>
+                <button type="submit">Add User</button>
+            </form>
+            
+            <h1>Manage Users</h1>
+            <table id="customers-table">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTable">
+                    <!-- DITO MALALAGAY YUNG MGA USERS-->
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script src="JS/Users.js"></script>
+</body>
+</html>

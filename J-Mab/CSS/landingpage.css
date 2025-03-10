@@ -1,0 +1,253 @@
+html{
+	scroll-behavior: smooth;
+}
+
+body{
+	margin: 0;
+	padding: 0;
+}
+/*header{
+	background-color: white;
+    text-align: center;#
+	display: flex;
+	justify-content: space-between;
+}
+
+header h1{
+	margin: 0;
+	margin-left: 35%;
+	font-size: 50px;
+	font-family:monospace;
+	padding-top: 30px;
+} */
+
+.J-Mab {
+	background: #012647;
+	color: black;
+	text-align: center;
+	padding: 100px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+}
+
+/* Content Styling */
+.J-Mab .content {
+	max-width: 600px;
+	background: transparent;
+}
+
+.J-Mab h1 {
+	color: white;
+	font-size: 3rem;
+	margin-bottom: 20px;
+}
+
+.J-Mab p {
+	color: white;
+	font-size: 1.25rem;
+	margin-bottom: 30px;
+	line-height: 1.6;
+}
+
+
+.J-Mab .btn {
+	display: inline-block;
+    padding: 15px 30px;
+    color: black;
+    background: white;
+    text-decoration: none;
+    font-size: 1rem;
+    border-radius: 25px;
+    transition: background-color 0.3s, color 0.3s;
+    border: none;
+}
+
+.jmab-button{
+	margin-top: 50px;
+	text-align: center;
+	width: 50%;
+	display: inline-block; /* Makes it behave like a button */
+    padding: 10px 20px;   
+    background-color: transparent;
+    color: black;         
+    text-decoration: none; 
+    border-radius: 20px;    
+    font-size: 16px;      
+    font-family: Arial, sans-serif; 
+    border: 1px solid black;
+}
+.content{
+	width: calc(100% - 120px);
+	height: 81%;
+	background-color: #ffffff;
+	margin: 0 60px;
+}
+
+.smol{
+	margin-top: 200px;
+	padding: 15px;
+	background-color: #012647;
+} 
+
+.low-button{
+	text-align: center;
+	width: 50%;
+	display: inline-block; /* Makes it behave like a button */
+    padding: 10px 20px;   
+    background-color: transparent;
+    color: black;         
+    text-decoration: none; 
+    border-radius: 20px;    
+    font-size: 16px;      
+    font-family: Arial, sans-serif; 
+    border: 1px solid black;
+}
+
+.button:hover{
+	background-color: rgb(110, 142, 237);
+}
+
+.content h2{
+	text-align: center;
+	font-size: 30px;
+} 
+
+.content h3{
+	font-size: 30px;
+} 
+
+.content button{
+	margin-top: 5px;
+	border-radius: 100px;
+	padding: 5px;
+	background-color: transparent;
+}
+
+.boxbox{
+	display: flex;
+	border: 2px solid black;
+}
+
+.note{
+	margin-top: 60px;
+	width: 50%;
+	color: rgb(7, 0, 0);
+	padding-left: 80px;
+	padding-top: 80px;
+}
+
+.note h1{
+	font-size: 80px;
+	margin: 0;
+}
+
+.note h4{
+	margin: 0;
+	font-size: 18px;
+	color:rgb(0, 7, 0);
+	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.logo{
+	width: 50%;
+}
+
+.logo img{
+	width: 70%;
+    height: 70%;
+	object-fit: cover;
+	display: block;
+	margin-left: 100px;
+	margin-top: 50px;
+}
+
+.sample-container{
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap; /* Allows products to wrap if needed */
+	justify-content: space-evenly; 
+	align-items: flex-start;
+	padding: 20px 0; 
+}
+
+.sample-container .sample1, .sample2 ,.sample3 ,.sample4{
+	background-color: white;
+	width: 200px;
+}
+
+.sample-container p{
+	text-align: center;
+}
+
+.sample-container img {
+    width: 200px; 
+    object-fit: cover; 
+    border-radius: 5px;
+}
+
+.button-container {
+    width: 100%; 
+    display: flex;
+    justify-content: center; 
+    margin-top: 20px;
+}
+
+.shop-now-btn {
+    padding: 10px 20px;
+    color: black;
+    border: 1px solid black;
+    border-radius: 20px;
+    font-size: 16px;
+	width:20%;
+}
+
+footer {
+    background-color: #012647;
+    color: white;
+    width: 100%;
+    padding: 20px 0;
+	margin-top: 100px;
+}
+
+.footer-container {
+    width: 100%;
+    max-width: 1200px; 
+    margin: 0 auto;
+}
+
+.footer-row {
+    display: flex;
+    justify-content: space-between; 
+    align-items: flex-start; 
+    gap: 30px; 
+}
+
+.footer-contactus,
+.footer-aboutus,
+.footer-social {
+    font-family: 'Poppins', sans-serif;
+}
+
+.footer-contactus h2,
+.footer-aboutus h2,
+.footer-social h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+
+.footer-social a {
+    color: white;
+    margin-right: 15px;
+    font-size: 30px;
+}
+
+.footer-social a:hover {
+    color: #0078ff; 
+}
+
+.footer-social i {
+    transition: color 0.3s;
+}

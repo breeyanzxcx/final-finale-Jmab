@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        /* Notification Styles */
+        #notification-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1100;
+            width: 300px;
+        }
+
+        .notification {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.5s, transform 0.5s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            margin-right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .notification-icon.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .notification-icon.error {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .notification-icon.warning {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .notification-icon.info {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .notification-content {
+            flex-grow: 1;
+        }
+
+        .notification-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: #02254B;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Add this to your existing HTML, preferably right after the navbar -->
+    <div id="notification-container"></div>
+
+    <script>
+        // Notification System
+        class NotificationManager {
+            static showNotification(type, title, message, duration = 5000) {
+                const container = document.getElementById('notification-container');
+                
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.classList.add('notification', 'show');
+                
+                // Create icon
+                const icon = document.createElement('div');
+                icon.classList.add('notification-icon', type);
+                icon.innerHTML = this.getIconForType(type);
+                
+                // Create content
+                const content = document.createElement('div');
+                content.classList.add('notification-content');
+                content.innerHTML = `
+                    <h4>${title}</h4>
+                    <p>${message}</p>
+                `;
+                
+                // Create close button
+                const closeBtn = document.createElement('button');
+                closeBtn.classList.add('notification-close');
+                closeBtn.innerHTML = '&times;';
+                closeBtn.onclick = () => this.removeNotification(notification);
+                
+                // Assemble notification
+                notification.appendChild(icon);
+                notification.appendChild(content);
+                notification.appendChild(closeBtn);
+                
+                // Add to container
+                container.appendChild(notification);
+                
+                // Auto-remove after specified duration
+                const autoRemoveTimer = setTimeout(() => {
+                    this.removeNotification(notification);
+                }, duration);
+                
+                // Allow cancelling auto-removal if manually closed
+                notification.dataset.autoRemoveTimer = autoRemoveTimer;
+            }
+
+            static removeNotification(notification) {
+                // Clear any existing auto-remove timer
+                const existingTimer = notification.dataset.autoRemoveTimer;
+                if (existingTimer) {
+                    clearTimeout(parseInt(existingTimer));
+                }
+
+                // Remove notification
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }
+
+            static getIconForType(type) {
+                switch(type) {
+                    case 'success': return '✓';
+                    case 'error': return '✗';
+                    case 'warning': return '!';
+                    case 'info': return 'i';
+                    default: return '';
+                }
+            }
+
+            // Methods to show specific types of notifications
+            static success(title, message) {
+                this.showNotification('success', title, message);
+            }
+
+            static error(title, message) {
+                this.showNotification('error', title, message);
+            }
+
+            static warning(title, message) {
+                this.showNotification('warning', title, message);
+            }
+
+            static info(title, message) {
+                this.showNotification('info', title, message);
+            }
+        }
+
+        // Example usage in your existing script or add a new script tag
+        document.addEventListener('DOMContentLoaded', () => {
+            // Example notification triggers
+            const notificationIcon = document.querySelector('.action-icons .icon-link[href="../HTML/"]');
+            
+            if (notificationIcon) {
+                notificationIcon.addEventListener('click', (e) => {
+                    e.preventDefault(); // Prevent default navigation
+                    
+                    // Example notifications
+                    NotificationManager.success('Welcome!', 'You have no new notifications.');
+                    // Uncomment to test other types
+                    // NotificationManager.error('Error', 'Something went wrong');
+                    // NotificationManager.warning('Warning', 'Check your account settings');
+                    // NotificationManager.info('Information', 'New feature available');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

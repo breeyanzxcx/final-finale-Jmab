@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-Mab Admin</title>
+    <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* {
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+    
+body {
+    display: flex;
+    background-color: #DCD7C9;
+}
+    
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 100%;
+    background: #02254B;
+    transition: all 0.3s ease;
+    color: white; 
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+    
+#sidebar .logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+    
+#sidebar img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+    
+#sidebar .admin-text {
+    font-weight: 500;
+    font-size: 18px;
+    color: #15DBa0;
+}
+    
+#sidebar hr {
+    border: none;
+    height: 2px;
+    background:  #15DBa0;
+    margin: 15px 0;
+}
+    
+#sidebar .side-menu {
+    list-style: none;
+    padding: 0;
+}
+    
+#sidebar .side-menu li {
+    position: relative;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+}
+    
+#sidebar .side-menu li a {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    padding: 12px 20px;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+    
+#sidebar .side-menu li a i {
+    margin-right: 15px;
+    width: 25px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+    
+#sidebar .side-menu li a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(21, 219, 160, 0.2);
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+    
+#sidebar .side-menu li a:hover::before,
+#sidebar .side-menu li a.active::before {
+    left: 0;
+}
+    
+#sidebar .side-menu li a:hover,
+#sidebar .side-menu li a.active {
+    color:  #15DBa0;
+}
+    
+#sidebar .side-menu li a:hover i,
+#sidebar .side-menu li a.active i {
+    transform: scale(1.1);
+}
+    
+#sidebar .logout-container {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    padding: 0 15px;
+}
+    
+#sidebar .logout-container a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255,0,0,0.1);
+    color: #ff4d4d;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+    
+#sidebar .logout-container a:hover {
+    background-color: rgba(255,0,0,0.2);
+    transform: translateY(-3px);
+}
+
+main {
+    margin-left: 190px; 
+    padding: 20px;
+    min-height: 100vh;
+    background-color: #DCD7C9; 
+    color: black; 
+    width: calc(100% - 200px);
+    transition: all 0.3s ease;
+}
+
+h1 {
+    color: #02254B;
+    margin-bottom: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+th {
+    background: #02254B;
+    color: white;
+}
+
+.btn-accept, .accept-btn{
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease, transform 0.2s;
+}
+.btn-decline, .decline-btn {
+    background-color: #dc3545; 
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease, transform 0.2s;
+}
+</style>
+</head>
+
+<body>
+    <section id="sidebar">
+        <div class="logo-container">
+            <img src="../images/J-mab Logo.png" class="logo">
+            <p class="admin-text">Admin</p>
+        </div>
+        <hr>
+        <ul class="side-menu">
+            <li><a href="/JMAB/admin-jmab/dashboard.html"><i class="fas fa-gauge"></i><span> Dashboard</span></a></li>
+            <li><a href="/JMAB/admin-jmab/products.html"><i class="fas fa-box"></i><span> Products</span></a></li>
+            <li><a href="/JMAB/admin-jmab/orderConfirm.html" class="active"><i class="fas fa-shopping-cart"></i><span> Orders</span></a></li>
+            <li><a href="/JMAB/admin-jmab/customerTransaction.html"><i class="fas fa-user-circle"></i><span>Customers</span></a></li>
+    <li><a href="/JMAB/admin-jmab/Users.html"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
+        </ul>
+        <div class="logout-container">
+            <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i><span> Logout</span></a>
+        </div>
+    </section>
+
+    <main>
+        <h1>CONFIRM ORDERS</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Reference Number</th>
+                    <th>User ID</th>
+                    <th>User Name</th>
+                    <th>Total Price</th>
+                    <th>Payment Method</th>
+                    <th>Products</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body"></tbody> 
+        </table>
+        
+        </table>
+    </main>
+    <script src="JS/orderConfirm.js"></script>
+</body>
+</html>

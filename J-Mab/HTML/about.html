@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | J-MAB Car Supplies</title>
+  <link rel="stylesheet" href="../CSS/about.css">
+  <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<body>
+  <nav class="navbar">
+    <div class="Title">J-Mab</div>
+    <div class="nav-links">
+      <a href="home.html">HOME</a>
+      <a href="./productPage.html?category=tires">PRODUCTS</a>
+      <a href="about.html" class="active">ABOUT</a>
+    </div>
+
+    <div class="action-icons">
+      <a href="../HTML/userCart.html" class="icon-link">
+          <img src="../imahe/cart.png" alt="Cart Icon">
+      </a>
+      <a href="../HTML/" class="icon-link">
+          <img src="../imahe/notifications.png" alt="Notification Icon">
+      </a>
+      <div class="profile-button" onclick="toggleDropdown()">
+          <img src="../imahe/prof.png" alt="Profile Icon">
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="../HTML/profile.html">My Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="about-header">
+    <div class="header-content">
+      <h1>Driven by <span class="highlight">Passion</span>, Committed to Quality</h1>
+      <p class="tagline">Your trusted partner in car care and performance.</p>
+    </div>
+  </header>
+
+  <section class="about-container">
+    <div class="about-section">
+      <h2>J-Mab</h2>
+      <p>At J-MAB, we're passionate about helping you get the most out of your vehicle. 
+        We offer a wide range of high-quality car supplies, from performance parts to everyday essentials,  
+        all designed to keep your car running smoothly and efficiently. Whether you're upgrading your ride 
+        or simply maintaining it, we make it easy to find the products you need. Your journey matters to us, 
+        and we're here to support you every mile of the way with reliable, top-notch car care solutions.</p>
+    </div>
+
+    <div class="about-section">
+      <h2>What We Offer</h2>
+      <p>From high-performance tires to maintenance supplies, we bring you the best in automotive care:</p>
+      <div class="products-grid">
+        <div class="product-category">
+          <img src="../Products/Tire(3).png" alt="Tires">
+          <h3>Premium Tires</h3>
+        </div>
+
+        <div class="product-category">
+          <img src="../Products/Lubricant(2).png" alt="Parts">
+          <h3>Performance Parts</h3>
+        </div>
+
+        <div class="product-category">
+          <img src="../Products/Oil(2).png" alt="Oil">
+          <h3>Maintenance Supplies</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>Why Choose J-MAB?</h2>
+      <div class="values-container">
+        <div class="value-item">
+          <h3>Top-Quality Products</h3>
+          <p>Every item is handpicked for durability and reliability.</p>
+        </div>
+
+        <div class="value-item">
+          <h3>Expert Advice</h3>
+          <p>Our team of professionals is ready to assist you with expert recommendations.</p>
+        </div>
+
+        <div class="value-item">
+          <h3>Customer-Centric Service</h3>
+          <p>We prioritize your satisfaction with fast service and a smooth shopping experience.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>Visit Us</h2>
+      <p>Drop by and let us help you find the best car solutions.</p>
+      <div class="contact-details">
+        <div class="contact-item">
+          <img src="../imahe/location(blue).png" alt="Location">
+          <p>87 Tebeng Road Dagupan City, Pangasinan</p>
+        </div>
+
+        <div class="contact-item">
+          <img src="../imahe/call_icon.png" alt="Phone">
+          <p>0977 769 3620 |  0946 298 6767</p>
+        </div>
+
+        <div class="contact-item">
+          <img src="../imahe/box.png" alt="Email">
+          <p>jmab@gmail.com</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <script src="../JS/logout.js"></script>
+  <script>
+    function toggleDropdown() {
+      const dropdown = document.getElementById('profileDropdown');
+      dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    window.addEventListener('click', function(e) {
+      const profileButton = document.querySelector('.profile-button');
+      const dropdown = document.getElementById('profileDropdown');
+      if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

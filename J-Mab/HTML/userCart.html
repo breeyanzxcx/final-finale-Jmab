@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-MAB Cart</title>
+     <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+    <link rel="stylesheet" href="../CSS/user_cart.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main>
+        <div id="returnBtn" class="back-button">
+            &#8592; Back
+        </div>
+
+        <div class="cart-container">
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <div class="select-all-section">
+                    <input type="checkbox" id="select-all">
+                    <label for="select-all">SELECT ALL ITEMS</label>
+                    <button id="hehe" class="delete-btn">DELETE</button>
+                </div>
+            </div>
+        
+            <!-- New container for cart items -->
+            <div class="cart-items-container">
+
+                
+            </div> 
+        
+            <div class="order-summary">
+                <h4>ORDER SUMMARY</h4>
+                <p>SUBTOTAL <span>₱0.00</span></p>
+                <p>SHIPPING FEE <span>₱50.00</span></p>
+                <p>TOTAL <span>₱50.00</span></p>
+                <button class="checkout-btn">PROCEED TO CHECKOUT</button>
+            </div>
+        </div>
+        
+    </main>
+    <script src="../JS/cart.js"></script>
+    <script src="../JS/returnbutton.js"></script>
+</body>
+</html>

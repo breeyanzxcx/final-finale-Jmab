@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J-MAB Profile</title>
+  <link rel="stylesheet" href="../CSS/profile.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="Title">J-Mab</div>
+    <div class="nav-links">
+      <a href="home.html" class="active">HOME</a>
+      <a href="./productPage.html?category=tires">PRODUCTS</a>
+      <a href="about.html">ABOUT</a>
+    </div>
+
+    <div class="action-icons">
+      <a href="../HTML/userCart.html" class="icon-link">
+          <img src="../imahe/cart.png" alt="Cart Icon">
+      </a>
+      <a href="../HTML/" class="icon-link">
+          <img src="../imahe/notifications.png" alt="Notification Icon">
+      </a>
+      <div class="profile-button" onclick="toggleDropdown()">
+          <img src="../imahe/prof.png" alt="Profile Icon">
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="../HTML/profile.html">My Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="sidebar">
+      <h3>MY ACCOUNT</h3>
+      <a href="../HTML/profile.html" class="active">
+        <img src="../imahe/profile(blue).png" alt="Profile Icon" class="sidebar-icon"> PROFILE
+      </a>
+      <a href="../HTML/address.html">
+        <img src="../imahe/location(blue).png" alt="Address Icon" class="sidebar-icon"> ADDRESSES
+      </a>
+      <h3>MY PURCHASES</h3>
+      <a href="#">
+        <img src="../imahe/bag(blue).png" alt="Items Icon" class="sidebar-icon"> ALL ITEMS
+      </a>
+      <a href="#">
+        <img src="../imahe/dollar(blue).png" alt="Pay Icon" class="sidebar-icon"> TO PAY
+      </a>
+      <a href="#">
+        <img src="../imahe/package(blue).png" alt="Ship Icon" class="sidebar-icon"> TO SHIP
+      </a>
+      <a href="#">
+        <img src="../imahe/truck(blue).png" alt="Receive Icon" class="sidebar-icon"> TO RECEIVE
+      </a>
+      <a href="#">
+        <img src="../imahe/star(blue).png" alt="Rate Icon" class="sidebar-icon"> TO RATE
+      </a>
+      <a href="#">
+        <img src="../imahe/canceled(blue).png" alt="Cancel Icon" class="sidebar-icon"> CANCELLED
+      </a>
+    </div>
+    <div class="content">
+      <div class="additional-box">
+        <h2>MY PROFILE</h2>
+        <p class="manage">File size maximum 1MB, File extension .JPG, .PNG</p>
+      </div>
+      <div class="content-boxes">
+        <div class="info-box">
+          <form class="profile-form" id="profileForm">
+            <div class="form-group">
+              <label for="firstName">FIRST NAME</label>
+              <input type="text" id="firstName" readonly>
+            </div>
+            <div class="form-group">
+              <label for="lastName">LAST NAME</label>
+              <input type="text" id="lastName" readonly>
+            </div>
+            <div class="form-group">
+              <label for="email">EMAIL</label>
+              <input type="email" id="email" readonly>
+            </div>
+            <div class="form-group">
+              <label for="phone">PHONE NUMBER</label>
+              <input type="tel" id="phone" readonly>
+            </div>
+            <div class="form-group">
+              <label>GENDER</label>
+              <div class="radio-group">
+                <input type="radio" id="male" name="gender" value="male" disabled>
+                <label for="male">Male</label>
+                <input type="radio" id="female" name="gender" value="female" disabled>
+                <label for="female">Female</label>
+                <input type="radio" id="other" name="gender" value="other" disabled>
+                <label for="other">Other</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="birthday">BIRTHDAY</label>
+              <input type="date" id="birthday" readonly>
+            </div>
+            <div class="button-group">
+              <button type="button" class="edit-btn" id="editBtn">EDIT</button>
+              <button type="button" class="cancel-btn" id="cancelBtn" style="display: none;">CANCEL</button>
+              <button type="submit" class="save-btn" id="saveBtn" disabled>SAVE</button>
+            </div>
+          </form>
+        </div>
+        <div class="image-box">
+          <div class="profile-image-container">
+            <div class="profile-image">
+              <img src="../imahe/profile-pic.png" alt="Profile Picture" class="profile-pic">
+              <button type="button" class="upload-btn">SELECT IMAGE</button>
+              <p class="center">File size maximum 1MB, File extension .JPG, .PNG</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../JS/logout.js"></script>
+<script>
+  function toggleDropdown() {
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  window.addEventListener('click', function (e) {
+    const profileButton = document.querySelector('.profile-button');
+    const dropdown = document.getElementById('profileDropdown');
+    if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  document.getElementById('editBtn').addEventListener('click', function () {
+    const inputs = document.querySelectorAll('.profile-form input');
+    inputs.forEach(input => input.removeAttribute('readonly'));
+    document.querySelectorAll('.profile-form input[type="radio"]').forEach(radio => radio.removeAttribute('disabled'));
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('saveBtn').classList.add('enabled');
+    document.getElementById('cancelBtn').style.display = 'inline-block';
+    document.getElementById('editBtn').style.display = 'none';
+  });
+
+  document.getElementById('cancelBtn').addEventListener('click', function () {
+    loadProfileData();
+    const inputs = document.querySelectorAll('.profile-form input');
+    inputs.forEach(input => input.setAttribute('readonly', true));
+    document.querySelectorAll('.profile-form input[type="radio"]').forEach(radio => radio.setAttribute('disabled', true));
+    document.getElementById('saveBtn').disabled = true;
+    document.getElementById('saveBtn').classList.remove('enabled');
+    document.getElementById('cancelBtn').style.display = 'none';
+    document.getElementById('editBtn').style.display = 'inline-block';
+  });
+
+  document.getElementById('profileForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const userId = JSON.parse(localStorage.getItem('user')).id;
+    const token = localStorage.getItem('authToken');
+    const userData = {
+      first_name: document.getElementById('firstName').value,
+      last_name: document.getElementById('lastName').value,
+      email: document.getElementById('email').value,
+      phone_number: document.getElementById('phone').value,
+      gender: document.querySelector('input[name="gender"]:checked').value,
+      birthday: document.getElementById('birthday').value
+    };
+
+    fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(userData)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Profile updated successfully!');
+          const inputs = document.querySelectorAll('.profile-form input');
+          inputs.forEach(input => input.setAttribute('readonly', true));
+          document.querySelectorAll('.profile-form input[type="radio"]').forEach(radio => radio.setAttribute('disabled', true));
+          document.getElementById('saveBtn').disabled = true;
+          document.getElementById('saveBtn').classList.remove('enabled');
+          document.getElementById('cancelBtn').style.display = 'none';
+          document.getElementById('editBtn').style.display = 'inline-block';
+          // Update localStorage with new user data and reload
+          const updatedUser = { ...JSON.parse(localStorage.getItem('user')), ...userData };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          fetchUserProfile(userId); // Fetch updated profile data
+        } else {
+          alert('Failed to update profile: ' + (data.errors?.join(', ') || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("An error occurred. Please try again.");
+      });
+  });
+
+  function fetchUserProfile(userId) {
+    const token = localStorage.getItem('authToken');
+    fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem('user', JSON.stringify(data.user)); // Update localStorage with full user data
+          loadProfileData(); // Update UI with fetched data
+        } else {
+          console.error('Failed to fetch user profile:', data.message);
+        }
+      })
+      .catch(error => console.error('Error fetching user profile:', error));
+  }
+
+  function loadProfileData() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      document.getElementById('firstName').value = user.first_name || '';
+      document.getElementById('lastName').value = user.last_name || '';
+      document.getElementById('email').value = user.email || '';
+      document.getElementById('phone').value = user.phone_number || '';
+      document.getElementById('birthday').value = user.birthday || '';
+      if (user.gender) {
+        document.getElementById(user.gender.toLowerCase()).checked = true;
+      }
+    }
+  }
+
+  // Sidebar hover and active state logic
+  const sidebarLinks = document.querySelectorAll('.sidebar a');
+  sidebarLinks.forEach(link => {
+    const icon = link.querySelector('.sidebar-icon');
+    const originalSrc = icon.src;
+    const hoverSrc = originalSrc.replace('-blue', '');
+
+    link.addEventListener('mouseenter', () => {
+      icon.src = hoverSrc;
+    });
+
+    link.addEventListener('mouseleave', () => {
+      if (!link.classList.contains('active')) {
+        icon.src = originalSrc;
+      }
+    });
+
+    link.addEventListener('click', () => {
+      sidebarLinks.forEach(link => {
+        const icon = link.querySelector('.sidebar-icon');
+        icon.src = icon.src.replace('/imahe/', '/imahe/').replace('.png', '-blue.png');
+        link.classList.remove('active');
+      });
+      icon.src = hoverSrc;
+      link.classList.add('active');
+    });
+  });
+
+  // Load full profile data on page load
+  document.addEventListener('DOMContentLoaded', function () {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.id) {
+      fetchUserProfile(user.id); // Fetch full profile using user ID from login
+    } else {
+      console.error('No user data found in localStorage');
+    }
+  });
+</script>
+</body>
+</html>

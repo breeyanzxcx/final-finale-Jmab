@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-Mab Admin</title>
+    <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* {
+    text-decoration: none;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+    
+body {
+    display: flex;
+    background-color: #DCD7C9;
+}
+    
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 100%;
+    background: #02254B;
+    transition: all 0.3s ease;
+    color: white; 
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+    
+#sidebar .logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+    
+#sidebar img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+    
+#sidebar .admin-text {
+    font-weight: 500;
+    font-size: 18px;
+    color: #15DBa0;
+}
+    
+#sidebar hr {
+    border: none;
+    height: 2px;
+    background:  #15DBa0;
+    margin: 15px 0;
+}
+    
+#sidebar .side-menu {
+    list-style: none;
+    padding: 0;
+}
+    
+#sidebar .side-menu li {
+    position: relative;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+}
+    
+#sidebar .side-menu li a {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    padding: 12px 20px;
+    color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+    
+#sidebar .side-menu li a i {
+    margin-right: 15px;
+    width: 25px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+    
+#sidebar .side-menu li a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(21, 219, 160, 0.2);
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+    
+#sidebar .side-menu li a:hover::before,
+#sidebar .side-menu li a.active::before {
+    left: 0;
+}
+    
+#sidebar .side-menu li a:hover,
+#sidebar .side-menu li a.active {
+    color:  #15DBa0;
+}
+    
+#sidebar .side-menu li a:hover i,
+#sidebar .side-menu li a.active i {
+    transform: scale(1.1);
+}
+    
+#sidebar .logout-container {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    padding: 0 15px;
+}
+    
+#sidebar .logout-container a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255,0,0,0.1);
+    color: #ff4d4d;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+    
+#sidebar .logout-container a:hover {
+background-color: rgba(255,0,0,0.2);
+transform: translateY(-3px);
+}
+
+main {
+    margin-left: 190px; 
+    padding: 20px;
+    min-height: 100vh;
+    background-color: #DCD7C9; 
+    color: black; 
+    width: calc(100% - 200px);
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.flex-container h3 {
+    font-size: 30px;
+    font-weight: lighter;
+    margin-top: 50px;
+}
+
+.item-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Adjusts to grid column */
+    min-height: 400px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.item-container p, .item-container h4 {
+    max-width: 100%;
+    word-wrap: break-word; 
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+.item-container img {
+    width: 225px;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.tire-section,
+.Battery-section,
+.Oil-section,
+.Lubricant-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive grid */
+    gap: 20px;
+    padding: 10px;
+    align-items: start; /* Ensure equal alignment */
+}
+
+label {
+    display: block;
+    margin: 8px 0;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+textarea {
+    height: 100px;
+}
+
+.dynamic-fields {
+    margin-top: 10px;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.products-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.product-item {
+    width: 200px;
+    padding: 10px;
+    background: white;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    color: black; 
+}
+
+.product-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.tire-section,
+.Battery-section,
+.Oil-section,
+.Lubricant-section{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 15px;
+    padding: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+.flex-container h3 {
+    font-size: 30px;
+    font-weight: lighter;
+    margin-top: 50px;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+  }
+  
+  #addProductButton {
+    background-color:#012647;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  #addProductButton:hover {
+    background-color: #00796b;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  }
+  
+  #productFormContainer {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    display: none;
+  }
+  
+  form div {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    margin-right: 10px;
+  }
+  
+  input[type="text"], input[type="number"], input[type="url"], textarea, select {
+    width: 250px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  input[type="submit"], #cancelButton {
+    background-color: #009688;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    width: auto;
+  }
+  
+  #cancelButton {
+    background-color: #808080;
+    width: auto;
+  }
+
+  #sidebar .side-menu li a:hover, #sidebar .side-menu li a.active {
+    background-color: rgba(21, 219, 160, 0.2);
+    transition: background 0.3s ease, color 0.3s ease;
+    width: 95%;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px 25px;
+    background-color: #ffffff; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+    border: 1px solid #e0e0e0; 
+}
+
+#addProductButton {
+    background-color: #02254B; 
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#addProductButton:hover {
+    background-color: #01579B; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+#addProductButton:active {
+    transform: translateY(0); 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.category-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.category-buttons button {
+    padding: 10px 20px;
+    background-color: #02254B; 
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-buttons button:hover {
+    background-color: #01579B; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+
+.category-buttons button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    width: 300px;
+    position: relative;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.search-container:hover {
+    background-color: #e0e0e0; 
+    border-color: #ccc; 
+}
+
+.search-container input {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    outline: none;
+    color: #333; 
+}
+
+.search-container input::placeholder {
+    color: #888; 
+}
+
+.search-container i {
+    position: absolute;
+    right: 12px;
+    font-size: 18px;
+    color: #888; 
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.search-container i:hover {
+    color: #02254B; 
+}
+</style>
+</head>
+
+<body>
+    <section id="sidebar">
+        <div class="logo-container">
+            <img src="../images/ICONS.png" class="logo" alt="Logo">
+            <p class="admin-text">Admin</p>
+        </div>
+        <hr>
+        <ul class="side-menu">
+            <li><a href="/JMAB/admin-jmab/dashboard.html"><i class="fas fa-gauge"></i><span>Dashboard</span></a></li>
+            <li><a href="/JMAB/admin-jmab/products.html" class="active"><i class="fas fa-box"></i><span>Products</span></a></li>
+            <li><a href="/JMAB/admin-jmab/orderConfirm.html"><i class="fas fa-shopping-cart"></i><span>Orders</span></a></li>
+            <li><a href="/JMAB/admin-jmab/customerTransaction.html"><i class="fas fa-user-circle"></i><span>Customers</span></a></li>
+            <li><a href="/JMAB/admin-jmab/Users.html"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
+        </ul>
+        <div class="logout-container">
+            <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+        </div>
+    </section>
+
+<main>
+    <h1>Add new product</h1>
+    <div class="top-bar">
+        <button id="addProductButton">Add Product</button>
+        <div class="category-buttons">
+            <button id="allButton">All Products</button>
+            <button id="tireButton">Tire</button>
+            <button id="oilButton">Oil</button>
+            <button id="lubricantButton">Lubricant</button>
+            <button id="batteryButton">Battery</button>
+        </div>
+        <div class="search-container">
+            <input type="text" id="productSearch" placeholder="Search for products...">
+            <i class="fas fa-search"></i>
+        </div>
+    </div>
+
+<div id="productFormContainer" style="display: none;">
+    <h3>Product Details</h3>
+    <form id="createProductForm">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description"></textarea>
+        </div>
+        <div>
+            <label for="category">Category:</label>
+            <select id="category" name="category" required>
+                <option value="">Select Category</option>
+                <option value="Tires">Tires</option>
+                <option value="Batteries">Batteries</option>
+                <option value="Oils">Oils</option>
+                <option value="Lubricants">Lubricants</option>
+                <!-- Add more categories as needed -->
+            </select>
+        </div>
+        <div id="sizeField" style="display:none;">
+            <label for="size">Size:</label>
+            <input type="text" id="size" name="size">
+        </div>
+        <div id="voltageField" style="display:none;">
+            <label for="voltage">Voltage:</label>
+            <input type="text" id="voltage" name="voltage">
+        </div>
+        <div>
+            <label for="price">Price:</label>
+            <input type="number" id="price" name="price" required>
+        </div>
+        <div>
+            <label for="stock">Stock:</label>
+            <input type="number" id="stock" name="stock" required>
+        </div>
+        <div>
+            <label for="image_url">Image URL:</label>
+            <input type="url" id="image_url" name="image_url" required>
+        </div>
+        <div>
+            <label for="brand">Brand:</label>
+            <input type="text" id="brand" name="brand" required>
+        </div>
+        <input type="submit" value="Create Product"> 
+        <input type="button" value="Cancel" id="cancelButton">
+    </form>
+</div>
+
+   <div class="flex-container">
+        <div class="tire-title"><h3>Tire section</h3>
+        </div>
+            <div class="tire-section">
+                <div class="item-container">
+                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
+                   
+                </div>
+            </div>  
+    </div>
+    <hr>
+
+    <div class="flex-container" >
+        <div class="Battery-title"><h3>Battery section</h3>
+        </div>
+            <div class="Battery-section">
+                <div class="item-container">
+                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
+                   
+                </div>
+            </div>   
+    </div>
+    <hr>
+
+    <div class="flex-container" >
+        <div class="Lubricant-title"><h3>Lubricant section</h3>
+        </div>
+            <div class="Lubricant-section">
+                <div class="item-container">
+                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
+                    
+                </div>
+            </div>   
+    </div>
+    <hr>
+
+    <div class="flex-container" >
+        <div class="Oil-title"><h3>Oil section</h3>
+        </div>
+            <div class="Oil-section">
+                <div class="item-container">
+                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
+                    
+                </div>
+            </div>
+    </div>
+</main>
+<script src="JS/products.js"></script>
+</body>
+</html>
