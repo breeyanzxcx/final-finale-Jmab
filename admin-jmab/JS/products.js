@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', (event) => {
-    // Define section variables here
+    // Define section variables
     const tireSection = document.querySelector('.tire-section');
     const batterySection = document.querySelector('.Battery-section');
     const lubricantSection = document.querySelector('.Lubricant-section');
@@ -9,16 +9,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const oilButton = document.getElementById('oilButton');
     const lubricantButton = document.getElementById('lubricantButton');
     const batteryButton = document.getElementById('batteryButton');
+    const allButton = document.getElementById('allButton');
 
     tireButton.addEventListener('click', () => filterProducts('Tires'));
     oilButton.addEventListener('click', () => filterProducts('Oils'));
     lubricantButton.addEventListener('click', () => filterProducts('Lubricants'));
     batteryButton.addEventListener('click', () => filterProducts('Batteries'));
-    const allButton = document.getElementById('allButton');
-
     allButton.addEventListener('click', () => filterProducts('All'));
 
-
+    // Product Form Elements
     const form = document.getElementById('createProductForm');
     const categorySelect = document.getElementById('category');
     const sizeField = document.getElementById('sizeField');
@@ -26,26 +25,32 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const productFormContainer = document.getElementById('productFormContainer');
     const addProductButton = document.getElementById('addProductButton');
     const cancelButton = document.getElementById('cancelButton');
-    
+
     let isEditing = false;
     let currentProductId = null;
 
+    // Show form smoothly
     addProductButton.addEventListener('click', function() {
         resetForm();
         document.querySelector('input[type="submit"]').value = "Create Product";
         productFormContainer.style.display = 'block';
+        setTimeout(() => productFormContainer.style.opacity = '1', 10);
     });
 
+    // Hide form smoothly
     cancelButton.addEventListener('click', function() {
-        productFormContainer.style.display = 'none';
+        productFormContainer.style.opacity = '0';
+        setTimeout(() => productFormContainer.style.display = 'none', 200);
         resetForm();
     });
 
+    // Show/hide fields based on category
     categorySelect.addEventListener('change', function() {
         sizeField.style.display = this.value === 'Tires' ? 'block' : 'none';
         voltageField.style.display = this.value === 'Batteries' ? 'block' : 'none';
     });
 
+    // Product form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -84,9 +89,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
             if (result.success) {
                 alert(isEditing ? 'Product updated successfully!' : 'Product created successfully!');
                 form.reset();
-                productFormContainer.style.display = 'none';
+                productFormContainer.style.opacity = '0';
+                setTimeout(() => productFormContainer.style.display = 'none', 200);
                 resetForm();
-                loadProducts();  
+                loadProducts();
             } else {
                 alert('Error: ' + (result.errors ? result.errors.join('\n') : 'Unknown error'));
             }
@@ -96,6 +102,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     });
 
+    // Logout function
     document.getElementById('logout').addEventListener('click', function (e) {
         e.preventDefault();
         const isConfirmed = confirm("Are you sure you want to log out?");
@@ -104,24 +111,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     });
 
-    async function loadProducts(products) {
-        const tireSection = document.querySelector('.tire-section');
-        tireSection.innerHTML = '';
+    // Load products with smooth transition
+    async function loadProducts() {
+        tireSection.innerHTML = '<p class="loading">Loading products...</p>'; 
+        tireSection.style.opacity = '0.5';
+
         try {
             const response = await fetch('http://localhost/jmab/final-jmab/api/products');
             const data = await response.json();
-    
+
             console.log('API Response:', data);
-    
+
             if (data.success && Array.isArray(data.products)) {
-                const products = data.products;
-    
                 tireSection.innerHTML = '';
                 batterySection.innerHTML = '';
                 lubricantSection.innerHTML = '';
                 oilSection.innerHTML = '';
-    
-                products.forEach(product => {
+
+                data.products.forEach(product => {
                     const productId = product.product_id;
                     
                     if (!productId) {
@@ -132,7 +139,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     const productElement = document.createElement('div');
                     productElement.classList.add('item-container');
                     productElement.dataset.productId = productId;
-    
+
                     productElement.innerHTML = `
                         <img src="${product.image_url}" alt="${product.name}" class="product-image">
                         <h4>${product.name}</h4>
@@ -147,7 +154,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                             <button class="delete-product-btn" data-id="${productId}" style="background-color: #f44336; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
                         </div>
                     `;
-    
+
                     switch (product.category) {
                         case 'Tires': tireSection.appendChild(productElement); break;
                         case 'Batteries': batterySection.appendChild(productElement); break;
@@ -156,7 +163,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         default: console.log(`Unknown category: ${product.category}`);
                     }
                 });
-                
+
+                // Add event listeners to the edit and delete buttons
                 document.querySelectorAll('.edit-product-btn').forEach(button => {
                     button.addEventListener('click', function() {
                         const productId = this.getAttribute('data-id');
@@ -181,8 +189,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         deleteProduct(productId);
                     });
                 });
+
+                tireSection.style.opacity = '1';
             } else {
-                console.error('Error: Unexpected API response format.', data);
                 alert('Error loading products.');
             }
         } catch (error) {
@@ -190,7 +199,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
             alert('An error occurred while fetching products.');
         }
     }
-    
+
+    // Edit product function
     async function editProduct(productId) {
         if (!productId) {
             console.error('Invalid product ID for editing');
@@ -229,6 +239,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 document.querySelector('input[type="submit"]').value = "Update Product";
     
                 productFormContainer.style.display = 'block';
+                setTimeout(() => productFormContainer.style.opacity = '1', 10);
     
                 productFormContainer.scrollIntoView({ behavior: 'smooth' });
             } else {
@@ -240,6 +251,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
     
+    // Delete product function
     async function deleteProduct(productId) {
         if (!productId) {
             console.error('Cannot delete: Product ID is undefined or empty');
@@ -283,6 +295,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
+    // Reset form function
     function resetForm() {
         form.reset();
         isEditing = false;
@@ -291,67 +304,131 @@ document.addEventListener('DOMContentLoaded', (event) => {
         voltageField.style.display = 'none';
     }
 
+    // Product search functionality with smooth filtering
+    document.getElementById('productSearch').addEventListener('input', function() {
+        let filter = this.value.toLowerCase().trim();
+        let activeSections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
+
+        activeSections.forEach(section => {
+            let products = section.querySelectorAll('.item-container');
+            let found = false;
+
+            products.forEach(product => {
+                let name = product.querySelector('h4').textContent.toLowerCase();
+                let description = product.querySelector('p').textContent.toLowerCase();
+                let brand = product.querySelector('p:nth-child(4)').textContent.toLowerCase();
+
+                if (name.includes(filter) || description.includes(filter) || brand.includes(filter)) {
+                    product.style.display = 'flex'; // Ensure it's visible in the grid
+                    product.style.opacity = '1'; 
+                    product.style.transition = 'opacity 0.2s ease-in-out';
+                    found = true;
+                } else {
+                    product.style.display = 'none'; // Completely remove from layout
+                    product.style.opacity = '0';
+                }
+            });
+
+            section.style.display = found ? 'grid' : 'none'; // Keep section hidden if no matching product
+        });
+    });
+
+    // Filter function for category selection
+    function filterProducts(category) {
+        const sections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
+        const titles = document.querySelectorAll('.tire-title, .Battery-title, .Lubricant-title, .Oil-title');
+
+        // Hide all sections initially
+        sections.forEach(section => section.style.display = 'none');
+        titles.forEach(title => title.style.display = 'none');
+
+        switch (category) {
+            case 'Tires':
+                document.querySelector('.tire-section').style.display = 'grid';
+                document.querySelector('.tire-title').style.display = 'block';
+                adjustContainerSizes('Tires');
+                break;
+            case 'Batteries':
+                document.querySelector('.Battery-section').style.display = 'grid';
+                document.querySelector('.Battery-title').style.display = 'block';
+                adjustContainerSizes('Batteries');
+                break;
+            case 'Lubricants':
+                document.querySelector('.Lubricant-section').style.display = 'grid';
+                document.querySelector('.Lubricant-title').style.display = 'block';
+                adjustContainerSizes('Lubricants');
+                break;
+            case 'Oils':
+                document.querySelector('.Oil-section').style.display = 'grid';
+                document.querySelector('.Oil-title').style.display = 'block';
+                adjustContainerSizes('Oils');
+                break;
+            case 'All': 
+                sections.forEach(section => section.style.display = 'grid');
+                titles.forEach(title => title.style.display = 'block');
+                adjustContainerSizes('All');
+                break;
+            default:
+                console.log(`Unknown category: ${category}`);
+        }
+    }
+
+     // Function to adjust container sizes based on category
+     function adjustContainerSizes(category) {
+        const tireContainers = document.querySelectorAll('.tire-section .item-container');
+        const batteryContainers = document.querySelectorAll('.Battery-section .item-container');
+        const lubricantContainers = document.querySelectorAll('.Lubricant-section .item-container');
+        const oilContainers = document.querySelectorAll('.Oil-section .item-container');
+
+        if (category === 'Tires' || category === 'All') {
+            tireContainers.forEach(container => {
+                container.classList.add('small-container');
+                container.classList.remove('big-container');
+            });
+        } else {
+            tireContainers.forEach(container => {
+                container.classList.remove('small-container');
+                container.classList.add('big-container');
+            });
+        }
+
+        if (category === 'Batteries' || category === 'All') {
+            batteryContainers.forEach(container => {
+                container.classList.add('small-container');
+                container.classList.remove('big-container');
+            });
+        } else {
+            batteryContainers.forEach(container => {
+                container.classList.remove('small-container');
+                container.classList.add('big-container');
+            });
+        }
+
+        if (category === 'Lubricants' || category === 'All') {
+            lubricantContainers.forEach(container => {
+                container.classList.add('small-container');
+                container.classList.remove('big-container');
+            });
+        } else {
+            lubricantContainers.forEach(container => {
+                container.classList.remove('small-container');
+                container.classList.add('big-container');
+            });
+        }
+
+        if (category === 'Oils' || category === 'All') {
+            oilContainers.forEach(container => {
+                container.classList.add('small-container');
+                container.classList.remove('big-container');
+            });
+        } else {
+            oilContainers.forEach(container => {
+                container.classList.remove('small-container');
+                container.classList.add('big-container');
+            });
+        }
+    }
+    
+    // Initialize product loading
     loadProducts();
 });
-
-document.getElementById('productSearch').addEventListener('input', function () {
-    let filter = this.value.toLowerCase().trim();
-    let activeSections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
-
-    activeSections.forEach(section => {
-        let products = section.querySelectorAll('.item-container');
-        let found = false;
-
-        products.forEach(product => {
-            let name = product.querySelector('h4').textContent.toLowerCase();
-            let description = product.querySelector('p').textContent.toLowerCase();
-            let brand = product.querySelector('p:nth-child(4)').textContent.toLowerCase();
-
-            if (name.includes(filter) || description.includes(filter) || brand.includes(filter)) {
-                product.style.display = 'flex'; // Ensure it's visible in the grid
-                product.style.opacity = '1'; 
-                product.style.transition = 'opacity 0.2s ease-in-out';
-                found = true;
-            } else {
-                product.style.display = 'none'; // Completely remove from layout
-                product.style.opacity = '0';
-            }
-        });
-
-        section.style.display = found ? 'grid' : 'none'; // Keep section hidden if no matching product
-    });
-});
-
-function filterProducts(category) {
-    const sections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
-    const titles = document.querySelectorAll('.tire-title, .Battery-title, .Lubricant-title, .Oil-title');
-
-    // Hide all sections initially
-    sections.forEach(section => section.style.display = 'none');
-    titles.forEach(title => title.style.display = 'none');
-
-    switch (category) {
-        case 'Tires':
-            document.querySelector('.tire-section').style.display = 'flex';
-            document.querySelector('.tire-title').style.display = 'block';
-            break;
-        case 'Batteries':
-            document.querySelector('.Battery-section').style.display = 'flex';
-            document.querySelector('.Battery-title').style.display = 'block';
-            break;
-        case 'Lubricants':
-            document.querySelector('.Lubricant-section').style.display = 'flex';
-            document.querySelector('.Lubricant-title').style.display = 'block';
-            break;
-        case 'Oils':
-            document.querySelector('.Oil-section').style.display = 'flex';
-            document.querySelector('.Oil-title').style.display = 'block';
-            break;
-        case 'All': // Show all categories
-            sections.forEach(section => section.style.display = 'flex');
-            titles.forEach(title => title.style.display = 'block');
-            break;
-        default:
-            console.log(`Unknown category: ${category}`);
-    }
-}

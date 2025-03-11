@@ -19,6 +19,7 @@
 body {
     display: flex;
     background-color: #DCD7C9;
+    font-family: 'Arial', sans-serif;
 }
     
 #sidebar {
@@ -138,17 +139,18 @@ body {
 }
     
 #sidebar .logout-container a:hover {
-background-color: rgba(255,0,0,0.2);
-transform: translateY(-3px);
+    background-color: rgba(255,0,0,0.2);
+    transform: translateY(-3px);
 }
 
 main {
-    margin-left: 190px; 
+    margin-left: 200px;
     padding: 20px;
     min-height: 100vh;
     background-color: #DCD7C9; 
     color: black; 
     width: calc(100% - 200px);
+    box-sizing: border-box;
 }
 
 .flex-container {
@@ -167,8 +169,8 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    width: 100%; /* Adjusts to grid column */
+    justify-content: space-between;
+    width: 100%;
     min-height: 400px;
     background-color: white;
     border-radius: 10px;
@@ -176,20 +178,22 @@ main {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     transition: all 0.3s ease-in-out;
-}
-
-.item-container p, .item-container h4 {
-    max-width: 100%;
-    word-wrap: break-word; 
-    overflow-wrap: break-word;
-    white-space: normal;
+    box-sizing: border-box;
 }
 
 .item-container img {
-    width: 225px;
-    height: 220px;
-    object-fit: cover;
+    max-width: 100%;
+    height: 200px;
+    object-fit: contain;
     border-radius: 8px;
+}
+
+.item-container h4, 
+.item-container p {
+    max-width: 100%;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .tire-section,
@@ -197,10 +201,11 @@ main {
 .Oil-section,
 .Lubricant-section {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive grid */
+    grid-template-columns: repeat(5, 1fr);
     gap: 20px;
     padding: 10px;
-    align-items: start; /* Ensure equal alignment */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 label {
@@ -282,11 +287,7 @@ button:hover {
     margin-top: 50px;
 }
 
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f0f0;
-  }
-  
+
   #addProductButton {
     background-color:#012647;
     color: white;
@@ -558,7 +559,7 @@ body {
                 </div>
             </div>  
     </div>
-    <hr>
+
 
     <div class="flex-container" >
         <div class="Battery-title"><h3>Battery section</h3>
@@ -570,7 +571,7 @@ body {
                 </div>
             </div>   
     </div>
-    <hr>
+
 
     <div class="flex-container" >
         <div class="Lubricant-title"><h3>Lubricant section</h3>
@@ -582,7 +583,7 @@ body {
                 </div>
             </div>   
     </div>
-    <hr>
+
 
     <div class="flex-container" >
         <div class="Oil-title"><h3>Oil section</h3>
