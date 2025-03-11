@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J-MAB ADDRESS</title>
+    <title>J-MAB Address Management</title>
     <link rel="stylesheet" href="../CSS/address.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
-        <div class="Title">J-Mab</div>
+      <div class="logo-container">
+        <img src="../imahe/j-mab.png" alt="J-MAB Logo">
+        <span>J-MAB</span>
+      </div>
+      
         <div class="nav-links">
           <a href="home.html">HOME</a>
           <a href="./productPage.html?category=tires">PRODUCTS</a>
@@ -22,24 +25,15 @@
             <a href="../HTML/userCart.html" class="icon-link">
                 <img src="../imahe/cart.png" alt="Cart Icon">
             </a>
-            <a href="../HTML/" class="icon-link">
+            <a href="../HTML/notifications.html" class="icon-link">
                 <img src="../imahe/notifications.png" alt="Notification Icon">
             </a>
             <div class="profile-button" onclick="toggleDropdown()">
                 <img src="../imahe/prof.png" alt="Profile Icon">
             </div>
-            <div class="profile-dropdown" id="profileDropdown">
-              <a href="../HTML/profile.html">My Profile</a>
-              <a href="#" id="logout">Logout</a>
-            </div>
           </div>
-
-          <div class="profile-dropdown" id="profileDropdown">
-            <a href="../HTML/profile.html">My Profile</a>
-            <a href="#">Logout</a>
-          </div>
-        </div>
       </nav>
+
     <div class="container">
         <div class="sidebar">
             <h3>MY ACCOUNT</h3>
@@ -50,70 +44,38 @@
               <i class="fas fa-map-marker-alt sidebar-icon"></i> ADDRESSES
             </a>
             <h3>MY PURCHASES</h3>
-            <a href="#">
+            <a href="../HTML/all-items.html">
               <i class="fas fa-shopping-bag sidebar-icon"></i> ALL ITEMS
             </a>
-            <a href="#">
+            <a href="../HTML/to-pay.html">
               <i class="fas fa-dollar-sign sidebar-icon"></i> TO PAY
             </a>
-            <a href="#">
+            <a href="../HTML/to-ship.html">
               <i class="fas fa-box sidebar-icon"></i> TO SHIP
             </a>
-            <a href="#">
+            <a href="../HTML/to-receive.html">
               <i class="fas fa-truck sidebar-icon"></i> TO RECEIVE
             </a>
-            <a href="#">
+            <a href="../HTML/to-rate.html">
               <i class="fas fa-star sidebar-icon"></i> TO RATE
             </a>
-            <a href="#">
+            <a href="../HTML/cancelled.html">
               <i class="fas fa-times-circle sidebar-icon"></i> CANCELLED
             </a>
           </div>
+
           <div class="content">
-        <div class="header">
-            <h2>My Addresses</h2>
-            <div>
-                <button class="add-button">+ ADD ADDRESS</button>
+            <div class="header">
+                <h2>My Addresses</h2>
+                <div>
+                    <button class="add-button">+ ADD ADDRESS</button>
+                </div>
             </div>
-        </div>
-        
-        <div class="address-card" id="address1">
-            <div class="address-info">
-                <strong>John Doe</strong> | 0987-654-3210
-                <p>123 Main St, Barangay San Roque, Quezon City Metro Manila, Western Luzon, 1018</p>
-            </div>
-            <div class="address-actions">
-                <button class="edit-button">EDIT</button>
-                <button class="default-button">SET AS DEFAULT</button>
-            </div>
-        </div>
-
-        <div class="address-card default-address" id="address2">
-            <div class="address-info">
-                <strong>John Doe</strong> | 0987-654-3210
-                <p>123 Main St, Barangay San Roque, Quezon City Metro Manila, Western Luzon, 1018</p>
-            </div>
-            <div class="address-actions">
-                <button class="edit-button">EDIT</button>
-                <button class="default-button">DEFAULT</button>
+            
+            <div id="addressesContainer">
             </div>
         </div>
     </div>
-</div>
-
-<!--<footer class="footer">
-    <div class="footer-left">
-      <img src="../imahe/fb.png" alt="Website Icon" class="footer-icon">
-      <a href="https://www.facebook.com/jmab.trd" target="_blank">www.facebook.com/jmab.trd</a>
-    </div>
-    <div class="footer-right">
-      <div class="contact-info">
-        <img src="../imahe/phone.png" alt="Phone Icon" class="footer-icon">
-        <span>GLOBE: 0977 769 3620</span>   |  
-        <span>SMART: 0946 298 6767</span>
-      </div>
-    </div>
-  </footer>-->
 
     <!-- Add/Edit Address Modal -->
     <div class="modal" id="addAddressModal">
@@ -122,26 +84,23 @@
             <h2 id="modalTitle">ADD ADDRESS</h2>
             <form id="addressForm">
                 <div class="form-group">
-                    <label>PROVINCE</label>
-                    <input type="text" name="province" required>
+                    <label for="city">CITY/MUNICIPALITY</label>
+                    <input type="text" name="city" id="city" required>
                 </div>
                 <div class="form-group">
-                    <label>CITY/MUNICIPALITY</label>
-                    <input type="text" name="city" required>
+                    <label for="barangay">BARANGAY</label>
+                    <input type="text" name="barangay" id="barangay" required>
                 </div>
                 <div class="form-group">
-                    <label>BARANGAY</label>
-                    <input type="text" name="barangay" required>
-                </div>
-                <div class="form-group">
-                    <label>STREET NAME</label>
-                    <input type="text" name="street" required>
+                    <label for="street">STREET NAME</label>
+                    <input type="text" name="street" id="street" required>
                 </div>
                 <div class="form-group checkbox-group">
                     <label for="setDefault">SET AS DEFAULT ADDRESS</label>
                     <input type="checkbox" name="setDefault" id="setDefault" class="boxcheck">
                 </div>
-                <button type="submit" class="save-button" disabled>SAVE</button>
+                <input type="hidden" name="addressId" id="addressId" value="">
+                <button type="submit" class="save-button">SAVE</button>
                 <button type="button" class="delete-button" id="deleteAddressButton">DELETE</button>
             </form>
         </div>
@@ -151,183 +110,12 @@
     <div class="confirmation-modal" id="confirmationModal">
         <div class="confirmation-modal-content">
             <h2>Are you sure you want to delete this address?</h2>
-            <button id="confirmDeleteButton">Yes</button>
-            <button id="cancelDeleteButton" class="cancel-button">Cancel</button>
+            <div class="confirmation-buttons">
+                <button id="confirmDeleteButton">Yes</button>
+                <button id="cancelDeleteButton" class="cancel-button">Cancel</button>
+            </div>
         </div>
     </div>
-
-    <script>
-         let isEditMode = false;
-        let currentEditId = null;
-        let originalAddress = {};
-
-        // Handle Add Address button click to show modal
-        document.querySelector('.add-button').addEventListener('click', () => {
-            isEditMode = false;
-            document.getElementById('modalTitle').textContent = 'ADD ADDRESS';
-            document.getElementById('addressForm').reset();
-            document.getElementById('deleteAddressButton').style.display = 'none';
-            document.querySelector('.save-button').disabled = true;
-            document.getElementById('addAddressModal').style.display = 'block';
-        });
-
-        // Handle closing the modal
-        document.querySelector('.close-button').addEventListener('click', () => {
-            document.getElementById('addAddressModal').style.display = 'none';
-        });
-
-        // Enable save button if all required fields are filled
-        document.querySelectorAll('#addressForm input[required]').forEach(input => {
-            input.addEventListener('input', () => {
-                const allFilled = Array.from(document.querySelectorAll('#addressForm input[required]')).every(input => input.value.trim() !== '');
-                document.querySelector('.save-button').disabled = !allFilled;
-            });
-        });
-
-        // Handle form submission
-        document.getElementById('addressForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const address = {
-                province: formData.get('province'),
-                city: formData.get('city'),
-                barangay: formData.get('barangay'),
-                street: formData.get('street'),
-                setDefault: formData.get('setDefault') === 'on'
-            };
-
-            if (isEditMode) {
-                if (JSON.stringify(address) !== JSON.stringify(originalAddress)) {
-                    document.querySelector(`#${currentEditId} .address-info p`).textContent = `${address.street}, ${address.barangay}, ${address.city}, ${address.province}`;
-                    if (address.setDefault) {
-                        document.querySelectorAll('.address-card').forEach(card => {
-                            card.classList.remove('default-address');
-                            card.querySelector('.default-button').textContent = 'SET AS DEFAULT';
-                        });
-                        document.querySelector(`#${currentEditId}`).classList.add('default-address');
-                        document.querySelector(`#${currentEditId} .default-button`).textContent = 'DEFAULT';
-                    }
-                    alert('Address updated!');
-                } else {
-                    alert('No changes made.');
-                }
-            } else {
-                const newAddressCard = document.createElement('div');
-                newAddressCard.className = 'address-card';
-                newAddressCard.innerHTML = `
-                    <div class="address-info">
-                        <strong>John Doe</strong> | 0987-654-3210
-                        <p>${address.street}, ${address.barangay}, ${address.city}, ${address.province}</p>
-                    </div>
-                    <div class="address-actions">
-                        <button class="edit-button">EDIT</button>
-                        <button class="default-button">SET AS DEFAULT</button>
-                    </div>
-                `;
-                document.querySelector('.container').appendChild(newAddressCard);
-                if (address.setDefault) {
-                    document.querySelectorAll('.address-card').forEach(card => {
-                        card.classList.remove('default-address');
-                        card.querySelector('.default-button').textContent = 'SET AS DEFAULT';
-                    });
-                    newAddressCard.classList.add('default-address');
-                    newAddressCard.querySelector('.default-button').textContent = 'DEFAULT';
-                }
-                alert('Address saved! Implement your save logic here.');
-            }
-
-            document.getElementById('addAddressModal').style.display = 'none';
-        });
-
-        // Handle edit button click to show modal with existing data
-        document.querySelectorAll('.edit-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                isEditMode = true;
-                currentEditId = e.target.closest('.address-card').id;
-                document.getElementById('modalTitle').textContent = 'EDIT ADDRESS';
-                document.getElementById('deleteAddressButton').style.display = 'inline-block';
-
-                const addressInfo = e.target.closest('.address-card').querySelector('.address-info p').textContent.split(', ');
-                const street = addressInfo[0];
-                const barangay = addressInfo[1];
-                const city = addressInfo[2];
-                const province = addressInfo[3];
-
-                originalAddress = {
-                    province: province,
-                    city: city,
-                    barangay: barangay,
-                    street: street,
-                    setDefault: e.target.closest('.address-card').classList.contains('default-address')
-                };
-
-                document.querySelector('input[name="province"]').value = province;
-                document.querySelector('input[name="city"]').value = city;
-                document.querySelector('input[name="barangay"]').value = barangay;
-                document.querySelector('input[name="street"]').value = street;
-                document.querySelector('input[name="setDefault"]').checked = originalAddress.setDefault;
-
-                document.querySelector('.save-button').disabled = true;
-                document.getElementById('addAddressModal').style.display = 'block';
-            });
-        });
-
-        // Enable save button if any changes are made in edit mode
-        document.querySelectorAll('#addressForm input').forEach(input => {
-            input.addEventListener('input', () => {
-                const formData = new FormData(document.getElementById('addressForm'));
-                const address = {
-                    province: formData.get('province'),
-                    city: formData.get('city'),
-                    barangay: formData.get('barangay'),
-                    street: formData.get('street'),
-                    setDefault: formData.get('setDefault') === 'on'
-                };
-                document.querySelector('.save-button').disabled = JSON.stringify(address) === JSON.stringify(originalAddress);
-            });
-        });
-
-        // Handle delete button click to show confirmation modal
-        document.getElementById('deleteAddressButton').addEventListener('click', () => {
-            document.getElementById('confirmationModal').style.display = 'block';
-        });
-
-        // Handle confirmation modal buttons
-        document.getElementById('confirmDeleteButton').addEventListener('click', () => {
-            document.querySelector(`#${currentEditId}`).remove();
-            document.getElementById('confirmationModal').style.display = 'none';
-            document.getElementById('addAddressModal').style.display = 'none';
-        });
-
-        document.getElementById('cancelDeleteButton').addEventListener('click', () => {
-            document.getElementById('confirmationModal').style.display = 'none';
-        });
-
-        // Handle set as default button click
-        document.querySelectorAll('.default-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                document.querySelectorAll('.address-card').forEach(card => {
-                    card.classList.remove('default-address');
-                    card.querySelector('.default-button').textContent = 'SET AS DEFAULT';
-                });
-                e.target.closest('.address-card').classList.add('default-address');
-                e.target.textContent = 'DEFAULT';
-                alert('Address set as default!');
-            });
-        });
-        
-    function toggleDropdown() {
-      const dropdown = document.getElementById('profileDropdown');
-      dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
-    }
-
-    window.addEventListener('click', function (e) {
-      const profileButton = document.querySelector('.profile-button');
-      const dropdown = document.getElementById('profileDropdown');
-      if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.style.display = 'none';
-      }
-    });
-    </script>
+  <script src="../JS/address.js"></script>
 </body>
 </html>

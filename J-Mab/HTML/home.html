@@ -81,6 +81,13 @@
   
   <script src="../JS/logout.js"></script>
   <script>
+
+const userId = localStorage.getItem("userId");  // Get userId directly
+const authToken = localStorage.getItem("authToken");
+
+console.log("User ID:", userId);
+console.log("Auth Token:", authToken);
+
     function toggleDropdown() {
       const dropdown = document.getElementById('profileDropdown');
       dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';

@@ -57,10 +57,12 @@ function displayOrders(orders) {
         if (!groupedOrders[order.reference_number]) {
             groupedOrders[order.reference_number] = {
                 user_id: order.user_id,
+                first_name: order.first_name,
+                last_name: order.last_name,
                 total_price: parseFloat(order.total_price) || 0,
                 payment_method: order.payment_method,
                 status: order.status,
-                products: [], // Store product names
+                product_details: order.product_details, // Store product names
                 order_id: order.order_id
             };
         }
@@ -76,10 +78,10 @@ function displayOrders(orders) {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${reference_number}</td> <!-- Order ID is reference number -->
-            <td>${order.user_id}</td>
+            <td>${order.first_name} ${order.last_name}</td>
             <td>₱${order.total_price.toFixed(2)}</td>
             <td>${order.payment_method.toUpperCase()}</td>
-            <td>${order.products.length > 0 ? order.products.join(", ") : "No products"}</td> <!-- Fix: Display product names -->
+            <td>${order.product_details.replace(/, /g, "<br>")}</td>
             <td>${order.status}</td>
             <td>
                 <button class="accept-btn" onclick="updateOrderStatus(${order.order_id}, 'accepted')">Accept</button>

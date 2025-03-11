@@ -59,10 +59,11 @@ async function fetchUserCart() {
     const authToken = localStorage.getItem("authToken");
 
     if (!userId || !authToken) {
-        alert("Please log in to view your cart.");
+        alert("Please log in to proceed with checkout.");
         window.location.href = "../HTML/sign-in.php";
         return;
     }
+
 
     try {
         const response = await fetch(`http://localhost/jmab/final-jmab/api/carts/${userId}`, {

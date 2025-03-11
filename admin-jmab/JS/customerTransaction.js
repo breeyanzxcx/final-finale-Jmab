@@ -15,38 +15,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchUsers(); // Fetch users when the page loads
 
-    // Fetch Users and Display in Table
     function fetchUsers() {
-        // Add debugging to see if token exists
         console.log("Token for auth:", token);
-        
-        // Make the fetch request
+    
         fetch("http://localhost/jmab/final-jmab/api/users", {
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`  
             },
         })
-        .then(response => {
-            console.log("Response status:", response.status);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             console.log("API response data:", data);
-            
+    
             if (data.success) {
                 const tableBody = document.querySelector('#customers-table tbody');
                 if (!tableBody) {
                     console.error("Table body not found!");
                     return;
                 }
-                
+    
                 tableBody.innerHTML = '';
                 let customerCount = 0;
-
+    
                 data.users.forEach(user => {
                     if (user.roles === "customer") { 
                         customerCount++;
+    
+                        // Store user_id in localStorage for later use
+                        localStorage.setItem(`user_${user.id}`, JSON.stringify(user));
+    
                         const row = `
                             <tr data-id="${user.id}">
                                 <td>${user.first_name}</td>
@@ -58,10 +56,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         tableBody.innerHTML += row;
                     }
                 });
-                
+    
                 console.log(`Found ${customerCount} customers`);
-
-                // Attach view event listeners
+    
+                // Attach event listeners
                 document.querySelectorAll('.view-btn').forEach(button => {
                     button.addEventListener('click', function () {
                         const userId = this.getAttribute('data-id');
@@ -70,70 +68,48 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             } else {
                 console.error("Error fetching users:", data.errors);
-                
-                // Show error message on the page
-                const tableBody = document.querySelector('#customers-table tbody');
-                if (tableBody) {
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: red;">
-                                Error loading customers. Please check console for details.
-                            </td>
-                        </tr>
-                    `;
-                }
             }
         })
-        .catch(error => {
-            console.error("Error fetching users:", error);
-            
-            // Show error message on the page
-            const tableBody = document.querySelector('#customers-table tbody');
-            if (tableBody) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: red;">
-                            Could not connect to server. Please check your connection.
-                        </td>
-                    </tr>
-                `;
-            }
-        });
+        .catch(error => console.error("Error fetching users:", error));
     }
+    
 
     function viewTransactions(userId) {
-        fetch(`http://localhost/jmab/final-jmab/api/users/?user_id=${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                let transactionsHTML = `<h2>Recent Transactions</h2>`;
+        const authToken = localStorage.getItem("authToken");
     
-                if (data.success && data.transactions && data.transactions.length > 0) {
-                    transactionsHTML += `<ul>`;
-                    data.transactions.forEach(transaction => {
-                        transactionsHTML += `<li>Order ID: ${transaction.order_id} - ₱${transaction.amount} - ${transaction.date}</li>`;
-                    });
-                    transactionsHTML += `</ul>`;
-                } else {
-                    transactionsHTML += `
-                        <div style="margin-top: 20%; display: flex; justify-content: center; align-text: center; height: 100%;">
-                            <p style="font-size: 18px;">NO TRANSACTIONS</p>
-                        </div>
-                    `;
-                }
+        console.log("Fetching transactions for User ID:", userId);
     
-                // Display transactions in the modal
-                const viewContent = document.getElementById("transaction-view-content");
-                if (viewContent) {
-                    viewContent.innerHTML = transactionsHTML;
-                    
-                    const viewModal = document.getElementById("transaction-view");
-                    if (viewModal) {
-                        viewModal.style.display = "block";
-                    }
-                }
-            })
-            .catch(error => console.error("Error fetching transactions:", error));
+        fetch(`http://localhost/jmab/final-jmab/api/orders/${userId}`, { // Adjusted API endpoint
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${authToken}`,
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let transactionsHTML = `<h2>Recent Transactions</h2>`;
+    
+            if (data.success && data.orders && data.orders.length > 0) {
+                transactionsHTML += `<ul>`;
+                data.orders.forEach(order => {
+                    transactionsHTML += `<li>Order ID: ${order.order_id} - ₱${order.total_price} - ${order.created_at}</li>`;
+                });
+                transactionsHTML += `</ul>`;
+            } else {
+                transactionsHTML += `<p style="text-align: center; font-size: 18px;">NO TRANSACTIONS</p>`;
+            }
+    
+            const viewContent = document.getElementById("transaction-view-content");
+            if (viewContent) {
+                viewContent.innerHTML = transactionsHTML;
+                document.getElementById("transaction-view").style.display = "block";
+            }
+        })
+        .catch(error => console.error("Error fetching transactions:", error));
     }
+    
+    
 
     // Close View function
     function closeView() {

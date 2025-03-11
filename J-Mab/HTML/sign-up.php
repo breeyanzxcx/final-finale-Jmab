@@ -133,7 +133,7 @@ document.getElementById('signup-form').addEventListener('submit', function(event
 
         if (data.success) {
             alert('Registration successful! Redirecting to login page.');
-            window.location.href = 'sign-in.html'; 
+            window.location.href = 'sign-in.php'; 
         } else {
             alert('Registration failed: ' + (data.message || 'Please try again.'));
         }

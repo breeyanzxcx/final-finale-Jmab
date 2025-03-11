@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
+    console.log("User ID:", userId);
+    console.log("Auth Token:", authToken);
+
+
+
     if (productId) {
         // If "Buy Now" was clicked, fetch only 1 product
         await fetchBuyNowItem(productId, quantity);
