@@ -168,7 +168,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 document.querySelectorAll('.edit-product-btn').forEach(button => {
                     button.addEventListener('click', function() {
                         const productId = this.getAttribute('data-id');
-                        console.log('Edit Product ID:', productId);
+                        console.log('Edit Product ID:', productId); // Debugging step
+                
                         if (!productId) {
                             console.error('Edit button missing product ID');
                             return;
@@ -214,12 +215,32 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 return;
             }
            
-            const response = await fetch(`http://localhost/jmab/final-jmab/api/products/${productId}`);
+            console.log(`Fetching product details for ID: ${productId}`);
+            console.log('Token:', token);
+            
+            const response = await fetch(`http://localhost/jmab/final-jmab/api/products/${productId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('Response Status:', response.status);
+            console.log('Response OK:', response.ok);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorText}`);
+            }
+    
             const data = await response.json();
-    
-            if (data.success && data.product) {
-                const product = data.product;
-    
+            console.log('API Response:', data);
+        
+            // Check for 'products' instead of 'product'
+            if (data.success && data.products) {
+                const product = data.products; // Adjust to use 'products' key
+        
                 document.getElementById('name').value = product.name || '';
                 document.getElementById('description').value = product.description || '';
                 document.getElementById('category').value = product.category || '';
@@ -227,27 +248,27 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 document.getElementById('stock').value = product.stock || '';
                 document.getElementById('image_url').value = product.image_url || '';
                 document.getElementById('brand').value = product.brand || '';
-    
+        
                 categorySelect.dispatchEvent(new Event('change'));
-    
+        
                 if (product.size) document.getElementById('size').value = product.size;
                 if (product.voltage) document.getElementById('voltage').value = product.voltage;
-    
+        
                 isEditing = true;
                 currentProductId = productId;
-    
+        
                 document.querySelector('input[type="submit"]').value = "Update Product";
-    
+        
                 productFormContainer.style.display = 'block';
                 setTimeout(() => productFormContainer.style.opacity = '1', 10);
-    
+        
                 productFormContainer.scrollIntoView({ behavior: 'smooth' });
             } else {
                 alert('Error: ' + (data.message || 'Failed to fetch product details'));
             }
         } catch (error) {
-            console.error('Error fetching product details:', error);
-            alert('An error occurred while fetching product details.');
+            console.error('Error fetching product details:', error.message);
+            alert(`An error occurred while fetching product details: ${error.message}`);
         }
     }
     
