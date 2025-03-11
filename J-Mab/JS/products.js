@@ -189,95 +189,87 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //CODE NG SEARCH BAR//
 document.addEventListener("DOMContentLoaded", () => {
-    const searchInput = document.querySelector('.search-bar input');
-    const searchButton = document.querySelector('.search-bar button');
+  const searchInput = document.querySelector('.search-bar input');
+  const searchButton = document.querySelector('.search-bar button');
 
-    const originalLoadProducts = loadProducts;
-    loadProducts = async function(selectedCategory = "tires") {
-        await originalLoadProducts(selectedCategory);
-        setupSearch();
-    };
+  if (!searchInput || !searchButton) {
+      console.error("Search input or button not found.");
+      return;
+  }
 
-    function setupSearch() {
-        function performSearch() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            
-            const sections = [
-                { selector: '.tire-section', container: '.tire-section .item-container' },
-                { selector: '.Battery-section', container: '.Battery-section .item-container' },
-                { selector: '.Lubricant-section', container: '.Lubricant-section .item-container' },
-                { selector: '.Oil-section', container: '.Oil-section .item-container' }
-            ];
+  function performSearch() {
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      console.log("Searching for:", searchTerm);
 
-            let anyResultFound = false;
+      const sections = [
+          { selector: '.tire-section', container: '.tire-section .item-container' },
+          { selector: '.Battery-section', container: '.Battery-section .item-container' },
+          { selector: '.Lubricant-section', container: '.Lubricant-section .item-container' },
+          { selector: '.Oil-section', container: '.Oil-section .item-container' }
+      ];
 
-            sections.forEach(section => {
-                const sectionElement = document.querySelector(section.selector);
-                const itemContainer = document.querySelector(section.container);
-                
-                if (!sectionElement || !itemContainer) return;
+      let anyResultFound = false;
 
-                const productItems = itemContainer.querySelectorAll('.item');
-                let sectionHasResults = false;
+      sections.forEach(section => {
+          const sectionElement = document.querySelector(section.selector);
+          const itemContainer = document.querySelector(section.container);
+          
+          if (!sectionElement || !itemContainer) return;
 
-                productItems.forEach(item => {
-                    const nameElement = item.querySelector('h4');
-                    const descElement = item.querySelector('.description');
-                    const sizeElement = item.querySelector('p:nth-child(4)');
-                    const priceElement = item.querySelector('p:nth-child(6)');
+          const productItems = itemContainer.querySelectorAll('.item');
+          let sectionHasResults = false;
 
-                    if (!nameElement || !descElement) return;
+          productItems.forEach(item => {
+              const nameElement = item.querySelector('h4');
+              const descElement = item.querySelector('.description');
 
-                    const productName = nameElement.textContent.toLowerCase();
-                    const productDesc = descElement.textContent.toLowerCase();
-                    const productSize = sizeElement ? sizeElement.textContent.toLowerCase() : '';
-                    const productPrice = priceElement ? priceElement.textContent.toLowerCase() : '';
+              if (!nameElement || !descElement) return;
 
-                    if (
-                        productName.includes(searchTerm) || 
-                        productDesc.includes(searchTerm) ||
-                        productSize.includes(searchTerm) ||
-                        productPrice.includes(searchTerm)
-                    ) {
-                        item.style.display = 'block';
-                        sectionHasResults = true;
-                        anyResultFound = true;
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
+              const productName = nameElement.textContent.toLowerCase();
+              const productDesc = descElement.textContent.toLowerCase();
 
-                // Show/hide section based on search results
-                sectionElement.style.display = sectionHasResults ? 'block' : 'none';
-            });
+              if (productName.includes(searchTerm) || productDesc.includes(searchTerm)) {
+                  item.style.display = 'block';
+                  sectionHasResults = true;
+                  anyResultFound = true;
+              } else {
+                  item.style.display = 'none';
+              }
+          });
 
-            const resultsContainer = document.querySelector('.products');
-            let noResultsMessage = document.getElementById('no-results-message');
+          // Show/hide section based on search results
+          sectionElement.style.display = sectionHasResults ? 'block' : 'none';
+      });
 
-            if (!anyResultFound) {
-                if (!noResultsMessage) {
-                    noResultsMessage = document.createElement('div');
-                    noResultsMessage.id = 'no-results-message';
-                    noResultsMessage.textContent = 'No products found matching your search.';
-                    noResultsMessage.style.textAlign = 'center';
-                    noResultsMessage.style.padding = '20px';
-                    noResultsMessage.style.color = 'gray';
-                    resultsContainer.appendChild(noResultsMessage);
-                } else {
-                    noResultsMessage.style.display = 'block';
-                }
-            } else if (noResultsMessage) {
-                noResultsMessage.style.display = 'none';
-            }
-        }
+      // Handle "No Results" message
+      let noResultsMessage = document.getElementById('no-results-message');
+      if (!anyResultFound) {
+          if (!noResultsMessage) {
+              noResultsMessage = document.createElement('div');
+              noResultsMessage.id = 'no-results-message';
+              noResultsMessage.textContent = 'No products found matching your search.';
+              noResultsMessage.style.textAlign = 'center';
+              noResultsMessage.style.padding = '20px';
+              noResultsMessage.style.color = 'gray';
+              document.querySelector('.products').appendChild(noResultsMessage);
+          } else {
+              noResultsMessage.style.display = 'block';
+          }
+      } else if (noResultsMessage) {
+          noResultsMessage.style.display = 'none';
+      }
+  }
 
-        searchButton.addEventListener('click', performSearch);
-        searchInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                performSearch();
-            }
-        });
-    }
+  // **Live search while typing**
+  searchInput.addEventListener('input', performSearch);
 
-    setupSearch();
+  // **Search on button click**
+  searchButton.addEventListener('click', performSearch);
+
+  // **Search on pressing Enter**
+  searchInput.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+          performSearch();
+      }
+  });
 });
