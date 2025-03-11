@@ -73,13 +73,13 @@
   document.getElementById("show-password").addEventListener("change", function () {
     const passwordInput = document.getElementById("password");
     if (this.checked) {
-      passwordInput.type = "text"; // Show password
+      passwordInput.type = "text"; 
     } else {
-      passwordInput.type = "password"; // Hide password
+      passwordInput.type = "password"; 
     }
   });
 
- // Function to auto-capitalize first letter
+
 function capitalizeInput(input) {
     input.value = input.value.replace(/\b\w/g, (char) => char.toUpperCase());
 }
@@ -96,7 +96,7 @@ document.getElementById('lName').addEventListener('input', function () {
 document.getElementById('signup-form').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent form submission if validation fails
 
-    // Get form values
+
     const fName = document.getElementById('fName').value.trim();
     const lName = document.getElementById('lName').value.trim();
     const email = document.getElementById('email').value.trim();
@@ -115,7 +115,6 @@ document.getElementById('signup-form').addEventListener('submit', function(event
         return;
     }
 
-    // If validation passes, proceed with the API request
     fetch('http://localhost/jmab/final-jmab/api/users/register', {
         method: 'POST',
         headers: {
@@ -134,7 +133,7 @@ document.getElementById('signup-form').addEventListener('submit', function(event
 
         if (data.success) {
             alert('Registration successful! Redirecting to login page.');
-            window.location.href = 'sign-in.php'; // Redirect to login page
+            window.location.href = 'sign-in.html'; 
         } else {
             alert('Registration failed: ' + (data.message || 'Please try again.'));
         }

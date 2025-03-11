@@ -65,9 +65,9 @@
     document.getElementById("show-password").addEventListener("change", function () {
     const passwordInput = document.getElementById("password");
     if (this.checked) {
-      passwordInput.type = "text"; // Show password
+      passwordInput.type = "text"; 
     } else {
-      passwordInput.type = "password"; // Hide password
+      passwordInput.type = "password"; 
     }
   });
   
@@ -89,16 +89,15 @@
         console.log('API Response:', data); 
         
         if (data.success && data.user) {
-            localStorage.setItem('authToken', data.token);  // Save token
-            localStorage.setItem('user', JSON.stringify(data.user));  // Store full user data
+            localStorage.setItem('authToken', data.token);  
+            localStorage.setItem('user', JSON.stringify(data.user));  
             
             console.log('User & Token saved:', data.user, data.token);
 
-            // Redirect based on role
             if (data.user.roles === 'admin') {
                 window.location.href = '../../admin-jmab/dashboard.html';
             } else if (data.user.roles === 'customer') {
-                window.location.href = 'home.php';
+                window.location.href = 'home.html';
             } else {
                 alert('Unknown role: ' + data.user.roles);
             }

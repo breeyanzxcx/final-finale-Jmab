@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: 'Montserrat', 'Poppins', sans-serif;
+  font-family: 'Montserrat', 'Poppins', Arial, sans-serif;
   line-height: 1.6;
   color: #333;
   background-color: #f4f4f4;
@@ -27,16 +27,29 @@ body {
   z-index: 1000;
 }
 
-.Title {
-  margin-left: 50px;
-  font-size: 32px;
+.navbar .logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 30px;
+  transition: transform 0.3s ease;
+  
+}
+
+.navbar .logo-container:hover {
+  transform: scale(1.05);
+}
+
+.navbar .logo-container img {
+  height: 50px;
+}
+
+.navbar .logo-container span {
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  background: white;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white;
 }
 
 .nav-links {
