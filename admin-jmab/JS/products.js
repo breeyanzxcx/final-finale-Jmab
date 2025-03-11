@@ -149,9 +149,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         ${product.size ? `<p>Size: ${product.size}</p>` : ''}
                         ${product.voltage ? `<p>Voltage: ${product.voltage}</p>` : ''}
                         <p>Price: ₱${product.price}</p>
-                        <div class="product-actions" style="display: flex; justify-content: space-between; margin-top: 10px;">
-                            <button class="edit-product-btn" data-id="${productId}" style="background-color: #4CAF50; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
-                            <button class="delete-product-btn" data-id="${productId}" style="background-color: #f44336; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                        <div class="product-actions" ">
+                            <button class="edit-product-btn" data-id="${productId}">Edit</button>
+                            <button class="delete-product-btn" data-id="${productId}">Delete</button>
                         </div>
                     `;
 
@@ -304,36 +304,88 @@ document.addEventListener('DOMContentLoaded', (event) => {
         voltageField.style.display = 'none';
     }
 
-    // Product search functionality with smooth filtering
+    // UPDATED: Product search functionality with respect to the current category filter
     document.getElementById('productSearch').addEventListener('input', function() {
         let filter = this.value.toLowerCase().trim();
-        let activeSections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
+        
+        // Determine which sections are currently visible (based on category selection)
+        let visibleSections = [];
+        
+        // Check which sections are displayed
+        if (document.querySelector('.tire-section').style.display !== 'none') {
+            visibleSections.push('.tire-section');
+        }
+        if (document.querySelector('.Battery-section').style.display !== 'none') {
+            visibleSections.push('.Battery-section');
+        }
+        if (document.querySelector('.Lubricant-section').style.display !== 'none') {
+            visibleSections.push('.Lubricant-section');
+        }
+        if (document.querySelector('.Oil-section').style.display !== 'none') {
+            visibleSections.push('.Oil-section');
+        }
+        
+        let anyResultsFound = false;
 
-        activeSections.forEach(section => {
-            let products = section.querySelectorAll('.item-container');
-            let found = false;
+        // Apply search filter only to visible sections
+        visibleSections.forEach(sectionSelector => {
+            const section = document.querySelector(sectionSelector);
+            const products = section.querySelectorAll('.item-container');
+            let sectionHasResults = false;
 
             products.forEach(product => {
-                let name = product.querySelector('h4').textContent.toLowerCase();
-                let description = product.querySelector('p').textContent.toLowerCase();
-                let brand = product.querySelector('p:nth-child(4)').textContent.toLowerCase();
+                const nameElement = product.querySelector('h4');
+                const descElement = product.querySelector('p');
+                const brandElement = product.querySelector('p:nth-child(4)');
+                
+                if (!nameElement || !descElement || !brandElement) return;
+                
+                const name = nameElement.textContent.toLowerCase();
+                const description = descElement.textContent.toLowerCase();
+                const brand = brandElement.textContent.toLowerCase();
 
                 if (name.includes(filter) || description.includes(filter) || brand.includes(filter)) {
-                    product.style.display = 'flex'; // Ensure it's visible in the grid
-                    product.style.opacity = '1'; 
+                    product.style.display = 'flex'; // Show matching products
+                    product.style.opacity = '1';
                     product.style.transition = 'opacity 0.2s ease-in-out';
-                    found = true;
+                    sectionHasResults = true;
+                    anyResultsFound = true;
                 } else {
-                    product.style.display = 'none'; // Completely remove from layout
+                    product.style.display = 'none'; // Hide non-matching products
                     product.style.opacity = '0';
                 }
             });
 
-            section.style.display = found ? 'grid' : 'none'; // Keep section hidden if no matching product
+            // If no products match in this section, optionally hide the section title too
+            const titleSelector = sectionSelector.replace('section', 'title');
+            const title = document.querySelector(titleSelector);
+            
+            if (title) {
+                title.style.display = sectionHasResults ? 'block' : 'none';
+            }
         });
+        
+        // Optionally add a "no results found" message
+        let noResultsMessage = document.getElementById('no-results-message');
+        
+        if (!anyResultsFound && filter.length > 0) {
+            if (!noResultsMessage) {
+                noResultsMessage = document.createElement('div');
+                noResultsMessage.id = 'no-results-message';
+                noResultsMessage.textContent = 'No products found matching your search.';
+                noResultsMessage.style.textAlign = 'center';
+                noResultsMessage.style.padding = '20px';
+                noResultsMessage.style.color = 'gray';
+                document.querySelector('.products-container').appendChild(noResultsMessage);
+            } else {
+                noResultsMessage.style.display = 'block';
+            }
+        } else if (noResultsMessage) {
+            noResultsMessage.style.display = 'none';
+        }
     });
 
-    // Filter function for category selection
+    // UPDATED: Filter function for category selection that respects search
     function filterProducts(category) {
         const sections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
         const titles = document.querySelectorAll('.tire-title, .Battery-title, .Lubricant-title, .Oil-title');
@@ -341,6 +393,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
         // Hide all sections initially
         sections.forEach(section => section.style.display = 'none');
         titles.forEach(title => title.style.display = 'none');
+
+        // Remove any existing no results message
+        const noResultsMessage = document.getElementById('no-results-message');
+        if (noResultsMessage) {
+            noResultsMessage.style.display = 'none';
+        }
 
         switch (category) {
             case 'Tires':
@@ -371,10 +429,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
             default:
                 console.log(`Unknown category: ${category}`);
         }
+        
+        // Re-apply any current search filter after changing category
+        const searchInput = document.getElementById('productSearch');
+        if (searchInput && searchInput.value.trim() !== '') {
+            // Trigger the input event to re-filter with current search term
+            searchInput.dispatchEvent(new Event('input'));
+        }
     }
 
-     // Function to adjust container sizes based on category
-     function adjustContainerSizes(category) {
+    // Function to adjust container sizes based on category
+    function adjustContainerSizes(category) {
         const tireContainers = document.querySelectorAll('.tire-section .item-container');
         const batteryContainers = document.querySelectorAll('.Battery-section .item-container');
         const lubricantContainers = document.querySelectorAll('.Lubricant-section .item-container');

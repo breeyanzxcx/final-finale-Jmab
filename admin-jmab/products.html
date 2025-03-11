@@ -168,7 +168,7 @@ main {
 .item-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+ 
     justify-content: space-between;
     width: 100%;
     min-height: 400px;
@@ -176,7 +176,6 @@ main {
     border-radius: 10px;
     padding: 15px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
     transition: all 0.3s ease-in-out;
     box-sizing: border-box;
 }
@@ -188,12 +187,16 @@ main {
     border-radius: 8px;
 }
 
-.item-container h4, 
 .item-container p {
     max-width: 100%;
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
+}
+
+.item-container h4{
+    text-align: center;
+    font-size: 20px;
 }
 
 .tire-section,
@@ -257,7 +260,6 @@ button:hover {
     width: 200px;
     padding: 10px;
     background: white;
-    text-align: center;
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     color: black; 
@@ -458,6 +460,32 @@ button:hover {
 
 .search-container i:hover {
     color: #02254B; 
+}
+
+.product-actions{
+   display: flex; 
+   margin-top: 10px;
+   gap: 10px;
+}
+
+.edit-product-btn{
+    background-color: #4CAF50; 
+    color: white; 
+    padding: 5px 10px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer;
+    width: 50%;
+}
+
+.delete-product-btn{
+    background-color: #f44336; 
+    color: white; 
+    padding: 5px 10px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer;
+    width: 50%;
 }
 </style>
 </head>
