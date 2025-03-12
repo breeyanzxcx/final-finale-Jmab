@@ -1,3 +1,4 @@
+// Replace the old populateAddressDropdown function with this new one
 document.addEventListener("DOMContentLoaded", async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("productId");
@@ -14,7 +15,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("User ID:", userId);
     console.log("Auth Token:", authToken);
 
-
+    // Use the new function to fetch user data and populate addresses
+    await fetchUserAndPopulateAddresses();
 
     if (productId) {
         // If "Buy Now" was clicked, fetch only 1 product
@@ -27,7 +29,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector(".confirm-btn").addEventListener("click", checkout);
     
     // Check for pending payments when the page loads
-    checkPendingPayments();
+    checkPendingPayments(userId);
+   
 });
 
 // Payment related data storage
@@ -52,10 +55,65 @@ class PaymentDataManager {
     }
 }
 
+// Fetch user data and populate address dropdown
+async function fetchUserAndPopulateAddresses() {
+    const userId = localStorage.getItem("userId");
+    const authToken = localStorage.getItem("authToken");
+    const addressSelect = document.getElementById("address-id");
+    
+    console.log("Fetching user data for address population...");
+    
+    if (!addressSelect) {
+        console.error("Could not find address-id select element!");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
+            headers: {
+                "Authorization": `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API responded with status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("User data response:", data);
+
+        // Clear any existing options
+        addressSelect.innerHTML = '<option value="">Select an address</option>';
+        
+        if (data.success && data.user && data.user.addresses && data.user.addresses.length > 0) {
+            // Add each address as an option
+            data.user.addresses.forEach(address => {
+                const option = document.createElement("option");
+                option.value = address.id;
+                option.textContent = `${address.home_address}, ${address.barangay}, ${address.city}${address.is_default ? " (Default)" : ""}`;
+                addressSelect.appendChild(option);
+                
+                // Auto-select default address
+                if (address.is_default) {
+                    addressSelect.value = address.id;
+                }
+            });
+            
+            console.log(`Added ${data.user.addresses.length} addresses to dropdown`);
+        } else {
+            console.warn("No addresses found for user");
+            addressSelect.innerHTML = '<option value="">No addresses available</option>';
+        }
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        addressSelect.innerHTML = '<option value="">Failed to load addresses</option>';
+    }
+}
+
 // Fetch single product (for Buy Now)
 async function fetchBuyNowItem(productId, quantity) {
     try {
-        const response = await fetch("http://localhost/jmab/final-jmab/api/products");
+        const response = await fetch(`http://localhost/jmab/final-jmab/api/products/${productId}`);
         const data = await response.json();
 
         if (data.success) {
@@ -77,7 +135,6 @@ async function fetchBuyNowItem(productId, quantity) {
 async function fetchSelectedCartItems() {
     const userId = localStorage.getItem("userId");
     const authToken = localStorage.getItem("authToken");
-    // Get selected cart IDs from localStorage
     const selectedCartIds = JSON.parse(localStorage.getItem("selectedCartIds") || "[]");
     
     try {
@@ -93,7 +150,6 @@ async function fetchSelectedCartItems() {
         console.log("Cart Data:", data);
 
         if (data.success && data.cart && data.cart.length > 0) {
-            // Filter cart items to show only selected ones
             const selectedItems = data.cart.filter(item => 
                 selectedCartIds.includes(item.cart_id.toString())
             );
@@ -118,7 +174,6 @@ function displaySelectedItems(items) {
     container.innerHTML = ""; // Clear previous items
 
     items.forEach(item => {
-        // Create a normalized item object that works for both cart items and buy now items
         const normalizedItem = {
             name: item.product_name || item.name,
             brand: item.product_brand || item.brand || 'N/A',
@@ -166,13 +221,13 @@ async function checkout() {
     
     const shippingInfo = {
         full_name: document.getElementById("full-name").value,
-        address: document.getElementById("address").value,
+        address_id: document.getElementById("address-id").value,
         payment_method: document.getElementById("payment-method").value
     };
 
     // Form validation
-    if (!shippingInfo.full_name || !shippingInfo.address) {
-        alert("Please fill in all shipping information fields.");
+    if (!shippingInfo.full_name || !shippingInfo.address_id) {
+        alert("Please fill in all shipping information fields, including selecting an address.");
         return;
     }
 
@@ -184,11 +239,19 @@ async function checkout() {
         // Get selected cart IDs
         const selectedCartIds = JSON.parse(localStorage.getItem("selectedCartIds") || "[]");
         
-        // Match the format in Postman
+        // Updated order data with address_id
         const orderData = {
             cart_ids: selectedCartIds.map(id => parseInt(id)),
+            address_id: parseInt(shippingInfo.address_id), // Ensure it's an integer
             payment_method: shippingInfo.payment_method
         };
+
+        // If it's a "Buy Now" order, include product_id and quantity instead of cart_ids
+        if (productId) {
+            orderData.product_id = parseInt(productId);
+            orderData.quantity = quantity;
+            delete orderData.cart_ids; // Remove cart_ids for Buy Now
+        }
 
         // Disable the checkout button and show loading state
         const checkoutButton = document.querySelector(".confirm-btn");
@@ -197,7 +260,8 @@ async function checkout() {
             checkoutButton.textContent = "Processing...";
         }
 
-        // Use the same endpoint format as in Postman
+        console.log("Sending order data:", JSON.stringify(orderData, null, 2));
+
         const response = await fetch(`http://localhost/jmab/final-jmab/api/orders/${userId}`, {
             method: "POST",
             headers: { 
@@ -216,31 +280,25 @@ async function checkout() {
             
             // Check for payment method
             if (shippingInfo.payment_method === "gcash" && result.payment_link) {
-                // Store payment data for future reference
                 PaymentDataManager.storePaymentData(
                     result.order_id || "unknown", 
                     "gcash",
                     result.payment_link
                 );
                 
-                // Show confirmation before redirect
                 if (confirm("You will now be redirected to complete your payment via GCash. Click OK to proceed.")) {
-                    // For GCash, redirect to the payment link
                     window.location.href = result.payment_link;
                 } else {
-                    // If user cancels, redirect to a page where they can resume payment
                     alert("You can complete your payment later from your account page.");
                     window.location.href = "account.html";
                 }
             } else {
-                // For COD or if no payment link is provided
                 alert("Order placed successfully!");
-               // window.location.href = "order-confirmation.html";
+                // window.location.href = "order-confirmation.html";
             }
         } else {
             alert(result.errors ? result.errors.join(", ") : "Failed to place order.");
             
-            // Re-enable the checkout button
             if (checkoutButton) {
                 checkoutButton.disabled = false;
                 checkoutButton.textContent = "Confirm Order";
@@ -250,7 +308,6 @@ async function checkout() {
         console.error("Error during checkout:", error);
         alert("An error occurred during checkout. Please try again.");
         
-        // Re-enable the checkout button
         const checkoutButton = document.querySelector(".confirm-btn");
         if (checkoutButton) {
             checkoutButton.disabled = false;
@@ -259,32 +316,77 @@ async function checkout() {
     }
 }
 
-// Check for pending payments
-function checkPendingPayments() {
-    const pendingPayment = PaymentDataManager.getPaymentData();
-    
-    if (pendingPayment && pendingPayment.paymentMethod === "gcash") {
-        // Calculate how long ago the payment was initiated
-        const paymentTime = new Date(pendingPayment.timestamp);
-        const currentTime = new Date();
-        const hoursSincePending = (currentTime - paymentTime) / (1000 * 60 * 60);
-        
-        // Only show the prompt if the pending payment is less than 24 hours old
-        if (hoursSincePending < 24) {
-            // Show a notification about pending payment
-            const resumePayment = confirm(
-                "You have a pending GCash payment. Do you want to complete your payment now?"
-            );
-            
-            if (resumePayment) {
-                window.location.href = pendingPayment.paymentLink;
-            } else {
-                // If they decline, give them another chance later
-                console.log("User declined to complete pending payment");
-            }
-        } else {
-            // If the payment is older than 24 hours, just clear it
-            PaymentDataManager.clearPaymentData();
+function checkPendingPayments(userId) {
+    console.log("Starting checkPendingPayments for userId:", userId);
+
+    const authToken = localStorage.getItem("authToken");
+    const paymentData = PaymentDataManager.getPaymentData(); // Get stored payment data
+
+    fetch(`http://localhost/jmab/final-jmab/api/orders/${userId}`, {
+        headers: {
+            "Authorization": `Bearer ${authToken}`
         }
-    }
+    })
+        .then(response => {
+            console.log("Fetch response received:", response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Parsed JSON data:", data);
+
+            if (data.success && data.orders && data.orders.length > 0) {
+                console.log("Total orders found:", data.orders.length);
+                console.log("All orders:", data.orders);
+                
+                const pendingPayment = data.orders.find(order => 
+                    order.payment_method === "gcash" && 
+                    order.payment_status === "pending"
+                );
+
+                if (pendingPayment) {
+                    console.log("Found pending payment:", pendingPayment);
+                    const paymentTime = new Date(pendingPayment.created_at);
+                    const currentTime = new Date();
+                    const hoursSincePending = (currentTime - paymentTime) / (1000 * 60 * 60);
+
+                    if (hoursSincePending < 24) {
+                        // Use stored payment_link if available, otherwise log an error
+                        const paymentLink = paymentData && paymentData.orderId === pendingPayment.order_id 
+                            ? paymentData.paymentLink 
+                            : null;
+
+                        if (!paymentLink) {
+                            console.error("No valid payment link found for order:", pendingPayment.order_id);
+                            alert("Unable to redirect to payment page. Please try again or contact support.");
+                            return;
+                        }
+
+                        const resumePayment = confirm(
+                            "You have a pending GCash payment. Do you want to complete your payment now?"
+                        );
+                        if (resumePayment) {
+                            window.location.href = paymentLink; // Use the stored checkout_url
+                        } else {
+                            console.log("User declined to complete pending payment");
+                        }
+                    } else {
+                        console.log("Pending payment is over 24 hours old:", pendingPayment.order_id);
+                    }
+                } else {
+                    console.log("No pending GCash payments found. All GCash orders status:", 
+                        data.orders
+                            .filter(order => order.payment_method === "gcash")
+                            .map(order => order.payment_status)
+                    );
+                }
+            } else {
+                console.log("No orders found or invalid data structure:", data);
+            }
+        })
+        .catch(error => {
+            console.error("Error in fetch process:", error);
+        });
 }

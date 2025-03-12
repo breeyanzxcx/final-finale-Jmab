@@ -1,4 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
+    //confirmation dialog element
+    const confirmationDialog = document.createElement('div');
+    confirmationDialog.className = 'confirmation-dialog';
+    confirmationDialog.innerHTML = `
+        <div class="dialog-content">
+            <div class="dialog-icon">⚠️</div>
+            <div class="dialog-title">Remove Item</div>
+            <div class="dialog-message">Are you sure you want to remove this item from your cart?</div>
+            <div class="dialog-buttons">
+                <button class="dialog-btn cancel-btn">Cancel</button>
+                <button class="dialog-btn confirm-btn">Remove</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(confirmationDialog);
+
     fetchUserCart();
 
     const checkoutButton = document.querySelector(".checkout-btn");
@@ -37,10 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
         selectAllCheckbox.addEventListener("change", toggleSelectAll);
     }
 
-    // Delete Selected Items button
+    // Delete Selected Items button - Use the custom confirmation
     const deleteButton = document.querySelector(".delete-btn");
     if (deleteButton) {
-        deleteButton.addEventListener("click", removeSelectedItems);
+        deleteButton.addEventListener("click", showDeleteSelectedConfirmation);
     }
 
     // Back button 
@@ -63,7 +79,6 @@ async function fetchUserCart() {
         window.location.href = "../HTML/sign-in.php";
         return;
     }
-
 
     try {
         const response = await fetch(`http://localhost/jmab/final-jmab/api/carts/${userId}`, {
@@ -212,46 +227,38 @@ function updateOrderSummary(cartItems) {
 
 //Remove a single item
 async function removeFromCart(cartId) {
-    const authToken = localStorage.getItem("authToken");
+    showConfirmationDialog(
+        "Remove Item", 
+        "Are you sure you want to remove this item from your cart?",
+        async () => {
+            const authToken = localStorage.getItem("authToken");
+            try {
+                const response = await fetch(`http://localhost/jmab/final-jmab/api/carts/${cartId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
 
-    if (!confirm("Are you sure you want to remove this item from your cart?")) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`http://localhost/jmab/final-jmab/api/carts/${cartId}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`
+                alert("Product removed.");
+                fetchUserCart(); // Refresh cart
+            } catch (error) {
+                console.error("Error removing item:", error);
+                alert("An error occurred while removing the item.");
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-
-        alert("Product removed.");
-        fetchUserCart(); // Refresh cart
-    } catch (error) {
-        console.error("Error removing item:", error);
-        alert("An error occurred while removing the item.");
-    }
+    );
 }
 
 //Remove selected items
 async function removeSelectedItems() {
     const authToken = localStorage.getItem("authToken");
-
     const selectedItems = document.querySelectorAll(".item-checkbox:checked");
-    if (selectedItems.length === 0) {
-        alert("No items selected for deletion.");
-        return;
-    }
-
-    if (!confirm(`Are you sure you want to remove ${selectedItems.length} item(s) from your cart?`)) {
-        return;
-    }
 
     try {
         let allSuccess = true;
@@ -294,6 +301,54 @@ async function removeSelectedItems() {
         console.error("Error removing selected items:", error);
         alert("An error occurred while removing the items.");
     }
+}
+
+// Show confirmation for multiple items
+function showDeleteSelectedConfirmation() {
+    const selectedItems = document.querySelectorAll(".item-checkbox:checked");
+    if (selectedItems.length === 0) {
+        alert("No items selected for deletion.");
+        return;
+    }
+
+    showConfirmationDialog(
+        "Remove Items", 
+        `Are you sure you want to remove ${selectedItems.length} item(s) from your cart?`,
+        removeSelectedItems
+    );
+}
+
+// Main confirmation dialog function
+function showConfirmationDialog(title, message, confirmCallback) {
+    const dialog = document.querySelector('.confirmation-dialog');
+    const titleElement = dialog.querySelector('.dialog-title');
+    const messageElement = dialog.querySelector('.dialog-message');
+    const confirmButton = dialog.querySelector('.confirm-btn');
+    const cancelButton = dialog.querySelector('.cancel-btn');
+    
+    // Set dialog content
+    titleElement.textContent = title;
+    messageElement.textContent = message;
+    
+    // Show the dialog
+    dialog.style.display = 'flex';
+    
+    // Handle button clicks
+    const handleConfirm = () => {
+        dialog.style.display = 'none';
+        confirmButton.removeEventListener('click', handleConfirm);
+        cancelButton.removeEventListener('click', handleCancel);
+        confirmCallback();
+    };
+    
+    const handleCancel = () => {
+        dialog.style.display = 'none';
+        confirmButton.removeEventListener('click', handleConfirm);
+        cancelButton.removeEventListener('click', handleCancel);
+    };
+    
+    confirmButton.addEventListener('click', handleConfirm);
+    cancelButton.addEventListener('click', handleCancel);
 }
 
 //Select All Function

@@ -5,6 +5,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let availableStock = 0;
 
+    //Popup elements
+    const popupOverlay = document.createElement('div');
+    popupOverlay.className = 'popup-overlay';
+    
+    const popupContainer = document.createElement('div');
+    popupContainer.className = 'popup-container';
+    
+    const popupHTML = `
+        <div class="popup-header">
+            <h3>Shopping Cart</h3>
+        </div>
+        <div class="popup-content">
+            <div class="checkmark-circle">
+                <div class="background"></div>
+                <div class="checkmark"></div>
+            </div>
+            <p id="popup-message">Item added to your cart successfully!</p>
+        </div>
+        <div class="popup-buttons">
+            <button class="popup-btn popup-btn-secondary" id="popup-continue">Continue Shopping</button>
+            <button class="popup-btn popup-btn-primary" id="popup-view-cart">View Cart</button>
+        </div>
+    `;
+    
+    popupContainer.innerHTML = popupHTML;
+    popupOverlay.appendChild(popupContainer);
+    document.body.appendChild(popupOverlay);
+    
+    // Popup event listeners
+    document.getElementById('popup-continue').addEventListener('click', () => {
+        popupOverlay.classList.remove('active');
+    });
+    
+    document.getElementById('popup-view-cart').addEventListener('click', () => {
+        window.location.href = "../HTML/userCart.html";
+    });
+
     if (productId) {
         try {
             const response = await fetch('http://localhost/jmab/final-jmab/api/products');
@@ -126,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (isCheckout) {
-            // ✅ Redirect directly to checkout with product details
+            //Redirect directly to checkout with product details
             const checkoutUrl = `../HTML/checkout.html?productId=${productId}&quantity=${quantity}`;
             console.log("Redirecting to:", checkoutUrl);
             window.location.href = checkoutUrl;
@@ -157,10 +194,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('stock-info').textContent = `Stock: ${availableStock}`;
                 document.querySelector('.qty-input').setAttribute('max', availableStock);
 
-                alert(`Added ${quantity} item(s) to cart!`);
-                if (confirm("Item added to cart! Would you like to view your cart?")) {
-                    window.location.href = "../HTML/userCart.html";
-                }
+                // Set popup message
+                document.getElementById('popup-message').textContent = `Added ${quantity} item(s) to cart!`;
+                
+                // Show the popup with animation
+                popupOverlay.classList.add('active');
+                
+                // No more alert and confirm dialogs
             } else {
                 const errorMsg = result.errors ? result.errors.join(', ') : 'Failed to add item to cart.';
                 alert(errorMsg);
@@ -171,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // ✅ Ensure correct boolean parameter is passed
+    //Ensure correct boolean parameter is passed
     document.querySelector('.add-to-cart').addEventListener('click', () => addToCart(false));
     document.querySelector('.buy-now').addEventListener('click', () => addToCart(true));
 
