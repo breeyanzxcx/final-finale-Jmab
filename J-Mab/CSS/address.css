@@ -472,7 +472,7 @@ a {
   }
   
   .confirmation-modal-content button {
-    background-color: #02254B;
+    background-color: #dc3545;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -482,13 +482,13 @@ a {
     margin: 5px;
   }
   .confirmation-modal-content button:hover {
-    background-color: #03356b;
+    background-color: #c81123;
   }
   
   .confirmation-modal-content .cancel-button {
-    background-color: #dc3545;
+    background-color: #02254B;
   }
   
   .confirmation-modal-content .cancel-button:hover {
-    background-color: #c82333;
+    background-color: #02254B;
   }
