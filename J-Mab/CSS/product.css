@@ -336,7 +336,6 @@ a {
   border-radius: 12px;
   padding: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  text-align: center;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -360,6 +359,7 @@ a {
 }
 
 .item h4 {
+  text-align: center;
   margin: 15px 0 8px;
   font-size: 18px;
   max-width: 100%;
@@ -377,6 +377,7 @@ a {
 }
 
 .view-product-btn {
+  align-items: center;
   display: inline-block;
   margin-top: 12px;
   padding: 10px 20px;

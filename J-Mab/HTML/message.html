@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+    <link rel="stylesheet" href="../CSS/message.css">
+</head>
+<body>
+    <header>
+        <h1>Customer Dashboard</h1>
+        <button id="logout-btn" class="logout-btn">Logout</button>
+    </header>
+    
+    <div class="container">
+        <div class="user-info" id="user-info">
+            <!-- User info will be populated here -->
+        </div>
+        
+        <div class="admin-selector">
+            <label for="admin-select">Select Admin to Message:</label>
+            <select id="admin-select">
+                <option value="">Loading admins...</option>
+            </select>
+        </div>
+        
+        <div class="messaging-section">
+            <div class="message-header">
+                Messages with Support
+            </div>
+            
+            <div class="messages-container" id="messages-container">
+                <p>Loading messages...</p>
+            </div>
+            
+            <div class="message-input">
+                <input type="text" id="message-input" placeholder="Type a message...">
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentUser;
+                let admins = [];
+                let selectedAdminId = null;
+                let authToken;
+                
+                // WebSocket setup
+                let ws;
+        
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Check if user is logged in
+                    authToken = localStorage.getItem('authToken');
+                    currentUser = JSON.parse(localStorage.getItem('user'));
+                    
+                    if (!authToken || !currentUser) {
+                        window.location.href = 'sign-in.html';
+                        return;
+                    }
+                    
+                    if (currentUser.roles === 'admin') {
+                        window.location.href = 'admin.html';
+                        return;
+                    }
+                    
+                    // Display user info
+                    displayUserInfo();
+                    
+                    // Fetch admins
+                    fetchAdmins();
+                    
+                    // Initial fetch of messages
+                    fetchMessages();
+                    
+                    // Add event listeners
+                    document.getElementById('logout-btn').addEventListener('click', logout);
+                    document.getElementById('send-btn').addEventListener('click', sendMessage);
+                    document.getElementById('message-input').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') sendMessage();
+                    });
+                    
+                    document.getElementById('admin-select').addEventListener('change', function() {
+                        selectedAdminId = this.value;
+                    });
+                    
+                    // Initialize WebSocket
+                    initWebSocket();
+                });
+                
+                function initWebSocket() {
+                    ws = new WebSocket('ws://localhost:8080');
+                    
+                    ws.onopen = () => {
+                        ws.send(JSON.stringify({ userId: currentUser.id }));
+                        console.log('WebSocket connected for customer:', currentUser.id);
+                    };
+                    
+                    ws.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        console.log('WebSocket message received:', data);
+                        
+                        // Check if it's a message relevant to this user
+                        if (data.sender_id && data.receiver_id && 
+                            (data.sender_id == currentUser.id || data.receiver_id == currentUser.id)) {
+                            fetchMessages(); // Refresh messages instantly
+                        }
+                    };
+                    
+                    ws.onerror = (error) => console.error('WebSocket error:', error);
+                    ws.onclose = () => console.log('WebSocket disconnected');
+                }
+                
+                function displayUserInfo() {
+                    const userInfoElement = document.getElementById('user-info');
+                    userInfoElement.innerHTML = `
+                        <h2>Welcome, ${currentUser.first_name} ${currentUser.last_name}</h2>
+                        <p>Email: ${currentUser.email}</p>
+                    `;
+                }
+                
+                function fetchAdmins() {
+                    fetch('http://localhost/final-jmab/api/users', {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            admins = data.users.filter(user => user.roles === 'admin');
+                            displayAdmins();
+                        } else {
+                            console.error('Failed to fetch admins:', data.errors);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+                
+                function displayAdmins() {
+                    const adminSelect = document.getElementById('admin-select');
+                    if (admins.length === 0) {
+                        adminSelect.innerHTML = '<option value="">No admins available</option>';
+                        return;
+                    }
+                    
+                    let options = '<option value="">Select an admin</option>';
+                    admins.forEach(admin => {
+                        options += `<option value="${admin.id}">${admin.first_name} ${admin.last_name}</option>`;
+                    });
+                    
+                    adminSelect.innerHTML = options;
+                    if (admins.length === 1) {
+                        adminSelect.value = admins[0].id;
+                        selectedAdminId = admins[0].id;
+                    }
+                }
+                
+                function fetchMessages() {
+                    fetch(`http://localhost/final-jmab/api/messages/user/${currentUser.id}`, {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) displayMessages(data.messages);
+                        else console.error('Failed to fetch messages:', data.errors);
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+                
+                function displayMessages(messages) {
+                    const messagesContainer = document.getElementById('messages-container');
+                    if (!messages || messages.length === 0) {
+                        messagesContainer.innerHTML = '<p>No messages yet. Start a conversation with support.</p>';
+                        return;
+                    }
+                    
+                    let messagesHtml = '';
+                    messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    
+                    messages.forEach(message => {
+                        const isSent = parseInt(message.sender_id) === currentUser.id;
+                        const formattedDate = new Date(message.timestamp).toLocaleString();
+                        let adminName = '';
+                        if (!isSent) {
+                            const admin = admins.find(a => a.id == message.sender_id);
+                            adminName = admin ? `${admin.first_name} ${admin.last_name}` : `Admin ${message.sender_id}`;
+                        }
+                        
+                        messagesHtml += `
+                            <div class="message ${isSent ? 'sent' : 'received'}">
+                                <div>${message.message}</div>
+                                <div class="message-info">
+                                    ${isSent ? 'You' : adminName} | ${formattedDate}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    messagesContainer.innerHTML = messagesHtml;
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+                
+                function sendMessage() {
+                    const messageInput = document.getElementById('message-input');
+                    const message = messageInput.value.trim();
+                    
+                    if (!message || !selectedAdminId) {
+                        if (!selectedAdminId) alert('Please select an admin to message.');
+                        return;
+                    }
+                    
+                    const requestData = {
+                        sender_id: currentUser.id,
+                        receiver_id: selectedAdminId,
+                        message: message
+                    };
+                    
+                    fetch('http://localhost/final-jmab/api/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify(requestData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            messageInput.value = '';
+                            fetchMessages(); // Immediate refresh after sending
+                        } else {
+                            console.error('Failed to send message:', data.errors);
+                            alert('Failed to send message: ' + data.errors.join(', '));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while sending the message.');
+                    });
+                }
+                
+                function logout() {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    window.location.href = 'sign-in.html';
+                }
+            </script>
+        </body>
+</html>

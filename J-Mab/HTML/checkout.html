@@ -9,6 +9,8 @@
     <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
 </head>
 <body>
+    <button class="return-cart-btn" onclick="returnToCart()">← Return to Cart</button>
+
     <main class="checkout-container">
         <h2 class="checkout-title">🛍️ Checkout</h2>
 
@@ -46,16 +48,23 @@
             </div>
         </div>
 
-        <!-- Bottom: Order Summary -->
         <div class="order-summary">
             <h3>📦 Order Summary</h3>
             <p>Subtotal: <span id="subtotal">₱0.00</span></p>
             <p>Shipping Fee: <span>₱50.00</span></p>
             <p class="total"><strong>Total: <span id="total">₱50.00</span></strong></p>
-            <button class="confirm-btn">✅ Confirm Order</button>
+
+            <button class="confirm-btn">Place Order</button>
+
             <div id="checkout-status" class="checkout-status"></div>
         </div>
     </main>
+
+    <script>
+        function returnToCart() {
+            window.location.href = "../HTML/userCart.html";
+        }
+    </script>
 
     <script src="../JS/checkout.js"></script>
 </body>

@@ -242,7 +242,7 @@ async function checkout() {
         // Updated order data with address_id
         const orderData = {
             cart_ids: selectedCartIds.map(id => parseInt(id)),
-            address_id: parseInt(shippingInfo.address_id), // Ensure it's an integer
+            address_id: parseInt(shippingInfo.address_id), 
             payment_method: shippingInfo.payment_method
         };
 
@@ -253,11 +253,11 @@ async function checkout() {
             delete orderData.cart_ids; // Remove cart_ids for Buy Now
         }
 
-        // Disable the checkout button and show loading state
+        // Disable the checkout button and update text
         const checkoutButton = document.querySelector(".confirm-btn");
         if (checkoutButton) {
             checkoutButton.disabled = true;
-            checkoutButton.textContent = "Processing...";
+            checkoutButton.textContent = "Order Placed";
         }
 
         console.log("Sending order data:", JSON.stringify(orderData, null, 2));
@@ -277,8 +277,7 @@ async function checkout() {
         if (response.ok && result.success) {
             // Clear cart items from localStorage
             localStorage.removeItem("selectedCartIds");
-            
-            // Check for payment method
+
             if (shippingInfo.payment_method === "gcash" && result.payment_link) {
                 PaymentDataManager.storePaymentData(
                     result.order_id || "unknown", 
@@ -293,15 +292,16 @@ async function checkout() {
                     window.location.href = "account.html";
                 }
             } else {
-                alert("Order placed successfully!");
-                // window.location.href = "order-confirmation.html";
+                // Redirect COD orders to the user's cart
+                alert("Order placed successfully! Redirecting to your cart...");
+                window.location.href = "../HTML/userCart.html";
             }
         } else {
             alert(result.errors ? result.errors.join(", ") : "Failed to place order.");
             
             if (checkoutButton) {
                 checkoutButton.disabled = false;
-                checkoutButton.textContent = "Confirm Order";
+                checkoutButton.textContent = "Place Order";
             }
         }
     } catch (error) {
@@ -311,10 +311,11 @@ async function checkout() {
         const checkoutButton = document.querySelector(".confirm-btn");
         if (checkoutButton) {
             checkoutButton.disabled = false;
-            checkoutButton.textContent = "Confirm Order";
+            checkoutButton.textContent = "Place Order";
         }
     }
 }
+
 
 function checkPendingPayments(userId) {
     console.log("Starting checkPendingPayments for userId:", userId);

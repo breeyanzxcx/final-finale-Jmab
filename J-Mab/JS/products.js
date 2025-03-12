@@ -168,11 +168,11 @@ async function loadProducts(selectedCategory = "tires") {
     
     if (confirmLogout) {
         // Clear authentication data
-        localStorage.removeItem("authToken"); // Remove token if using authentication
+        localStorage.removeItem("authToken"); 
         sessionStorage.removeItem("authToken");
 
         // Redirect to login page
-        window.location.href = "../HTML/sign-in.php"; // Change this to your actual login page
+        window.location.href = "../HTML/sign-in.php"; 
     }
 }
 
