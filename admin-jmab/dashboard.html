@@ -248,25 +248,39 @@
         border-bottom: 1px solid #ddd;
     }
     
-    .status {
-        padding: 5px 10px;
-        border-radius: 5px;
-    }
-    
-    .pending {
-        background: orange;
-        color: white;
-    }
-    
-    .completed {
-        background: green;
-        color: white;
-    }
-    
-    .canceled {
-        background: red;
-        color: white;
-    }
+.status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: black;
+    text-align: center;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.pending {
+    background: #ffc107;
+}
+
+.processing {
+    background: #007bff;
+}
+
+.out-for-delivery {
+    background: black;
+}
+
+.delivered {
+    background: #28a745;
+}
+
+.failed-delivery {
+    background: #dc3545;
+}
+
+.cancelled {
+    background: #6c757d;
+}
     
 
 .notification-container {

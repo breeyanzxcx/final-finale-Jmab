@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchOrders() {
-    const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
+    const token = localStorage.getItem("authToken"); 
 
     if (!token) {
         console.error("No authorization token found.");
@@ -31,7 +31,7 @@ function fetchOrders() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            displayOrders(data.orders); // Assuming 'orders' is the key containing order data
+            displayOrders(data.orders); 
         } else {
             console.error("Error fetching orders:", data.errors);
         }
@@ -52,7 +52,7 @@ function displayOrders(orders) {
         row.innerHTML = `
             <td>${fullName || "N/A"}</td>
             <td>${formattedDate || "N/A"}</td>
-            <td><p class="status ${order.status.toLowerCase()}">${order.status}</p></td>
+            <td><p class="status ${statusClass}">${order.status}</p></td>
         `;
 
         ordersTableBody.appendChild(row);

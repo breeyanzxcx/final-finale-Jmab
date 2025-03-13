@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 transactionsHTML += `</ul>`;
             } else {
-                transactionsHTML += `<p style="text-align: center; font-size: 18px;">NO TRANSACTIONS</p>`;
+                transactionsHTML += `<p style="text-align: center; font-size: 18px; margin-top: 50px;">NO TRANSACTIONS</p>`;
             }
     
             const viewContent = document.getElementById("transaction-view-content");
