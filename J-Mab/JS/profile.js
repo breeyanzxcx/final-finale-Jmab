@@ -112,34 +112,6 @@ function loadProfileData() {
     }
   }
 
-  // Sidebar hover and active state logic
-const sidebarLinks = document.querySelectorAll('.sidebar a');
-  sidebarLinks.forEach(link => {
-    const icon = link.querySelector('.sidebar-icon');
-    const originalSrc = icon.src;
-    const hoverSrc = originalSrc.replace('-blue', '');
-
-    link.addEventListener('mouseenter', () => {
-      icon.src = hoverSrc;
-    });
-
-    link.addEventListener('mouseleave', () => {
-      if (!link.classList.contains('active')) {
-        icon.src = originalSrc;
-    }
-});
-
-    link.addEventListener('click', () => {
-      sidebarLinks.forEach(link => {
-        const icon = link.querySelector('.sidebar-icon');
-        icon.src = icon.src.replace('/imahe/', '/imahe/').replace('.png', '-blue.png');
-        link.classList.remove('active');
-      });
-      icon.src = hoverSrc;
-      link.classList.add('active');
-});
-});
-
   // Load full profile data on page load
 document.addEventListener('DOMContentLoaded', function () {
     const user = JSON.parse(localStorage.getItem('user'));

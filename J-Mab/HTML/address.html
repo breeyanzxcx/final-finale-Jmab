@@ -1,68 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J-MAB Address Management</title>
-    <link rel="stylesheet" href="../CSS/address.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J-MAB Profile</title>
+  <link rel="stylesheet" href="../CSS/address.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-      <div class="logo-container">
-        <img src="../imahe/j-mab.png" alt="J-MAB Logo">
-        <span>J-MAB</span>
-      </div>
-      
-        <div class="nav-links">
-          <a href="home.html">HOME</a>
-          <a href="./productPage.html?category=tires">PRODUCTS</a>
-          <a href="about.html">ABOUT</a>
-        </div>
+  <nav class="navbar">
+    <div class="logo-container">
+      <img src="../imahe/j-mab.png" alt="J-MAB Logo">
+      <span>J-MAB</span>
+    </div>
 
-        <div class="action-icons">
-            <a href="../HTML/userCart.html" class="icon-link">
-                <img src="../imahe/cart.png" alt="Cart Icon">
-            </a>
-            <a href="../HTML/notifications.html" class="icon-link">
-                <img src="../imahe/notifications.png" alt="Notification Icon">
-            </a>
-            <div class="profile-button" onclick="toggleDropdown()">
-                <img src="../imahe/prof.png" alt="Profile Icon">
-            </div>
-          </div>
-      </nav>
+    <div class="nav-links">
+      <a href="home.html">HOME</a>
+      <a href="./productPage.html?category=tires">PRODUCTS</a>
+      <a href="about.html">ABOUT</a>
+    </div>
+
+    <div class="action-icons">
+      <a href="../HTML/userCart.html" class="icon-link">
+          <img src="../imahe/cart.png" alt="Cart Icon">
+      </a>
+      <a href="../HTML/" class="icon-link">
+          <img src="../imahe/notifications.png" alt="Notification Icon">
+      </a>
+      <div class="profile-button" onclick="toggleDropdown()">
+          <img src="../imahe/prof.png" alt="Profile Icon">
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="../HTML/profile.html">My Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
 
     <div class="container">
         <div class="sidebar">
-            <h3>MY ACCOUNT</h3>
-            <a href="../HTML/profile.html">
-              <i class="fas fa-user sidebar-icon"></i> PROFILE
-            </a>
-            <a href="../HTML/address.html" class="active">
-              <i class="fas fa-map-marker-alt sidebar-icon"></i> ADDRESSES
-            </a>
-            <h3>MY PURCHASES</h3>
-            <a href="../HTML/all-items.html">
-              <i class="fas fa-shopping-bag sidebar-icon"></i> ALL ITEMS
-            </a>
-            <a href="../HTML/to-pay.html">
-              <i class="fas fa-dollar-sign sidebar-icon"></i> TO PAY
-            </a>
-            <a href="../HTML/to-ship.html">
-              <i class="fas fa-box sidebar-icon"></i> TO SHIP
-            </a>
-            <a href="../HTML/to-receive.html">
-              <i class="fas fa-truck sidebar-icon"></i> TO RECEIVE
-            </a>
-            <a href="../HTML/to-rate.html">
-              <i class="fas fa-star sidebar-icon"></i> TO RATE
-            </a>
-            <a href="../HTML/cancelled.html">
-              <i class="fas fa-times-circle sidebar-icon"></i> CANCELLED
-            </a>
-          </div>
+          <h3>MY ACCOUNT</h3>
+          <a href="../HTML/profile.html">
+            <img src="../imahe/profile(blue).png" alt="Profile Icon" class="sidebar-icon"> PROFILE
+          </a>
+          <a href="../HTML/address.html" class="active">
+            <img src="../imahe/location(blue).png" alt="Address Icon" class="sidebar-icon"> ADDRESSES
+          </a>
+          <h3>MY PURCHASES</h3>
+          <a href="../HTML/purchases.html">
+            <img src="../imahe/bag(blue).png" alt="Items Icon" class="sidebar-icon"> ALL ITEMS
+          </a>
+          <a href="../HTML/toPay.html">
+            <img src="../imahe/dollar(blue).png" alt="Pay Icon" class="sidebar-icon"> TO PAY
+          </a>
+          <a href="../HTML/toShip.html">
+            <img src="../imahe/package(blue).png" alt="Ship Icon" class="sidebar-icon"> TO SHIP
+          </a>
+          <a href="../HTML/toReceive.html">
+            <img src="../imahe/truck(blue).png" alt="Receive Icon" class="sidebar-icon"> TO RECEIVE
+          </a>
+          <a href="../HTML/toRate.html">
+            <img src="../imahe/star(blue).png" alt="Rate Icon" class="sidebar-icon"> TO RATE
+          </a>
+          <a href="../HTML/cancelled.html">
+            <img src="../imahe/canceled(blue).png" alt="Cancel Icon" class="sidebar-icon"> CANCELLED
+          </a>
+        </div>
 
           <div class="content">
             <div class="header">
@@ -80,16 +83,26 @@
     <!-- Add/Edit Address Modal -->
     <div class="modal" id="addAddressModal">
         <div class="modal-content">
-            <button class="close-button">&times;</button>
+            <button class="close-button">×</button>
             <h2 id="modalTitle">ADD ADDRESS</h2>
             <form id="addressForm">
                 <div class="form-group">
+                    <label for="province">PROVINCE</label>
+                    <input type="text" name="province" id="province" value="Pangasinan" readonly>
+                </div>
+                <div class="form-group">
                     <label for="city">CITY/MUNICIPALITY</label>
-                    <input type="text" name="city" id="city" required>
+                    <select name="city" id="city" required>
+                        <option value="">Select City/Municipality</option>
+                        <!-- Options will be populated via JavaScript -->
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="barangay">BARANGAY</label>
-                    <input type="text" name="barangay" id="barangay" required>
+                    <select name="barangay" id="barangay" required>
+                        <option value="">Select Barangay</option>
+                        <!-- Options will be populated via JavaScript -->
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="street">STREET NAME</label>
