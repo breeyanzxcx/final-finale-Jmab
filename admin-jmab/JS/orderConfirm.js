@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 async function fetchOrders() {
-    const authToken = localStorage.getItem("authToken"); // Make sure the admin is authenticated
+    const authToken = localStorage.getItem("authToken"); 
     if (!authToken) {
         alert("Unauthorized access. Please log in.");
         window.location.href = "../HTML/sign-in.php";
@@ -62,7 +62,7 @@ function displayOrders(orders) {
                 total_price: parseFloat(order.total_price) || 0,
                 payment_method: order.payment_method,
                 status: order.status,
-                product_details: order.product_details, // Store product names
+                product_details: order.product_details, 
                 order_id: order.order_id
             };
         }
@@ -106,7 +106,7 @@ function updateOrderStatus(orderId, newStatus) {
     .then(data => {
         if (data.success) {
             alert(`Order ${orderId} updated to ${newStatus}`);
-            fetchOrders(); // Refresh order list
+            fetchOrders(); 
         } else {
             alert(`Failed to update order: ${data.message}`);
         }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J-MAB Profile</title>
+  <link rel="stylesheet" href="../CSS/purchases.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo-container">
+      <img src="../imahe/j-mab.png" alt="J-MAB Logo">
+      <span>J-MAB</span>
+    </div>
+    <div class="nav-links">
+      <a href="home.html">HOME</a>
+      <a href="./productPage.html?category=tires">PRODUCTS</a>
+      <a href="about.html">ABOUT</a>
+    </div>
+    <div class="action-icons">
+      <a href="../HTML/userCart.html" class="icon-link">
+        <img src="../imahe/cart.png" alt="Cart Icon">
+      </a>
+      <a href="../HTML/" class="icon-link">
+        <img src="../imahe/notifications.png" alt="Notification Icon">
+      </a>
+      <div class="profile-button" onclick="toggleDropdown()">
+        <img src="../imahe/prof.png" alt="Profile Icon">
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="../HTML/profile.html">My Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="sidebar">
+      <h3>MY ACCOUNT</h3>
+      <a href="../HTML/profile.html"><i class="fas fa-user sidebar-icon"></i> PROFILE</a>
+      <a href="../HTML/address.html"><i class="fas fa-map-marker-alt sidebar-icon"></i> ADDRESSES</a>
+      <h3>MY PURCHASES</h3>
+      <a href="../HTML/purchases.html" class="active"><i class="fas fa-shopping-bag sidebar-icon"></i> ALL ITEMS</a>
+      <a href="../HTML/toPay.html"><i class="fas fa-dollar-sign sidebar-icon"></i> TO PAY</a>
+      <a href="../HTML/toShip.html"><i class="fas fa-box sidebar-icon"></i> TO SHIP</a>
+      <a href="../HTML/toReceive.html"><i class="fas fa-truck sidebar-icon"></i> TO RECEIVE</a>
+      <a href="../HTML/toRate.html"><i class="fas fa-star sidebar-icon"></i> TO RATE</a>
+      <a href="../HTML/cancelled.html"><i class="fas fa-times-circle sidebar-icon"></i> CANCELLED</a>
+    </div>
+    <div class="main-content">
+      <div class="tabs">
+        <a href="#../HTML/purchases.html" class="tab active">ALL ITEMS</a>
+        <a href="../HTML/toPay.html" class="tab">TO PAY</a>
+        <a href="../HTML/toShip.html" class="tab">TO SHIP</a>
+        <a href="../HTML/toReceive.html" class="tab">TO RECEIVE</a>
+        <a href="../HTML/toRate.html" class="tab">TO RATE</a>
+        <a href="../HTML/cancelled.html" class="tab">CANCELLED</a>
+      </div>
+      <div class="content-area">
+        <!-- Placeholder for content -->
+        <p>No items to display.</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    function toggleDropdown() {
+      const dropdown = document.getElementById('profileDropdown');
+      dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    window.addEventListener('click', function(e) {
+      const profileButton = document.querySelector('.profile-button');
+      const dropdown = document.getElementById('profileDropdown');
+      if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
