@@ -4,68 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - J-MAB</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/checkout.css">
     <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
 </head>
 <body>
-    <button class="return-cart-btn" onclick="returnToCart()">← Return to Cart</button>
+    <div class="checkout-wrapper">
+        <header class="checkout-header">
+            <button class="return-cart-btn" onclick="returnToCart()">
+                <span class="arrow">←</span> Back to Cart
+            </button>
+            <h1 class="checkout-title">Checkout</h1>
+        </header>
 
-    <main class="checkout-container">
-        <h2 class="checkout-title">🛍️ Checkout</h2>
+        <main class="checkout-container">
+            <div class="checkout-grid">
+                <!-- Shipping Information -->
+                <section class="shipping-section">
+                    <h2 class="section-title">Shipping Information</h2>
+                    <form id="checkout-form" class="shipping-form">
+                        <div class="form-group">
+                            <label for="full-name">Full Name</label>
+                            <input type="text" id="full-name" name="full-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address-id">Shipping Address</label>
+                            <select id="address-id" name="address-id" required>
+                                <option value="">Select an address</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="payment-method">Payment Method</label>
+                            <select id="payment-method" name="payment-method" required>
+                                <option value="cod">Cash on Delivery (COD)</option>
+                                <option value="gcash">GCash</option>
+                            </select>
+                        </div>
+                    </form>
+                </section>
 
-        <div class="checkout-content">
-            <!-- Left: Selected Items -->
-            <div class="selected-items">
-                <h3>🛒 Selected Items</h3>
-                <div id="selected-items-container"></div>
+                <!-- Order Details -->
+                <section class="order-section">
+                    <h2 class="section-title">Order Details</h2>
+                    <div class="items-container" id="selected-items-container"></div>
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="subtotal">₱0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping Fee</span>
+                            <span>₱50.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span id="total">₱50.00</span>
+                        </div>
+                        <button class="confirm-btn">Place Order</button>
+                    </div>
+                </section>
             </div>
-
-            <!-- Right: Shipping Form -->
-            <div class="checkout-form">
-                <h3>📍 Shipping Information</h3>
-                <form id="checkout-form">
-                    <div class="form-group">
-                        <label for="full-name">Customer Name</label>
-                        <input type="text" id="full-name" name="full-name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="address-id">Shipping Address</label>
-                        <select id="address-id" name="address-id" required>
-                            <option value="">Select an address</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="payment-method">Payment Method</label>
-                        <select id="payment-method" name="payment-method" required>
-                            <option value="cod">Cash on Delivery (COD)</option>
-                            <option value="gcash">Gcash</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="order-summary">
-            <h3>📦 Order Summary</h3>
-            <p>Subtotal: <span id="subtotal">₱0.00</span></p>
-            <p>Shipping Fee: <span>₱50.00</span></p>
-            <p class="total"><strong>Total: <span id="total">₱50.00</span></strong></p>
-
-            <button class="confirm-btn">Place Order</button>
-
             <div id="checkout-status" class="checkout-status"></div>
-        </div>
-    </main>
+        </main>
+    </div>
 
+    <script src="../JS/checkout.js"></script>
     <script>
         function returnToCart() {
             window.location.href = "../HTML/userCart.html";
         }
     </script>
-
-    <script src="../JS/checkout.js"></script>
 </body>
 </html>

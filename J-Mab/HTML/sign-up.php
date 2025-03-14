@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - J-MAB</title>
+  <title>J-MAB Products</title>
   <link rel="stylesheet" href="../CSS/sign-up.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
   <nav class="navbar">
     <div class="logo-container">
       <img src="../imahe/j-mab.png" alt="J-MAB Logo">
       <span>J-MAB</span>
-    </div>
+    </div> 
 
     <div class="help-link">
       <a href="#">Need Help?</a>

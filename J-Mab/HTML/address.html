@@ -3,30 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>J-MAB Profile</title>
+  <title>J-MAB Products</title>
   <link rel="stylesheet" href="../CSS/address.css">
+  <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar">
     <div class="logo-container">
       <img src="../imahe/j-mab.png" alt="J-MAB Logo">
       <span>J-MAB</span>
-    </div>
+    </div> 
 
     <div class="nav-links">
-      <a href="home.html">HOME</a>
-      <a href="./productPage.html?category=tires">PRODUCTS</a>
-      <a href="about.html">ABOUT</a>
+      <a id="hehe" href="./home.html">HOME</a>
+      <a id="hehe" href="./productPage.html?category=tires">PRODUCTS</a>
+      <a id="hehe" href="./about.html">ABOUT</a>
     </div>
 
     <div class="action-icons">
-      <a href="../HTML/userCart.html" class="icon-link">
+      <a href="../HTML/userCart.html">
           <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
-      <a href="../HTML/" class="icon-link">
+      <a href="../HTML/">
           <img src="../imahe/notifications.png" alt="Notification Icon">
       </a>
+      
       <div class="profile-button" onclick="toggleDropdown()">
           <img src="../imahe/prof.png" alt="Profile Icon">
       </div>
@@ -129,6 +133,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Custom Logout Pop-Up -->
+    <div id="logoutPopup" class="popup">
+      <div class="popup-content">
+          <h3>Logout Confirmation</h3>
+          <p>Are you sure you want to log out?</p>
+          <div class="popup-buttons">
+              <button id="confirmLogout" class="popup-btn confirm">Yes</button>
+              <button id="cancelLogout" class="popup-btn cancel">No</button>
+          </div>
+      </div>
+  </div>
+  
     <script src="../JS/logout.js"></script>
   <script src="../JS/address.js"></script>
 </body>

@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J-MAB</title>
-<link rel="stylesheet" href="../CSS/home.css">
-<link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J-MAB Products</title>
+  <link rel="stylesheet" href="../CSS/home.css">
+  <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Poppins:wght@300;400;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
   <nav class="navbar">
     <div class="logo-container">
       <img src="../imahe/j-mab.png" alt="J-MAB Logo">
       <span>J-MAB</span>
     </div> 
-    
+
     <div class="nav-links">
-      <a href="home.html" class="active">HOME</a>
-      <a href="./productPage.html?category=tires">PRODUCTS</a>
-      <a href="about.html">ABOUT</a>
+      <a id="hehe" href="./home.html"class="active">HOME</a>
+      <a id="hehe" href="./productPage.html?category=tires">PRODUCTS</a>
+      <a id="hehe" href="./about.html">ABOUT</a>
     </div>
 
     <div class="action-icons">
-      <a href="../HTML/userCart.html" class="icon-link">
+      <a href="../HTML/userCart.html">
           <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
-      <a href="../HTML/" class="icon-link">
+      <a href="../HTML/">
           <img src="../imahe/notifications.png" alt="Notification Icon">
       </a>
+      
       <div class="profile-button" onclick="toggleDropdown()">
           <img src="../imahe/prof.png" alt="Profile Icon">
       </div>
@@ -41,65 +41,76 @@
     </div>
   </nav>
 
-  <section>
-    <div class="topSection">
-      <div class="sectionText">
-        <h1 class="headline">Your <span class="highlight">Trusted Partner</span> for Quality Tires,<br> Batteries, Oils & Lubricants</h1>
-        <p class="tagline">Where durability meets performance</p>
-        <a style="text-decoration: none" href="./productPage.html?category=tires" class="shop-btn">View Products</button></a>
-      </div>
+    <section>
+        <div class="topSection">
+            <div class="sectionText">
+                <h1 class="headline">Your <span class="highlight">Trusted Partner</span> for Quality Tires,<br> Batteries, Oils & Lubricants</h1>
+                <p class="tagline">Where durability meets performance</p>
+                <a style="text-decoration: none" href="./productPage.html?category=tires" class="shop-btn">View Products</a>
+            </div>
+        </div>
+    </section>
+    
+    <section class="product-categories">
+        <div class="container">
+            <h2 class="section-title">Our Product Categories</h2>
+            <div class="category-grid">
+                <a href="./productPage.html?category=tires" class="category-card">
+                    <img src="../Products/Tire(4).png" alt="Tires">
+                    <h3>Tires</h3>
+                    <p>Premium Tires for All Vehicles</p>
+                </a>
+                <a href="./productPage.html?category=batteries" class="category-card">
+                    <img src="../Products/battery(3).png" alt="Batteries">
+                    <h3>Batteries</h3>
+                    <p>Reliable Power for Your Vehicle</p>
+                </a>
+                <a href="./productPage.html?category=oils" class="category-card">
+                    <img src="../Products/oil(1).png" alt="Oils">
+                    <h3>Oils</h3>
+                    <p>High-Performance Automotive Fluids</p>
+                </a>
+                <a href="./productPage.html?category=lubricants" class="category-card">
+                    <img src="../Products/lubricant(1).png" alt="Lubricants">
+                    <h3>Lubricants</h3>
+                    <p>High-Performance Automotive Fluids</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Custom Logout Pop-Up -->
+    <div id="logoutPopup" class="popup">
+        <div class="popup-content">
+            <h3>Logout Confirmation</h3>
+            <p>Are you sure you want to log out?</p>
+            <div class="popup-buttons">
+                <button id="confirmLogout" class="popup-btn confirm">Yes</button>
+                <button id="cancelLogout" class="popup-btn cancel">No</button>
+            </div>
+        </div>
     </div>
-  </section>
-  
-  <section class="product-categories">
-    <div class="container">
-      <h2 class="section-title">Our Product Categories</h2>
-      <div class="category-grid">
-        <a href="./productPage.html?category=tires" class="category-card">
-          <img src="../Products/Tire(4).png" alt="Tires">
-          <h3>Tires</h3>
-          <p>Premium Tires for All Vehicles</p>
-        </a>
-        <a href="./productPage.html?category=batteries" class="category-card">
-          <img src="../Products/battery(3).png" alt="Batteries">
-          <h3>Batteries</h3>
-          <p>Reliable Power for Your Vehicle</p>
-        </a>
-        <a href="./productPage.html?category=oils" class="category-card">
-          <img src="../Products/oil(1).png" alt="Oils">
-          <h3>Oils</h3>
-          <p>High-Performance Automotive Fluids</p>
-        </a>
-        <a href="./productPage.html?category=lubricants" class="category-card">
-          <img src="../Products/lubricant(1).png" alt="Lubricants">
-          <h3>Lubricants</h3>
-          <p>High-Performance Automotive Fluids</p>
-        </a>
-      </div>
-    </div>
-  </section>
-  
-  <script src="../JS/logout.js"></script>
-  <script>
 
-const userId = localStorage.getItem("userId"); 
-const authToken = localStorage.getItem("authToken");
+    <script src="../JS/logout.js"></script>
+    <script>
+        const userId = localStorage.getItem("userId"); 
+        const authToken = localStorage.getItem("authToken");
 
-console.log("User ID:", userId);
-console.log("Auth Token:", authToken);
+        console.log("User ID:", userId);
+        console.log("Auth Token:", authToken);
 
-    function toggleDropdown() {
-      const dropdown = document.getElementById('profileDropdown');
-      dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
-    }
+        function toggleDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-    window.addEventListener('click', function (e) {
-      const profileButton = document.querySelector('.profile-button');
-      const dropdown = document.getElementById('profileDropdown');
-      if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.style.display = 'none';
-      }
-    });
-  </script>
+        window.addEventListener('click', function (e) {
+            const profileButton = document.querySelector('.profile-button');
+            const dropdown = document.getElementById('profileDropdown');
+            if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

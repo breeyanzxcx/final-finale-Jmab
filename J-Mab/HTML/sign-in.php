@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In - J-MAB</title>
+  <title>J-MAB Products</title>
   <link rel="stylesheet" href="../CSS/sign-in.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-
-  <!--http://localhost/jmab/new_jmab/api/user/register-->
-
 <body>
   <nav class="navbar">
     <div class="logo-container">
       <img src="../imahe/j-mab.png" alt="J-MAB Logo">
       <span>J-MAB</span>
-    </div>
+    </div> 
     <div class="help-link">
       <a href="#">Need Help?</a>
     </div>
@@ -71,7 +71,7 @@
     }
   });
   
-  document.getElementById('signin-form').addEventListener('submit', function(event) {
+document.getElementById('signin-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
     const email = document.getElementById('email').value;
@@ -84,14 +84,15 @@
         },
         body: JSON.stringify({ email, password })
     })
-    .then(response => response.json())  
+    .then(response => response.json())
     .then(data => {
         console.log('API Response:', data); 
-        
+
         if (data.success && data.user) {
-            localStorage.setItem('authToken', data.token);  
-            localStorage.setItem('user', JSON.stringify(data.user));  
-            
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('userId', data.user.id);  // Store the logged-in user ID
+
             console.log('User & Token saved:', data.user, data.token);
 
             if (data.user.roles === 'admin') {

@@ -3,31 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>J-MAB Profile</title>
+  <title>J-MAB Products</title>
   <link rel="stylesheet" href="../CSS/purchases.css">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <nav class="navbar">
     <div class="logo-container">
       <img src="../imahe/j-mab.png" alt="J-MAB Logo">
       <span>J-MAB</span>
-    </div>
+    </div> 
+
     <div class="nav-links">
-      <a href="home.html">HOME</a>
-      <a href="./productPage.html?category=tires">PRODUCTS</a>
-      <a href="about.html">ABOUT</a>
+      <a id="hehe" href="./home.html">HOME</a>
+      <a id="hehe" href="./productPage.html?category=tires">PRODUCTS</a>
+      <a id="hehe" href="./about.html">ABOUT</a>
     </div>
+
     <div class="action-icons">
-      <a href="../HTML/userCart.html" class="icon-link">
-        <img src="../imahe/cart.png" alt="Cart Icon">
+      <a href="../HTML/userCart.html">
+          <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
-      <a href="../HTML/" class="icon-link">
-        <img src="../imahe/notifications.png" alt="Notification Icon">
+      <a href="../HTML/">
+          <img src="../imahe/notifications.png" alt="Notification Icon">
       </a>
+      
       <div class="profile-button" onclick="toggleDropdown()">
-        <img src="../imahe/prof.png" alt="Profile Icon">
+          <img src="../imahe/prof.png" alt="Profile Icon">
       </div>
       <div class="profile-dropdown" id="profileDropdown">
         <a href="../HTML/profile.html">My Profile</a>
@@ -66,7 +71,7 @@
     </div>
     <div class="main-content">
       <div class="tabs">
-         <a href="#../HTML/purchases.html" class="tab">ALL ITEMS</a>
+         <a href="../HTML/purchases.html" class="tab">ALL ITEMS</a>
         <a href="../HTML/toPay.html" class="tab">TO PAY</a>
         <a href="../HTML/toShip.html" class="tab">TO SHIP</a>
         <a href="../HTML/toReceive.html" class="tab active">TO RECEIVE</a>
@@ -79,6 +84,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Custom Logout Pop-Up -->
+  <div id="logoutPopup" class="popup">
+    <div class="popup-content">
+        <h3>Logout Confirmation</h3>
+        <p>Are you sure you want to log out?</p>
+        <div class="popup-buttons">
+            <button id="confirmLogout" class="popup-btn confirm">Yes</button>
+            <button id="cancelLogout" class="popup-btn cancel">No</button>
+        </div>
+    </div>
+</div>
+
+  <script src="../orderManagement.js"></script>
+  <script src="../JS/logout.js"></script>
   <script>
     function toggleDropdown() {
       const dropdown = document.getElementById('profileDropdown');

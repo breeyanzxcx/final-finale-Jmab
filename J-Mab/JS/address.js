@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success && data.user) {
                 const address = data.user.addresses.find(addr => addr.id == addressId);
                 if (address) {
-                    document.getElementById('modalTitle').textContent = `EDIT ADDRESS (ID: ${addressId})`;
+                    document.getElementById('modalTitle').textContent = `EDIT ADDRESS`;
                     document.getElementById('street').value = address.home_address || '';
                     document.getElementById('city').value = address.city || '';
                     

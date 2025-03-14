@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,25 +10,30 @@
 
 body {
   font-family: 'Montserrat', 'Poppins', Arial, sans-serif;
+  background-color: #F7F9FA;
   line-height: 1.6;
   color: #333;
-  background-color: #f4f4f4;
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
 }
 
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #02254b;
   padding: 15px 30px;
+  background-color: #02254b;
   color: white;
-  font-family: 'Poppins', sans-serif;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  position: fixed;
+  position: sticky !important;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: padding 0.3s ease, background-color 0.3s ease;
 }
 
 .navbar .logo-container {
@@ -52,38 +61,74 @@ body {
   color: white;
 }
 
-.nav-links {
-  list-style: none;
+.navbar .nav-links {
   display: flex;
+  margin-left: 40px;
   gap: 30px;
 }
 
-.navbar .nav-links a {
-  font-size: 18px;
-  font-weight: 600;
-  text-decoration: none;
+.navbar a {
   position: relative;
+  padding: 5px 10px;
   color: white;
-  transition: all 0.3s ease-in-out;
+  font-size: 16px;
+  font-weight: 600;
   letter-spacing: 1px;
-  padding: 5px 0;
 }
 
-.navbar .nav-links a:hover,
-.navbar .nav-links a.active {
+.navbar a:hover, .navbar a.active {
   color: #FFD700;
 }
 
-.navbar .nav-links a.active::after,
-.navbar .nav-links a:hover::after {
+.navbar a::after {
   content: '';
   position: absolute;
-  width: 100%;
+  width: 0;
   height: 2px;
   background-color: #FFD700;
   bottom: -2px;
   left: 0;
   transition: width 0.3s ease-in-out;
+}
+
+.navbar a.active::after, .navbar a:hover::after {
+  width: 100%;
+}
+
+.navbar .search-bar {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 30px;
+  padding: 8px 15px;
+  width: 460px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.navbar .search-bar input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar .search-bar button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.navbar .search-bar button:hover {
+  transform: scale(1.1);
+}
+
+.navbar .search-bar img {
+  height: 25px;
+  margin-top: 1px;
 }
 
 .action-icons {
@@ -92,6 +137,11 @@ body {
   gap: 20px;
   position: relative;
   margin-right: 30px;
+}
+
+.action-icons a{
+  margin-top: 10px;
+  margin-bottom: 3px;
 }
 
 .action-icons .icon-link,
@@ -109,6 +159,17 @@ body {
   width: 24px;
   height: 24px;
   filter: brightness(1.2);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .profile-dropdown {
@@ -149,7 +210,6 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  margin-top: 80px;
   position: relative;
 }
 
@@ -382,4 +442,74 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+/* Popup Styles */
+.popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 350px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.popup-content h3 {
+  color: #02254b;
+  margin-bottom: 15px;
+  font-size: 24px;
+}
+
+.popup-content p {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: space-around;
+}
+
+.popup-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.popup-btn.confirm {
+  background-color: #02254b;
+  color: #FFFFFF;
+}
+
+.popup-btn.confirm:hover {
+  background-color: #0147A1;
+}
+
+.popup-btn.cancel {
+  background-color: #FF0000;
+  color: #FFFFFF;
+}
+
+.popup-btn.cancel:hover {
+  background-color: #CC0000;
 }

@@ -9,9 +9,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #02254B;
+    padding: 15px 30px;
+    background-color: #02254b;
     color: white;
+    position: sticky !important;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: padding 0.3s ease, background-color 0.3s ease;
   }
   
   .navbar .logo-container {
@@ -19,15 +24,24 @@ body {
     align-items: center;
     gap: 10px;
     padding-left: 30px;
+    transition: transform 0.3s ease;
+    
   }
-
+  
+  .navbar .logo-container:hover {
+    transform: scale(1.05);
+  }
+  
   .navbar .logo-container img {
     height: 50px;
   }
-
+  
   .navbar .logo-container span {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: white;
   }
   
   .help-link a {

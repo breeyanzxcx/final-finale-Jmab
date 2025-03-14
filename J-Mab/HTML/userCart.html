@@ -1,46 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J-MAB Cart</title>
-    <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
-    <link rel="stylesheet" href="../CSS/user_cart.css">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J-MAB Products</title>
+  <link rel="stylesheet" href="../CSS/user_cart.css">
+  <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
+  <nav class="navbar">
+    <div class="logo-container">
+      <img src="../imahe/j-mab.png" alt="J-MAB Logo">
+      <span>J-MAB</span>
+    </div> 
+
+    <div class="nav-links">
+      <a id="hehe" href="./home.html">HOME</a>
+      <a id="hehe" href="./productPage.html?category=tires">PRODUCTS</a>
+      <a id="hehe" href="./about.html">ABOUT</a>
+    </div>
+
+    <div class="action-icons">
+      <a href="../HTML/userCart.html" class="active">
+          <img src="../imahe/cart.png" alt="Cart Icon">
+      </a>
+      <a href="../HTML/">
+          <img src="../imahe/notifications.png" alt="Notification Icon">
+      </a>
+      
+      <div class="profile-button" onclick="toggleDropdown()">
+          <img src="../imahe/prof.png" alt="Profile Icon">
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="../HTML/profile.html">My Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+
     <main>
-        <div id="returnBtn" class="back-button">
-            &#8592; Back
-        </div>
-
         <div class="cart-container">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <div class="select-all-section">
-                    <input type="checkbox" id="select-all">
-                    <label for="select-all">SELECT ALL ITEMS</label>
-                    <button id="hehe" class="delete-btn">DELETE</button>
-                </div>
+            <div class="cart-header">
+                <button id="returnBtn">⬅ Return</button>
+                <h1>Shopping Cart</h1>
             </div>
-        
-            <!-- New container for cart items -->
-            <div class="cart-items-container">
+            
+            <div class="select-all-section">
+                <div class="select-all-group">
+                    <input type="checkbox" id="select-all">
+                    <label for="select-all">Select All Items</label>
+                </div>
+                <button id="delete-selected" class="delete-btn">Delete Selected</button>
+            </div>
 
-                
-            </div> 
-        
+            <div class="cart-items-container">
+                <!-- Cart items will be populated here -->
+            </div>
+
             <div class="order-summary">
-                <h4>ORDER SUMMARY</h4>
-                <p>SUBTOTAL <span>₱0.00</span></p>
-                <p>SHIPPING FEE <span>₱50.00</span></p>
-                <p>TOTAL <span>₱50.00</span></p>
-                <button class="checkout-btn">PROCEED TO CHECKOUT</button>
+                <h4>Order Summary</h4>
+                <p>Subtotal <span id="subtotal">₱0.00</span></p>
+                <p>Shipping Fee <span>₱50.00</span></p>
+                <p>Total <span id="total">₱50.00</span></p>
+                <button class="checkout-btn">Proceed to Checkout</button>
             </div>
         </div>
-        
     </main>
+
+    <div id="logoutPopup" class="popup">
+        <div class="popup-content">
+            <h3>Logout Confirmation</h3>
+            <p>Are you sure you want to log out?</p>
+            <div class="popup-buttons">
+                <button id="confirmLogout" class="popup-btn confirm">Yes</button>
+                <button id="cancelLogout" class="popup-btn cancel">No</button>
+            </div>
+        </div>
+    </div>
+
     <script src="../JS/cart.js"></script>
     <script src="../JS/returnbutton.js"></script>
+    <script src="../JS/logout.js"></script>
+    <script>
+        function toggleDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        window.addEventListener('click', function (e) {
+            const profileButton = document.querySelector('.profile-button');
+            const dropdown = document.getElementById('profileDropdown');
+            if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
