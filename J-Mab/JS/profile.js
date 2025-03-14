@@ -70,10 +70,6 @@ document.getElementById('profileForm').addEventListener('submit', function (even
           } else {
               alert('Failed to update profile: ' + (data.errors?.join(', ') || 'Unknown error'));
           }
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
       })
       .catch(error => {
           console.error('Error:', error);
@@ -112,17 +108,9 @@ function loadProfileData() {
       if (user.gender) {
           document.getElementById(user.gender.toLowerCase()).checked = true;
       }
-<<<<<<< HEAD
   }
 }
 
-=======
-
-  }
-}
-
-
->>>>>>> 07b8b25 (no stock)
 document.addEventListener('DOMContentLoaded', function () {
   const user = JSON.parse(localStorage.getItem('user'));
   if (user && user.id) {

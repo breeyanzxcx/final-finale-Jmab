@@ -188,25 +188,20 @@ function updateOrderStatus(orderId, newStatus) {
         },
         body: JSON.stringify({ status: newStatus })
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                console.error("Server responded with an error:", err);
-                throw new Error(`HTTP error! Status: ${response.status}, Message: ${err.errors.join(", ")}`);
-            });
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.success) {
             alert(`Order ${orderId} updated to ${newStatus}`);
-            fetchOrders(); // Refresh the orders table
+            fetchOrders(); // Refresh admin panel orders
+
+            // Notify profile page to refresh
+            localStorage.setItem("orderUpdated", "true");
         } else {
             alert(`Failed to update order: ${data.errors.join(", ")}`);
         }
     })
     .catch(error => {
         console.error("Error updating order:", error);
-        alert("An error occurred while updating the order. Check the console for details.");
+        alert("An error occurred while updating the order.");
     });
 }

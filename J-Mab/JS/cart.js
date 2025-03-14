@@ -20,14 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const checkoutButton = document.querySelector(".checkout-btn");
     if (checkoutButton) {
         checkoutButton.addEventListener("click", () => {
-<<<<<<< HEAD
             const selectedItems = document.querySelectorAll(".item-checkbox:checked");
-=======
-
-            const selectedItems = document.querySelectorAll(".item-checkbox:checked");
-
-
->>>>>>> 07b8b25 (no stock)
             const cartItems = document.querySelectorAll(".cart-item");
 
             if (cartItems.length === 0) {
@@ -39,63 +32,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Please select at least one item to proceed to checkout.");
                 return;
             }
-<<<<<<< HEAD
             
-=======
-
-
->>>>>>> 07b8b25 (no stock)
             const selectedCartIds = Array.from(selectedItems).map(checkbox => {
                 return checkbox.closest(".cart-item").dataset.cartId;
             });
 
             localStorage.setItem("selectedCartIds", JSON.stringify(selectedCartIds));
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
             window.location.href = "../HTML/checkout.html";
         });
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
     const selectAllCheckbox = document.getElementById("select-all");
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener("change", toggleSelectAll);
     }
 
     const deleteButton = document.getElementById("delete-selected");
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
     if (deleteButton) {
         deleteButton.addEventListener("click", showDeleteSelectedConfirmation);
     }
 
-<<<<<<< HEAD
     const returnBtn = document.getElementById("returnBtn");
     if (returnBtn) {
         returnBtn.addEventListener("click", function() {
-=======
-
-    const returnBtn = document.getElementById("returnBtn");
-    if (returnBtn) {
-        returnBtn.addEventListener("click", function() {
-
->>>>>>> 07b8b25 (no stock)
             window.location.href = "../HTML/productPage.html?category=tires";
         });
     }
 });
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 async function fetchUserCart() {
     const cartItemsContainer = document.querySelector(".cart-items-container");
     cartItemsContainer.innerHTML = "<div class='loading'>Loading your cart...</div>";
@@ -118,10 +82,6 @@ async function fetchUserCart() {
             }
         });
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
         if (response.status === 404) {
             cartItemsContainer.innerHTML = "<div class='empty-cart'>Your cart is empty.</div>";
             updateOrderSummaryEmpty();
@@ -133,46 +93,21 @@ async function fetchUserCart() {
         }
 
         const data = await response.json();
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 07b8b25 (no stock)
         if (data.success && data.cart && data.cart.length > 0) {
             displayCartItems(data.cart);
         } else {
             cartItemsContainer.innerHTML = "<div class='empty-cart'>Your cart is empty.</div>";
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
             updateOrderSummaryEmpty();
         }
     } catch (error) {
         console.error("Error fetching cart:", error);
         cartItemsContainer.innerHTML = "<div class='error'>Error loading cart. Please try again.</div>";
-<<<<<<< HEAD
     }
 }
 
 function displayCartItems(cartItems) {
     const cartItemsContainer = document.querySelector(".cart-items-container");
     cartItemsContainer.innerHTML = "";
-=======
-
-    }
-}
-
-
-function displayCartItems(cartItems) {
-    const cartItemsContainer = document.querySelector(".cart-items-container");
-    cartItemsContainer.innerHTML = "";
-
-
-
-
-
->>>>>>> 07b8b25 (no stock)
 
     cartItems.forEach(item => {
         const cartItem = document.createElement("div");
@@ -194,12 +129,6 @@ function displayCartItems(cartItems) {
                 <input type="number" value="${item.quantity}" min="1" class="qty-input">
                 <button class="qty-btn increase">+</button>
             </div>
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 07b8b25 (no stock)
         `;
 
         cartItemsContainer.appendChild(cartItem);
@@ -209,10 +138,6 @@ function displayCartItems(cartItems) {
     updateOrderSummary();
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 function updateOrderSummaryEmpty() {
     const subtotalElement = document.getElementById("subtotal");
     const totalElement = document.getElementById("total");
@@ -244,11 +169,6 @@ function attachEventListeners() {
         input.addEventListener("change", function () {
             const cartId = this.closest(".cart-item").dataset.cartId;
             if (parseInt(this.value) < 1) this.value = 1;
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 07b8b25 (no stock)
             updateQuantity(cartId, parseInt(this.value));
         });
     });
@@ -256,11 +176,6 @@ function attachEventListeners() {
     // Add event listener for checkbox changes
     document.querySelectorAll(".item-checkbox").forEach(checkbox => {
         checkbox.addEventListener("change", updateOrderSummary);
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 07b8b25 (no stock)
     });
 }
 
@@ -271,13 +186,6 @@ function updateOrderSummary() {
     
     let subtotal = 0;
     const shippingFee = 50;
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> 07b8b25 (no stock)
 
     cartItems.forEach(item => {
         const checkbox = item.querySelector(".item-checkbox");
@@ -292,10 +200,6 @@ function updateOrderSummary() {
     totalElement.textContent = `₱${(subtotal + shippingFee).toFixed(2)}`;
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 async function removeFromCart(cartId) {
     showConfirmationDialog(
         "Remove Item",
@@ -311,13 +215,6 @@ async function removeFromCart(cartId) {
                     }
                 });
 
-<<<<<<< HEAD
-=======
-
-
-
-
->>>>>>> 07b8b25 (no stock)
                 if (!response.ok) throw new Error("Failed to remove item");
                 fetchUserCart();
                 showSuccessMessage("Item removed successfully!");
@@ -329,35 +226,14 @@ async function removeFromCart(cartId) {
     );
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 async function removeSelectedItems() {
     const authToken = localStorage.getItem("authToken");
     const selectedItems = document.querySelectorAll(".item-checkbox:checked");
 
     try {
         let allSuccess = true;
-<<<<<<< HEAD
         for (const checkbox of selectedItems) {
             const cartId = checkbox.closest(".cart-item").dataset.cartId;
-=======
-
-        for (const checkbox of selectedItems) {
-            const cartId = checkbox.closest(".cart-item").dataset.cartId;
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> 07b8b25 (no stock)
             const response = await fetch(`http://localhost/jmab/final-jmab/api/carts/${cartId}`, {
                 method: "DELETE",
                 headers: {
@@ -367,12 +243,6 @@ async function removeSelectedItems() {
             });
 
             if (!response.ok) allSuccess = false;
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 07b8b25 (no stock)
         }
 
         if (allSuccess) {
@@ -381,20 +251,12 @@ async function removeSelectedItems() {
             alert("Some items could not be removed. Please try again.");
         }
         fetchUserCart();
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
     } catch (error) {
         console.error("Error removing selected items:", error);
         alert("An error occurred while removing the items.");
     }
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 function showDeleteSelectedConfirmation() {
     const selectedItems = document.querySelectorAll(".item-checkbox:checked");
     if (selectedItems.length === 0) {
@@ -409,25 +271,15 @@ function showDeleteSelectedConfirmation() {
     );
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 function showConfirmationDialog(title, message, confirmCallback) {
     const dialog = document.querySelector('.confirmation-dialog');
     const titleElement = dialog.querySelector('.dialog-title');
     const messageElement = dialog.querySelector('.dialog-message');
     const confirmButton = dialog.querySelector('.confirm-btn');
     const cancelButton = dialog.querySelector('.cancel-btn');
-<<<<<<< HEAD
 
     titleElement.textContent = title;
     messageElement.textContent = message;
-=======
-    titleElement.textContent = title;
-    messageElement.textContent = message;
-
->>>>>>> 07b8b25 (no stock)
     dialog.style.display = 'flex';
 
     const handleConfirm = () => {
@@ -447,10 +299,6 @@ function showConfirmationDialog(title, message, confirmCallback) {
     cancelButton.addEventListener('click', handleCancel);
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 function toggleSelectAll() {
     const selectAllCheckbox = document.getElementById("select-all");
     const itemCheckboxes = document.querySelectorAll(".item-checkbox");
@@ -461,10 +309,6 @@ function toggleSelectAll() {
     updateOrderSummary(); // Update summary when select all changes
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07b8b25 (no stock)
 async function updateQuantity(cartId, quantity) {
     const authToken = localStorage.getItem("authToken");
 
@@ -480,12 +324,6 @@ async function updateQuantity(cartId, quantity) {
 
         if (!response.ok) throw new Error("Failed to update quantity");
         fetchUserCart();
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 07b8b25 (no stock)
     } catch (error) {
         console.error("Error updating quantity:", error);
         alert("Failed to update quantity. Please try again.");
@@ -498,34 +336,4 @@ function showSuccessMessage(message) {
     notification.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 3000);
-<<<<<<< HEAD
 }
-=======
-}
-// Optional: Function to update cart counter if you have one in your UI
-/*function updateCartCounter() {
-    const userId = localStorage.getItem('userId');
-    const authToken = localStorage.getItem('authToken');
-    
-    if (!userId || !authToken) return;
-    
-    fetch(`http://localhost/jmab/final-jmab/api/carts?user_id=${userId}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${authToken}`
-        }
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success && result.cart) {
-            // Calculate total items in cart
-            const totalItems = result.cart.reduce((sum, item) => sum + parseInt(item.quantity), 0);
-            
-            // Update cart counter if you have one in your UI
-            // Example: document.getElementById('cart-counter').textContent = totalItems;
-        }
-    })
-    .catch(error => console.error("Error fetching cart count:", error));
-}*/
->>>>>>> 07b8b25 (no stock)

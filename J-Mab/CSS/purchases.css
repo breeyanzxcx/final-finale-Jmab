@@ -458,3 +458,189 @@ a {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Order Card Styling */
+.content-area {
+  padding: 20px;
+}
+
+.order-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.order-info {
+  display: flex;
+  align-items: center;
+}
+
+.order-reference {
+  font-weight: 600;
+  font-size: 14px;
+  margin-right: 12px;
+}
+
+.order-status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #e6f7ff;
+  color: #0066cc;
+}
+
+.order-date {
+  font-size: 13px;
+  color: #666;
+}
+
+.order-content {
+  padding: 16px;
+}
+
+.product-item {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.product-item:last-child {
+  border-bottom: none;
+}
+
+.product-image {
+  width: 80px;
+  height: 80px;
+  margin-right: 16px;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.product-details {
+  flex: 1;
+}
+
+.product-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+}
+
+.product-details p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: #f9f9f9;
+  border-top: 1px solid #eaeaea;
+}
+
+.order-summary {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-summary span:last-child {
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 4px;
+}
+
+.order-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pay-btn {
+  background-color: #1890ff;
+  color: white;
+}
+
+.track-btn {
+  background-color: #52c41a;
+  color: white;
+}
+
+.receive-btn {
+  background-color: #722ed1;
+  color: white;
+}
+
+.rate-btn {
+  background-color: #fa8c16;
+  color: white;
+}
+
+.contact-btn {
+  background-color: #f5222d;
+  color: white;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+}
+
+/* Status-specific colors */
+.pending .order-status {
+  background-color: #fff7e6;
+  color: #fa8c16;
+}
+
+.processing .order-status {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.out-for-delivery .order-status {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.delivered .order-status {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.cancelled .order-status,
+.failed-delivery .order-status {
+  background-color: #fff1f0;
+  color: #f5222d;
+}
+
+.order-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #f9f9f9;
+}
