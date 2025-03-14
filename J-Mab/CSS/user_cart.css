@@ -213,6 +213,11 @@ main {
     margin: 0 auto;
     background-color: #fff;
     padding: 30px;
+
+
+
+
+
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s ease;
@@ -220,6 +225,11 @@ main {
 
 .cart-container:hover {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+
+
+
+
+
 }
 
 .cart-header {
@@ -227,6 +237,11 @@ main {
     align-items: center;
     gap: 20px;
     margin-bottom: 20px;
+
+
+
+
+
 }
 
 .cart-header h1 {
@@ -257,23 +272,39 @@ main {
 }
 
 .select-all-section {
+
+
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+
+
+
+
+
+
+
     padding: 15px;
     background-color: #f9f9f9;
     border-radius: 8px;
     margin-bottom: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+
+
 }
 
 .select-all-group {
     display: flex;
     align-items: center;
     gap: 10px;
+
 }
 
 .select-all-section label {
+
+
+
     font-size: 16px;
     font-weight: 600;
     color: #02254b;
@@ -427,6 +458,10 @@ main {
 }
 
 .checkout-btn {
+
+
+
+
     width: 100%;
     padding: 15px;
     background-color: #FFD700;
@@ -534,10 +569,15 @@ main {
     background: white;
     padding: 30px;
     border-radius: 10px;
+
+
     text-align: center;
     width: 400px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
     animation: fadeIn 0.3s ease-out;
+
+
+
 }
 
 .dialog-title {

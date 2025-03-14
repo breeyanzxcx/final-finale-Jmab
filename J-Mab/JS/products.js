@@ -102,32 +102,42 @@ async function loadProducts(selectedCategory = "tires") {
         let category = product.category.trim().toLowerCase();
         const productElement = document.createElement("div");
         productElement.classList.add("item");
-
-        productElement.innerHTML = `
-          <img src="${product.image_url}" alt="${product.name}">
-          <h4>${product.name}</h4>
-          <p class="description">${product.description}</p>
-          <p>Stock: ${product.stock}</p>
-          ${product.size ? `<p>Size: ${product.size}</p>` : ""}
-          ${product.voltage ? `<p>Voltage: ${product.voltage}</p>` : ""}
-          <p class="price">Price: ₱${product.price}</p> <!-- Add class="price" here -->
-          <a href="../HTML/productBoard.html?productId=${product.product_id}" class="view-product-btn">View Product</a>
-          `;
-
-        if (category.includes("tire") && (selectedCategory === "tires" || selectedCategory === "all")) {
-          tireSection.appendChild(productElement);
-          document.querySelector(".tire-section").style.display = "block";
-        } else if (category.includes("batter") && (selectedCategory === "batteries" || selectedCategory === "all")) {
-          batterySection.appendChild(productElement);
-          document.querySelector(".Battery-section").style.display = "block";
-        } else if (category.includes("lubric") && (selectedCategory === "lubricants" || selectedCategory === "all")) {
-          lubricantSection.appendChild(productElement);
-          document.querySelector(".Lubricant-section").style.display = "block";
-        } else if (category.includes("oil") && (selectedCategory === "oils" || selectedCategory === "all")) {
-          oilSection.appendChild(productElement);
-          document.querySelector(".Oil-section").style.display = "block";
+    
+        // Add a class for out-of-stock products
+        if (product.stock === 0) {
+            productElement.classList.add("out-of-stock");
         }
-      });
+    
+        productElement.innerHTML = `
+            <img src="${product.image_url}" alt="${product.name}">
+            <h4>${product.name}</h4>
+            <p class="description">${product.description}</p>
+            <p>Stock: ${product.stock}</p>
+            ${product.size ? `<p>Size: ${product.size}</p>` : ""}
+            ${product.voltage ? `<p>Voltage: ${product.voltage}</p>` : ""}
+            <p class="price">Price: ₱${product.price}</p>
+            ${product.stock === 0 ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>` : ""}
+        `;
+    
+        // Make the entire product container clickable
+        productElement.addEventListener('click', () => {
+            window.location.href = `../HTML/productBoard.html?productId=${product.product_id}`;
+        });
+    
+        if (category.includes("tire") && (selectedCategory === "tires" || selectedCategory === "all")) {
+            tireSection.appendChild(productElement);
+            document.querySelector(".tire-section").style.display = "block";
+        } else if (category.includes("batter") && (selectedCategory === "batteries" || selectedCategory === "all")) {
+            batterySection.appendChild(productElement);
+            document.querySelector(".Battery-section").style.display = "block";
+        } else if (category.includes("lubric") && (selectedCategory === "lubricants" || selectedCategory === "all")) {
+            lubricantSection.appendChild(productElement);
+            document.querySelector(".Lubricant-section").style.display = "block";
+        } else if (category.includes("oil") && (selectedCategory === "oils" || selectedCategory === "all")) {
+            oilSection.appendChild(productElement);
+            document.querySelector(".Oil-section").style.display = "block";
+        }
+    });
 
       console.log(`Loaded products for category: ${selectedCategory}`);
     } else {

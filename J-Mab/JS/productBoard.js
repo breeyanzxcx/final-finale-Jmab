@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let availableStock = 0;
 
-    //Popup elements
+    // Popup elements
     const popupOverlay = document.createElement('div');
     popupOverlay.className = 'popup-overlay';
     
@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (product) {
                     availableStock = parseInt(product.stock) || 0;
                     
+                    // Update product details
                     document.querySelector('.product-img').src = product.image_url || './imahe/default-image.png';
                     document.querySelector('.product-img').alt = product.name || 'Product';
                     document.getElementById('product-name').textContent = product.name || 'Unnamed Product';
@@ -62,26 +63,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('product-brand').textContent = `Brand: ${product.brand || 'N/A'}`;
                     document.getElementById('product-price').textContent = `₱${product.price || '0.00'}`;
                     
+                    // Update size selector
                     const sizeSelect = document.getElementById('size');
                     sizeSelect.innerHTML = product.size 
                         ? `<option value="${product.size}">${product.size}</option>`
                         : '<option value="">N/A</option>';
 
+                    // Add voltage info if available
                     if (product.voltage) {
                         const voltageInfo = document.createElement('p');
                         voltageInfo.textContent = `Voltage: ${product.voltage}`;
                         document.querySelector('.product-details').insertBefore(voltageInfo, document.getElementById('product-description'));
                     }
 
+                    // Add stock info
                     const stockInfo = document.createElement('p');
                     stockInfo.textContent = `Stock: ${product.stock || 0}`;
                     stockInfo.id = 'stock-info';
                     document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
                     
+                    // Set max quantity input
                     const qtyInput = document.querySelector('.qty-input');
                     qtyInput.setAttribute('max', availableStock);
                     
+                    // Validate quantity input
                     validateQuantityInput(qtyInput);
+
+                    // Disable "Add to Cart" button if stock is 0
+                    const addToCartButton = document.querySelector('.add-to-cart');
+                    if (availableStock === 0) {
+                        addToCartButton.disabled = true;
+                        addToCartButton.textContent = 'No Stock';
+                    }
                 } else {
                     document.getElementById('product-name').textContent = 'Product Not Found';
                     document.getElementById('product-description').textContent = 'No product matches this ID.';
@@ -99,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('product-description').textContent = 'Please select a product.';
     }
 
+    // Validate quantity input
     function validateQuantityInput(input) {
         const value = parseInt(input.value);
         if (value < 1) {
@@ -109,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Quantity button event listeners
     const qtyButtons = document.querySelectorAll('.qty-btn');
     qtyButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -127,6 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Quantity input event listeners
     const qtyInput = document.querySelector('.qty-input');
     qtyInput.addEventListener('change', function() {
         validateQuantityInput(this);
@@ -143,6 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Add to cart function
     async function addToCart(isCheckout = false) {
         const quantity = parseInt(document.querySelector('.qty-input').value);
         const productId = urlParams.get('productId');
@@ -163,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (isCheckout) {
-            //Redirect directly to checkout with product details
+            // Redirect directly to checkout with product details
             const checkoutUrl = `../HTML/checkout.html?productId=${productId}&quantity=${quantity}`;
             console.log("Redirecting to:", checkoutUrl);
             window.location.href = checkoutUrl;
@@ -200,7 +217,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Show the popup with animation
                 popupOverlay.classList.add('active');
                 
-                // No more alert and confirm dialogs
+                // Disable "Add to Cart" button if stock reaches 0
+                if (availableStock === 0) {
+                    const addToCartButton = document.querySelector('.add-to-cart');
+                    addToCartButton.disabled = true;
+                    addToCartButton.textContent = 'No Stock';
+                }
             } else {
                 const errorMsg = result.errors ? result.errors.join(', ') : 'Failed to add item to cart.';
                 alert(errorMsg);
@@ -211,10 +233,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    //Ensure correct boolean parameter is passed
+    // Event listeners for "Add to Cart" and "Buy Now" buttons
     document.querySelector('.add-to-cart').addEventListener('click', () => addToCart(false));
     document.querySelector('.buy-now').addEventListener('click', () => addToCart(true));
 
+    // Return button event listener
     document.getElementById('returnBtn').addEventListener('click', () => {
         window.history.back();
     });

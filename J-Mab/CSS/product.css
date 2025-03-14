@@ -42,7 +42,7 @@ a {
   gap: 10px;
   padding-left: 30px;
   transition: transform 0.3s ease;
-  
+
 }
 
 .navbar .logo-container:hover {
@@ -339,11 +339,31 @@ a {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  margin: 10px;
 }
 
 .item:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0);
+  transition: background-color 0.3s ease;
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.item:hover::after {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .item img {
@@ -490,4 +510,24 @@ a {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.item.out-of-stock {
+  opacity: 0.6; /* Reduce opacity for out-of-stock items */
+  position: relative;
+}
+
+.out-of-stock-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 0, 0, 0.8); /* Red background with opacity */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  z-index: 1; /* Ensure it appears above the product content */
+  pointer-events: none; /* Allow clicks to pass through */
 }

@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchOrders() {
-    const token = localStorage.getItem("authToken"); 
+    const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
 
     if (!token) {
         console.error("No authorization token found.");
@@ -31,14 +31,13 @@ function fetchOrders() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            displayOrders(data.orders); 
+            displayOrders(data.orders); // Assuming 'orders' is the key containing order data
         } else {
             console.error("Error fetching orders:", data.errors);
         }
     })
     .catch(error => console.error("Fetch error:", error));
 }
-
 
 function displayOrders(orders) {
     const ordersTableBody = document.querySelector(".orders-container tbody");
@@ -47,6 +46,9 @@ function displayOrders(orders) {
     orders.forEach(order => {
         const fullName = `${order.first_name || ""} ${order.last_name || ""}`.trim(); // Concatenate first and last name
         const formattedDate = formatDate(order.created_at); // Convert date to 12-hour format
+
+        // Map status to CSS class
+        const statusClass = order.status.toLowerCase().replace(/ /g, '-'); // Convert "out for delivery" to "out-for-delivery"
 
         const row = document.createElement("tr");
         row.innerHTML = `

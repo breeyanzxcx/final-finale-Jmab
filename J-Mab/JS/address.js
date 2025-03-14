@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     citySelect.addEventListener('change', function() {
         const selectedCity = this.value;
         barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
-        
+
         if (selectedCity && barangays[selectedCity]) {
             barangays[selectedCity].forEach(barangay => {
                 const option = document.createElement('option');
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('modalTitle').textContent = `EDIT ADDRESS`;
                     document.getElementById('street').value = address.home_address || '';
                     document.getElementById('city').value = address.city || '';
-                    
+
                     // Update barangay dropdown based on selected city
                     barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
                     if (barangays[address.city]) {
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             barangaySelect.appendChild(option);
                         });
                     }
-                    
+
                     document.getElementById('setDefault').checked = address.is_default === 1;
                     document.getElementById('addressId').value = address.id;
                     deleteAddressButton.style.display = 'block';

@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  text-decoration: none;
 }
 
 body {
@@ -50,7 +51,7 @@ body {
   gap: 10px;
   padding-left: 30px;
   transition: transform 0.3s ease;
-  
+
 }
 
 .navbar .logo-container:hover {
@@ -82,7 +83,6 @@ body {
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 1px;
-  text-decoration: none;
 }
 
 .navbar a:hover, .navbar a.active {
@@ -360,79 +360,4 @@ body {
 
 .category-card p {
   color: #666;
-}
-
-/* Popup Styles */
-.popup {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 2000;
-  justify-content: center;
-  align-items: center;
-}
-
-.popup-content {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  text-align: center;
-  width: 350px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  animation: fadeIn 0.3s ease-out;
-}
-
-.popup-content h3 {
-  color: #02254b;
-  margin-bottom: 15px;
-  font-size: 24px;
-}
-
-.popup-content p {
-  color: #666;
-  margin-bottom: 20px;
-  font-size: 16px;
-}
-
-.popup-buttons {
-  display: flex;
-  justify-content: space-around;
-}
-
-.popup-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.popup-btn.confirm {
-  background-color: #02254b;
-  color: #FFFFFF;
-}
-
-.popup-btn.confirm:hover {
-  background-color: #0147A1;
-}
-
-.popup-btn.cancel {
-  background-color: #FF0000;
-  color: #FFFFFF;
-}
-
-.popup-btn.cancel:hover {
-  background-color: #CC0000;
-}
-
-/* Fade-in animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
 }

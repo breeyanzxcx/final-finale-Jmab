@@ -383,6 +383,33 @@ button {
     color: white;
     padding: 10px;
 }
+
+.payment-status-label {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.payment-status-paid {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.payment-status-unpaid {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.payment-status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.payment-status-default {
+    background-color: #f0f0f0;
+    color: #333;
+}
 </style>
 </head>
 
@@ -412,15 +439,16 @@ button {
             <thead>
                 <tr>
                     <th>Reference Number</th>
-                    <th>User Name</th>
+                    <th>Customer Name</th>
                     <th>Total Price</th>
                     <th>Payment Method</th>
-                    <th>Products</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Product Details</th>
+                    <th>Order Status</th>
+                    <!--<th>Payment Status</th>-->
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="orders-table-body"></tbody> 
+            <tbody id="orders-table-body"></tbody>
         </table>
         
         </table>

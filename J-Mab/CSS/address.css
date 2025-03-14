@@ -205,7 +205,7 @@ a {
   color: #02254b;
   border-left: 3px solid #FFD700;
 }
-  
+
 .container {
   display: flex;
   max-width: 1400px;
@@ -313,7 +313,7 @@ a {
 .sidebar a.active .sidebar-icon {
   filter: brightness(0) invert(1);
 }
-    
+
 .content {
   flex: 1;
   padding: 20px;
@@ -323,7 +323,7 @@ a {
   display: flex;
   flex-direction: column;
 }
-  
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -333,12 +333,12 @@ a {
   border-radius: 5px 5px 0 0;
   margin-bottom: 10px;
 }
-  
+
 h2 {
   margin: 0;
   color: #02254B;
 }
-  
+
 .add-button {
   background-color: #02254B;
   color: white;
@@ -348,11 +348,11 @@ h2 {
   cursor: pointer;
   font-size: 14px;
 }
-  
+
 .add-button:hover {
   background-color: #03356b;
 }
-  
+
 .address-card {
   background-color: white;
   padding: 15px;
@@ -363,22 +363,22 @@ h2 {
   justify-content: space-between;
   align-items: center;
 }
-  
+
 .address-info {
   flex: 1;
   margin-right: 15px;
 }
-  
+
 .address-info strong {
   color: #02254B;
 }
-  
+
 .address-info p {
   margin: 5px 0 0;
   color: #02254B;
   font-size: 14px;
 }
-  
+
 .address-actions button {
   background: none;
   border: 1px solid #02254B;
@@ -388,11 +388,11 @@ h2 {
   cursor: pointer;
   font-size: 12px;
 }
-  
+
 .edit-button {
   color: #02254B;
 }
-  
+
 .edit-button:hover {
   background-color: #02254B;
   color: white;
@@ -402,21 +402,21 @@ h2 {
   color: #02254B;
   background-color: #e9ecef;
 }
-  
+
 .default-button:hover {
   background-color: #02254B;
   color: white;
 }
-  
+
 .default-address .default-button {
   background-color: #02254B;
   color: white;
 }
-  
+
 .default-address .default-button::before {
   content: '✔ ';
 }
-  
+
 .modal {
   display: none;
   position: fixed;
@@ -427,7 +427,7 @@ h2 {
   background-color: rgba(0,0,0,0.5);
   z-index: 1000;
 }
-  
+
 .modal-content {
   background-color: #e0e0e0;
   margin: 5% auto;
@@ -438,23 +438,23 @@ h2 {
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   position: relative;
 }
-  
+
 .modal-content h2 {
   margin: 0 0 15px;
   color: #02254B;
 }
-  
+
 .form-group {
   margin-bottom: 20px;
 }
-  
+
 .form-group label {
   display: block;
   color: #02254B;
   margin-bottom: 5px;
   font-weight: bold;
 }
-  
+
 .form-group input {
   width: 100%;
   padding: 10px;
@@ -462,7 +462,7 @@ h2 {
   border-radius: 4px;
   box-sizing: border-box;
 }
-  
+
 .form-group select {
   width: 100%;
   padding: 10px;
@@ -470,28 +470,28 @@ h2 {
   border-radius: 4px;
   box-sizing: border-box;
 }
-  
+
 .form-group select:focus {
   border-color: #02254B;
   outline: none;
   box-shadow: 0 0 5px rgba(2, 37, 75, 0.5);
 }
-  
+
 .checkbox-group {
   display: flex;
   align-items: center;
 }
-  
+
 .checkbox-group input {
   width: auto;
   margin-right: 10px;
 }
-  
+
 .boxcheck {
   margin-left: 20px;
   margin-bottom: 8px;
 }
-  
+
 .save-button {
   background-color: #02254B;
   color: white;
@@ -502,16 +502,16 @@ h2 {
   font-size: 14px;
   float: right;
 }
-  
+
 .save-button:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
 }
-  
+
 .save-button:hover:enabled {
   background-color: #03356b;
 }
-  
+
 .delete-button {
   background-color: #dc3545;
   color: white;
@@ -523,11 +523,11 @@ h2 {
   float: right;
   margin-right: 10px;
 }
-  
+
 .delete-button:hover {
   background-color: #c82333;
 }
-  
+
 .close-button {
   position: absolute;
   top: 10px;
@@ -537,7 +537,7 @@ h2 {
   font-size: 20px;
   cursor: pointer;
 }
-  
+
 .confirmation-modal {
   display: none;
   position: fixed;
@@ -548,7 +548,7 @@ h2 {
   background-color: rgba(0,0,0,0.5);
   z-index: 1000;
 }
-  
+
 .confirmation-modal-content {
   background-color: #fff;
   margin: 15% auto;
@@ -558,12 +558,12 @@ h2 {
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   text-align: center;
 }
-  
+
 .confirmation-modal-content h2 {
   margin: 0 0 15px;
   color: #02254B;
 }
-  
+
 .confirmation-modal-content button {
   background-color: #dc3545;
   color: white;
@@ -578,11 +578,11 @@ h2 {
 .confirmation-modal-content button:hover {
   background-color: #c81123;
 }
-  
+
 .confirmation-modal-content .cancel-button {
   background-color: #02254B;
 }
-  
+
 .confirmation-modal-content .cancel-button:hover {
   background-color: #02254B;
 }
