@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    fetchOrders();
+    fetchOrders(); // Fetch orders and update both sales and customer counters
 
     // Logout confirmation
     const logoutBtn = document.getElementById('logout');
@@ -13,42 +13,94 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-function fetchOrders() {
-    const token = localStorage.getItem("authToken"); // Retrieve token from localStorage
-
-    if (!token) {
-        console.error("No authorization token found.");
+async function fetchOrders() {
+    const authToken = localStorage.getItem("authToken");
+    if (!authToken) {
+        alert("Unauthorized access. Please log in.");
+        window.location.href = "../HTML/sign-in.php";
         return;
     }
 
-    fetch("http://localhost/jmab/final-jmab/api/orders", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+    try {
+        const response = await fetch("http://localhost/jmab/final-jmab/api/orders", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    })
-    .then(response => response.json())
-    .then(data => {
+
+        const data = await response.json();
+        console.log("API Response:", data); // Log the API response
         if (data.success) {
-            displayOrders(data.orders); // Assuming 'orders' is the key containing order data
+            displayOrders(data.orders);
+            updateSalesCounter(data.orders); // Calculate and update the sales counter
+            updateCustomerCounter(data.orders); // Calculate and update the customer counter
         } else {
-            console.error("Error fetching orders:", data.errors);
+            console.error("Failed to fetch orders:", data.message);
         }
-    })
-    .catch(error => console.error("Fetch error:", error));
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+    }
+}
+
+function updateSalesCounter(orders) {
+    let totalSales = 0;
+
+    orders.forEach(order => {
+        if (order.total_quantity) {
+            console.log("Order Quantity:", order.total_quantity); // Log each order's total quantity
+            totalSales += parseInt(order.total_quantity, 10);
+        }
+    });
+
+    console.log("Total Sales:", totalSales); // Log the total sales
+
+    const salesCounter = document.querySelector(".sales-counter");
+    if (salesCounter) {
+        salesCounter.textContent = totalSales;
+    }
+}
+
+function updateCustomerCounter(orders) {
+    const uniqueCustomers = new Set(); // Use a Set to store unique customer IDs
+
+    // Add each customer's user_id to the Set
+    orders.forEach(order => {
+        if (order.user_id) {
+            console.log("Customer ID:", order.user_id); // Log each customer's ID
+            uniqueCustomers.add(order.user_id);
+        }
+    });
+
+    const totalCustomers = uniqueCustomers.size; // Get the number of unique customers
+    console.log("Total Customers:", totalCustomers); // Log the total customers
+
+    // Update the customer counter in the UI
+    const customersCounter = document.querySelector(".customers-counter");
+    if (customersCounter) {
+        customersCounter.textContent = totalCustomers;
+    }
 }
 
 function displayOrders(orders) {
     const ordersTableBody = document.querySelector(".orders-container tbody");
     ordersTableBody.innerHTML = ""; // Clear previous data
 
-    orders.forEach(order => {
-        const fullName = `${order.first_name || ""} ${order.last_name || ""}`.trim(); // Concatenate first and last name
-        const formattedDate = formatDate(order.created_at); // Convert date to 12-hour format
+    // Show most recent orders first
+    const sortedOrders = orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    // Display only the recent orders
+    const recentOrders = sortedOrders.slice(0, 10);
 
-        // Map status to CSS class
-        const statusClass = order.status.toLowerCase().replace(/ /g, '-'); // Convert "out for delivery" to "out-for-delivery"
+    recentOrders.forEach(order => {
+        const fullName = `${order.first_name || ""} ${order.last_name || ""}`.trim();
+        const formattedDate = formatDate(order.created_at);
+        const statusClass = order.status.toLowerCase().replace(/ /g, '-');
 
         const row = document.createElement("tr");
         row.innerHTML = `

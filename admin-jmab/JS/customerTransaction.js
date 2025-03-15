@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
         console.log("Fetching transactions for User ID:", userId);
     
-        fetch(`http://localhost/jmab/final-jmab/api/orders/${userId}`, { // Adjusted API endpoint
+        fetch(`http://localhost/jmab/final-jmab/api/orders/${userId}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${authToken}`,
@@ -93,7 +93,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success && data.orders && data.orders.length > 0) {
                 transactionsHTML += `<ul>`;
                 data.orders.forEach(order => {
-                    transactionsHTML += `<li>Order ID: ${order.order_id} - ₱${order.total_price} - ${order.created_at}</li>`;
+                    transactionsHTML += `
+                        <li class="order-item" data-order-id="${order.order_id}">
+                            <span>Order ID: ${order.order_id} - ₱${order.total_price} - ${order.created_at}</span>
+                            <button class="view-order-details-btn" data-order-id="${order.order_id}">View Details</button>
+                        </li>
+                    `;
                 });
                 transactionsHTML += `</ul>`;
             } else {
@@ -104,13 +109,49 @@ document.addEventListener("DOMContentLoaded", function () {
             if (viewContent) {
                 viewContent.innerHTML = transactionsHTML;
                 document.getElementById("transaction-view").style.display = "block";
+    
+                // Attach click event listeners to each "View Details" button
+                document.querySelectorAll('.view-order-details-btn').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const orderId = this.getAttribute('data-order-id');
+                        displayOrderDetails(data.orders, orderId);
+                    });
+                });
             }
         })
         .catch(error => console.error("Error fetching transactions:", error));
     }
-    
-    
 
+    function displayOrderDetails(orders, orderId) {
+        // Filter the orders to find the ones matching the orderId
+        const orderDetails = orders.filter(order => order.order_id == orderId);
+    
+        let orderDetailsHTML = `<h3>Order Details for Order ID: ${orderId}</h3>`;
+    
+        if (orderDetails.length > 0) {
+            orderDetailsHTML += `<div class="order-details-container">`;
+            orderDetails.forEach(detail => {
+                orderDetailsHTML += `
+                    <div class="order-detail-item">
+                        <p><strong>Product:</strong> ${detail.product_name}</p>
+                        <p><strong>Quantity:</strong> ${detail.quantity}</p>
+                        <p><strong>Price:</strong> ₱${detail.product_price}</p>
+                        <p><strong>Brand:</strong> ${detail.product_brand}</p>
+                    </div>
+                    <hr> 
+                `;
+            });
+            orderDetailsHTML += `</div>`;
+        } else {
+            orderDetailsHTML += `<p style="text-align: center; font-size: 18px; margin-top: 50px;">NO ORDER DETAILS</p>`;
+        }
+    
+        const viewContent = document.getElementById("transaction-view-content");
+        if (viewContent) {
+            viewContent.innerHTML = orderDetailsHTML;
+        }
+    }
+    
     // Close View function
     function closeView() {
         const viewModal = document.getElementById("transaction-view");
