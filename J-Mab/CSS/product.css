@@ -325,8 +325,7 @@ a {
 .item-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 25px;
-  width: 100%;
+  max-width: 2000px;
 }
 
 .item {
@@ -395,6 +394,13 @@ a {
   color: #333;
   font-weight: 600;
 }
+
+.item .price{
+  margin-top: 20px;
+  margin-bottom: auto;
+  font-weight: bolder;
+  font-size: 20px;
+  }
 
 .view-product-btn {
   align-items: center;
@@ -531,3 +537,4 @@ a {
   z-index: 1; /* Ensure it appears above the product content */
   pointer-events: none; /* Allow clicks to pass through */
 }
+

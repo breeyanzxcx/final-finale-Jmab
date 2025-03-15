@@ -115,19 +115,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
     async function loadProducts() {
         tireSection.innerHTML = '<p class="loading">Loading products...</p>'; 
         tireSection.style.opacity = '0.5';
-
+    
         try {
             const response = await fetch('http://localhost/jmab/final-jmab/api/products');
             const data = await response.json();
-
+    
             console.log('API Response:', data);
-
+    
             if (data.success && Array.isArray(data.products)) {
                 tireSection.innerHTML = '';
                 batterySection.innerHTML = '';
                 lubricantSection.innerHTML = '';
                 oilSection.innerHTML = '';
-
+    
                 data.products.forEach(product => {
                     const productId = product.product_id;
                     
@@ -139,22 +139,39 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     const productElement = document.createElement('div');
                     productElement.classList.add('item-container');
                     productElement.dataset.productId = productId;
-
+    
+                    // Truncate the description if it's too long
+                    const maxDescriptionLength = 50; // Adjust this value as needed
+                    const truncatedDescription = product.description && product.description.length > maxDescriptionLength
+                        ? product.description.substring(0, maxDescriptionLength) + '...'
+                        : product.description || 'No description available';
+    
+                    // Add out-of-stock overlay if stock is 0
+                    const outOfStockOverlay = product.stock === 0
+                        ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>`
+                        : '';
+    
                     productElement.innerHTML = `
                         <img src="${product.image_url}" alt="${product.name}" class="product-image">
+                        ${outOfStockOverlay}
                         <h4>${product.name}</h4>
-                        <p>${product.description || 'No description available'}</p>
+                        <p>${truncatedDescription}</p>
                         <p>Brand: ${product.brand || 'Not specified'}</p>
                         <p>Stock: ${product.stock}</p>
                         ${product.size ? `<p>Size: ${product.size}</p>` : ''}
                         ${product.voltage ? `<p>Voltage: ${product.voltage}</p>` : ''}
                         <p>Price: ₱${product.price}</p>
-                        <div class="product-actions" ">
+                        <div class="product-actions">
                             <button class="edit-product-btn" data-id="${productId}">Edit</button>
                             <button class="delete-product-btn" data-id="${productId}">Delete</button>
                         </div>
                     `;
-
+    
+                    // Add a class for out-of-stock products
+                    if (product.stock === 0) {
+                        productElement.classList.add('out-of-stock');
+                    }
+    
                     switch (product.category) {
                         case 'Tires': tireSection.appendChild(productElement); break;
                         case 'Batteries': batterySection.appendChild(productElement); break;
@@ -163,7 +180,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         default: console.log(`Unknown category: ${product.category}`);
                     }
                 });
-
+    
                 // Add event listeners to the edit and delete buttons
                 document.querySelectorAll('.edit-product-btn').forEach(button => {
                     button.addEventListener('click', function() {
@@ -190,7 +207,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         deleteProduct(productId);
                     });
                 });
-
+    
                 tireSection.style.opacity = '1';
             } else {
                 alert('Error loading products.');

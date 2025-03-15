@@ -266,7 +266,7 @@ function showDeleteSelectedConfirmation() {
 
     showConfirmationDialog(
         "Remove Items",
-        `Are you sure you want to remove ${selectedItems.length} item(s) from your cart?`,
+        `Are you sure you want to remove this item from your cart?`,
         removeSelectedItems
     );
 }
@@ -326,7 +326,7 @@ async function updateQuantity(cartId, quantity) {
         fetchUserCart();
     } catch (error) {
         console.error("Error updating quantity:", error);
-        alert("Failed to update quantity. Please try again.");
+        alert("Quantity exceed from available stock.");
     }
 }
 

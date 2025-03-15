@@ -86,14 +86,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const qtyInput = document.querySelector('.qty-input');
                     qtyInput.setAttribute('max', availableStock);
                     
-                    // Validate quantity input
-                    validateQuantityInput(qtyInput);
+                    // Validate quantity input without alerts
+                    validateQuantityInput(qtyInput, false);
 
-                    // Disable "Add to Cart" button if stock is 0
+                    // Disable "Add to Cart" and "Buy Now" buttons if stock is 0
                     const addToCartButton = document.querySelector('.add-to-cart');
+                    const buyNowButton = document.querySelector('.buy-now');
                     if (availableStock === 0) {
                         addToCartButton.disabled = true;
-                        addToCartButton.textContent = 'No Stock';
+                        addToCartButton.textContent = 'OUT OF STOCK';
+                        buyNowButton.disabled = true;
+                        buyNowButton.textContent = 'OUT OF STOCK';
                     }
                 } else {
                     document.getElementById('product-name').textContent = 'Product Not Found';
@@ -113,13 +116,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Validate quantity input
-    function validateQuantityInput(input) {
+    function validateQuantityInput(input, showAlert = true) {
         const value = parseInt(input.value);
         if (value < 1) {
             input.value = 1;
         } else if (value > availableStock) {
             input.value = availableStock;
-            alert(`Sorry, only ${availableStock} items are available in stock.`);
+            if (showAlert && availableStock > 0) {
+                alert(`Sorry, only ${availableStock} items are available in stock.`);
+            }
         }
     }
 
@@ -135,7 +140,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 value += 1;
                 if (value > availableStock) {
                     value = availableStock;
-                    alert(`Sorry, only ${availableStock} items are available in stock.`);
+                    if (availableStock > 0) {
+                        alert(`Sorry, only ${availableStock} items are available in stock.`);
+                    }
                 }
             }
             input.value = value;
@@ -145,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Quantity input event listeners
     const qtyInput = document.querySelector('.qty-input');
     qtyInput.addEventListener('change', function() {
-        validateQuantityInput(this);
+        validateQuantityInput(this, true);
     });
     
     qtyInput.addEventListener('input', function() {
@@ -160,36 +167,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Add to cart function
-    async function addToCart(isCheckout = false) {
+    async function addToCart() {
         const quantity = parseInt(document.querySelector('.qty-input').value);
         const productId = urlParams.get('productId');
         
         const userId = localStorage.getItem('userId');
         const authToken = localStorage.getItem('authToken');
-
+    
         if (!userId || !authToken) {
             alert("Please log in to add items to your cart.");
             window.location.href = "../HTML/sign-in.php";
             return;
         }
-
-        if (quantity > availableStock) {
-            alert(`Cannot add ${quantity} items. Only ${availableStock} are available.`);
-            document.querySelector('.qty-input').value = availableStock;
-            return;
-        }
-
-        if (isCheckout) {
-            // Redirect directly to checkout with product details
-            const checkoutUrl = `../HTML/checkout.html?productId=${productId}&quantity=${quantity}`;
-            console.log("Redirecting to:", checkoutUrl);
-            window.location.href = checkoutUrl;
-            return;
-        }
-
+    
         try {
-            console.log("Adding to cart:", { user_id: userId, product_id: productId, quantity });
-
             const response = await fetch('http://localhost/jmab/final-jmab/api/carts', {
                 method: 'POST',
                 headers: {
@@ -202,27 +193,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     quantity: quantity
                 })
             });
-
+    
             const result = await response.json();
             console.log("API Response:", result);
-
+    
             if (response.ok && result.success) {
-                availableStock -= quantity;
-                document.getElementById('stock-info').textContent = `Stock: ${availableStock}`;
-                document.querySelector('.qty-input').setAttribute('max', availableStock);
-
-                // Set popup message
+                // Show success message (no stock update)
                 document.getElementById('popup-message').textContent = `Added ${quantity} item(s) to cart!`;
-                
-                // Show the popup with animation
                 popupOverlay.classList.add('active');
-                
-                // Disable "Add to Cart" button if stock reaches 0
-                if (availableStock === 0) {
-                    const addToCartButton = document.querySelector('.add-to-cart');
-                    addToCartButton.disabled = true;
-                    addToCartButton.textContent = 'No Stock';
-                }
             } else {
                 const errorMsg = result.errors ? result.errors.join(', ') : 'Failed to add item to cart.';
                 alert(errorMsg);
