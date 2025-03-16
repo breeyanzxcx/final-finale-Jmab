@@ -97,8 +97,26 @@
     </div>
 </div>
 
+<!-- Rating Modal -->
+<div id="ratingModal" class="popup">
+  <div class="popup-content">
+    <span class="close">&times;</span>
+    <h3>Rate Product</h3>
+    <p>Please rate your experience:</p>
+    <div class="star-rating">
+      <span class="star" data-value="1">&#9733;</span>
+      <span class="star" data-value="2">&#9733;</span>
+      <span class="star" data-value="3">&#9733;</span>
+      <span class="star" data-value="4">&#9733;</span>
+      <span class="star" data-value="5">&#9733;</span>
+    </div>
+    <button id="submitRating" class="popup-btn confirm">Submit Rating</button>
+  </div>
+</div>
+
   <script src="../JS/orderDisplay.js"></script>
   <script src="../JS/logout.js"></script>
+  <script src="../JS/rating.js"></script>
   <script>
     function toggleDropdown() {
       const dropdown = document.getElementById('profileDropdown');

@@ -610,3 +610,29 @@ main {
 .popup-btn-primary:hover {
   background-color: #FFC107;
 }
+
+.rating {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+}
+
+.star {
+  font-size: 18px;
+  color: #ccc; /* Default color for empty stars */
+}
+
+.star.filled {
+  color: #ffcc00; /* Color for filled stars */
+}
+
+.rating-value {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #666;
+}

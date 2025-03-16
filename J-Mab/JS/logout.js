@@ -1,4 +1,3 @@
-// logout.js
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Logout script loaded successfully");
 
@@ -12,6 +11,10 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Logout Popup:", logoutPopup);
     console.log("Confirm Button:", confirmLogout);
     console.log("Cancel Button:", cancelLogout);
+
+    if (logoutPopup) {
+        logoutPopup.style.display = 'none'; // Explicitly hide on load
+    }
 
     if (logoutButton && logoutPopup && confirmLogout && cancelLogout) {
         // Show popup when logout is clicked
