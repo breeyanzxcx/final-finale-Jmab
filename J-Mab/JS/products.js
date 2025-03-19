@@ -35,6 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Set up logout button listener with custom popup
+  setupLogoutButton();
+
+  // Set up search functionality
+  setupSearch();
+});
+
+function setupLogoutButton() {
   const logoutButton = document.getElementById("logout");
   const logoutPopup = document.getElementById("logoutPopup");
   const confirmLogoutBtn = document.getElementById("confirmLogout");
@@ -75,10 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     console.error("Logout button or popup not found. Check your HTML.");
   }
-
-  // Set up search functionality
-  setupSearch();
-});
+}
 
 function sortProducts(sortOrder) {
   console.log(`Sorting products ${sortOrder}...`);
@@ -167,33 +171,38 @@ async function loadProducts(selectedCategory = "tires") {
 
       // Filter and display products
       products.forEach(product => {
-        console.log(`Product: ${product.name}, Rating: ${product.rating}`);
         let category = product.category.trim().toLowerCase();
         const productElement = document.createElement("div");
         productElement.classList.add("item");
-
-        // Class for out-of-stock products
-        if (product.stock === 0) {
+        
+        // Check if product is out of stock by checking variants
+        let isOutOfStock = true;
+        if (product.variants && product.variants.length > 0) {
+          // Product is in stock if any variant has stock > 0
+          isOutOfStock = !product.variants.some(variant => variant.stock > 0);
+        }
+        
+        // Add out-of-stock class if necessary
+        if (isOutOfStock) {
           productElement.classList.add("out-of-stock");
         }
+        
+        // Find lowest price among variants for display
+        let lowestPrice = "N/A";
+        if (product.variants && product.variants.length > 0) {
+          const prices = product.variants.map(variant => parseFloat(variant.price));
+          lowestPrice = Math.min(...prices).toFixed(2);
+        }
 
-        // Truncate description if it's too long
-        const maxDescriptionLength = 100;
-        const truncatedDescription = product.description.length > maxDescriptionLength
-          ? product.description.substring(0, maxDescriptionLength) + "..."
-          : product.description;
-
-        // Add rating to the product card
+        // Create product card HTML <div class="rating">  ${generateRatingStars(product.average_rating || 0)}  <span class="rating-value">(${product.average_rating || 0})</span>       </div>
+           
         productElement.innerHTML = `
-        <img src="${product.image_url}" alt="${product.name}">
-        <h4>${product.name}</h4>
-        <p class="description">${truncatedDescription}</p>
-        <p class="price">₱${product.price}</p>
-        <div class="rating">
-          ${generateRatingStars(product.average_rating)} <!-- Use average_rating here -->
-        <span class="rating-value">(${product.average_rating || 0})</span> <!-- Handle undefined rating -->
-        </div>
-        ${product.stock === 0 ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>` : ""}
+          <img src="${product.image_url}" alt="${product.name}">
+          <h4>${product.name}</h4>
+          <p class="description">${truncateText(product.description, 100)}</p>
+          <p class="price">₱${lowestPrice}</p>
+          
+          ${isOutOfStock ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>` : ""}
         `;
 
         // Make the entire product container clickable
@@ -230,7 +239,7 @@ async function loadProducts(selectedCategory = "tires") {
 function generateRatingStars(rating) {
   const maxStars = 5;
   let stars = "";
-  const ratingValue = rating || 0; // Default to 0 if rating is undefined
+  const ratingValue = parseFloat(rating) || 0; // Convert to number and default to 0 if undefined
 
   for (let i = 1; i <= maxStars; i++) {
     if (i <= ratingValue) {
@@ -353,4 +362,9 @@ function setupSearch() {
       performSearch();
     }
   });
+}
+
+function truncateText(text, maxLength) {
+  if (!text) return ""; // Handle missing descriptions
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
 }

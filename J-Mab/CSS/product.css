@@ -558,3 +558,27 @@ a {
   font-size: 14px;
   color: #666;
 }
+
+.variant-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 5px;
+}
+
+.variant-list li {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.in-stock {
+  color: green;
+}
+
+.out-of-stock {
+  color: red;
+}
+
+.no-variants {
+  font-style: italic;
+  color: gray;
+}

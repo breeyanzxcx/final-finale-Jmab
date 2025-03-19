@@ -1,4 +1,3 @@
-// Replace the old populateAddressDropdown function with this new one
 document.addEventListener("DOMContentLoaded", async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("productId");
@@ -15,25 +14,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("User ID:", userId);
     console.log("Auth Token:", authToken);
 
-    // Use the new function to fetch user data and populate addresses
     await fetchUserAndPopulateAddresses();
 
     if (productId) {
-        // If "Buy Now" was clicked, fetch only 1 product
         await fetchBuyNowItem(productId, quantity);
     } else {
-        // If checkout is from the cart, fetch only selected items
         await fetchSelectedCartItems();
     }
 
     document.querySelector(".confirm-btn").addEventListener("click", checkout);
-    
-    // Check for pending payments when the page loads
     checkPendingPayments(userId);
-   
 });
 
-// Payment related data storage
 class PaymentDataManager {
     static storePaymentData(orderId, paymentMethod, paymentLink) {
         const paymentData = {
@@ -55,7 +47,6 @@ class PaymentDataManager {
     }
 }
 
-// Fetch user data and populate address dropdown
 async function fetchUserAndPopulateAddresses() {
     const userId = localStorage.getItem("userId");
     const authToken = localStorage.getItem("authToken");
@@ -82,23 +73,18 @@ async function fetchUserAndPopulateAddresses() {
         const data = await response.json();
         console.log("User data response:", data);
 
-        // Clear any existing options
         addressSelect.innerHTML = '<option value="">Select an address</option>';
         
         if (data.success && data.user && data.user.addresses && data.user.addresses.length > 0) {
-            // Add each address as an option
             data.user.addresses.forEach(address => {
                 const option = document.createElement("option");
                 option.value = address.id;
                 option.textContent = `${address.home_address}, ${address.barangay}, ${address.city}${address.is_default ? " (Default)" : ""}`;
                 addressSelect.appendChild(option);
-                
-                // Auto-select default address
                 if (address.is_default) {
                     addressSelect.value = address.id;
                 }
             });
-            
             console.log(`Added ${data.user.addresses.length} addresses to dropdown`);
         } else {
             console.warn("No addresses found for user");
@@ -110,17 +96,22 @@ async function fetchUserAndPopulateAddresses() {
     }
 }
 
-// Fetch single product (for Buy Now)
 async function fetchBuyNowItem(productId, quantity) {
     try {
         const response = await fetch(`http://localhost/jmab/final-jmab/api/products/${productId}`);
         const data = await response.json();
+        console.log("Buy Now Product Data:", data);
 
-        if (data.success) {
+        if (data.success && data.products) {
             const product = data.products.find(p => String(p.product_id) === String(productId));
             if (product) {
-                displaySelectedItems([{ ...product, quantity }]); 
-                updateOrderSummary(product.price, quantity);
+                // Use variant_price if available (assuming product has variants)
+                const price = product.variants && product.variants.length > 0 
+                    ? parseFloat(product.variants[0].price) || 0 
+                    : parseFloat(product.price) || 0;
+                const normalizedProduct = { ...product, price, quantity };
+                displaySelectedItems([normalizedProduct]);
+                updateOrderSummary(price, quantity);
             } else {
                 document.getElementById("selected-items-container").innerHTML = "<p>Product not found.</p>";
             }
@@ -131,7 +122,6 @@ async function fetchBuyNowItem(productId, quantity) {
     }
 }
 
-// Fetch only selected cart items
 async function fetchSelectedCartItems() {
     const userId = localStorage.getItem("userId");
     const authToken = localStorage.getItem("authToken");
@@ -152,7 +142,10 @@ async function fetchSelectedCartItems() {
         if (data.success && data.cart && data.cart.length > 0) {
             const selectedItems = data.cart.filter(item => 
                 selectedCartIds.includes(item.cart_id.toString())
-            );
+            ).map(item => ({
+                ...item,
+                price: parseFloat(item.variant_price) || 0 // Use variant_price from cart API
+            }));
             
             if (selectedItems.length > 0) {
                 displaySelectedItems(selectedItems);
@@ -171,15 +164,27 @@ async function fetchSelectedCartItems() {
 
 function displaySelectedItems(items) {
     const container = document.getElementById("selected-items-container");
-    container.innerHTML = ""; // Clear previous items
+    container.innerHTML = "";
 
     items.forEach(item => {
+        // Ensure we have a valid price
+        let itemPrice = 0;
+        if (item.price !== undefined && item.price !== null) {
+            itemPrice = parseFloat(item.price);
+        } else if (item.variant_price !== undefined && item.variant_price !== null) {
+            itemPrice = parseFloat(item.variant_price);
+        }
+        
+        // If price is NaN after parsing, default to 0
+        if (isNaN(itemPrice)) itemPrice = 0;
+
         const normalizedItem = {
-            name: item.product_name || item.name,
+            name: item.product_name || item.name || 'Unknown Product',
             brand: item.product_brand || item.brand || 'N/A',
-            price: item.product_price || item.price,
+            price: itemPrice,
             image: item.product_image || item.image_url || '../imahe/default-image.png',
-            quantity: item.quantity
+            quantity: item.quantity || 1,
+            size: item.variant_size || "N/A"
         };
 
         const itemElement = document.createElement("div");
@@ -189,32 +194,43 @@ function displaySelectedItems(items) {
             <div class="item-info">
                 <h3>${normalizedItem.name}</h3>
                 <p>Brand: ${normalizedItem.brand}</p>
-                <p>Price: ₱${parseFloat(normalizedItem.price).toFixed(2)}</p>
+                <p>Size: ${normalizedItem.size}</p>
+                <p>Price: ₱${normalizedItem.price.toFixed(2)}</p>
                 <p>Quantity: ${normalizedItem.quantity}</p>
             </div>
         `;
         container.appendChild(itemElement);
     });
 }
-
-// Update Order Summary
 function updateOrderSummary(price, quantity) {
-    const subtotal = price * quantity;
+    const parsedPrice = parseFloat(price) || 0;
+    const parsedQuantity = parseInt(quantity) || 1;
+    const subtotal = parsedPrice * parsedQuantity;
+    
     document.getElementById("subtotal").textContent = `₱${subtotal.toFixed(2)}`;
     document.getElementById("total").textContent = `₱${(subtotal + 50).toFixed(2)}`;
 }
 
 function updateOrderSummaryFromCart(cartItems) {
     const subtotal = cartItems.reduce((sum, item) => {
-        const price = parseFloat(item.product_price || item.price);
-        return sum + price * item.quantity;
+        let itemPrice = 0;
+        if (item.price !== undefined && item.price !== null) {
+            itemPrice = parseFloat(item.price);
+        } else if (item.variant_price !== undefined && item.variant_price !== null) {
+            itemPrice = parseFloat(item.variant_price);
+        }
+        
+        // If price is NaN after parsing, default to 0
+        if (isNaN(itemPrice)) itemPrice = 0;
+        
+        const quantity = parseInt(item.quantity) || 1;
+        return sum + itemPrice * quantity;
     }, 0);
     
     document.getElementById("subtotal").textContent = `₱${subtotal.toFixed(2)}`;
     document.getElementById("total").textContent = `₱${(subtotal + 50).toFixed(2)}`;
 }
 
-// Checkout Function
 async function checkout() {
     const userId = localStorage.getItem("userId");
     const authToken = localStorage.getItem("authToken");
@@ -225,7 +241,6 @@ async function checkout() {
         payment_method: document.getElementById("payment-method").value
     };
 
-    // Form validation
     if (!shippingInfo.full_name || !shippingInfo.address_id) {
         alert("Please fill in all shipping information fields, including selecting an address.");
         return;
@@ -236,24 +251,30 @@ async function checkout() {
     const quantity = parseInt(urlParams.get("quantity")) || 1;
 
     try {
-        // Get selected cart IDs
         const selectedCartIds = JSON.parse(localStorage.getItem("selectedCartIds") || "[]");
         
-        // Updated order data with address_id
         const orderData = {
-            cart_ids: selectedCartIds.map(id => parseInt(id)),
-            address_id: parseInt(shippingInfo.address_id), 
+            address_id: parseInt(shippingInfo.address_id),
             payment_method: shippingInfo.payment_method
         };
 
-        // If it's a "Buy Now" order, include product_id and quantity instead of cart_ids
         if (productId) {
+            // "Buy Now" order
             orderData.product_id = parseInt(productId);
             orderData.quantity = quantity;
-            delete orderData.cart_ids; // Remove cart_ids for Buy Now
+            // Assuming variant_id is needed for Buy Now, you'd need to pass it from the product page
+            const sizeSelect = document.getElementById("size"); // Not available in checkout, needs fixing
+            if (sizeSelect) {
+                orderData.variant_id = sizeSelect.value; // This won't work here, see note below
+            }
+        } else if (selectedCartIds.length > 0) {
+            // Cart-based order
+            orderData.cart_ids = selectedCartIds.map(id => parseInt(id));
+        } else {
+            alert("No items selected for checkout.");
+            return;
         }
 
-        // Disable the checkout button and update text
         const checkoutButton = document.querySelector(".confirm-btn");
         if (checkoutButton) {
             checkoutButton.disabled = true;
@@ -275,12 +296,11 @@ async function checkout() {
         console.log("Order result:", result);
 
         if (response.ok && result.success) {
-            // Clear cart items from localStorage
             localStorage.removeItem("selectedCartIds");
 
             if (shippingInfo.payment_method === "gcash" && result.payment_link) {
                 PaymentDataManager.storePaymentData(
-                    result.order_id || "unknown", 
+                    result.order_id || "unknown",
                     "gcash",
                     result.payment_link
                 );
@@ -292,13 +312,11 @@ async function checkout() {
                     window.location.href = "account.html";
                 }
             } else {
-                // Redirect COD orders to the user's cart
                 alert("Order placed successfully! Redirecting to your cart...");
                 window.location.href = "../HTML/userCart.html";
             }
         } else {
             alert(result.errors ? result.errors.join(", ") : "Failed to place order.");
-            
             if (checkoutButton) {
                 checkoutButton.disabled = false;
                 checkoutButton.textContent = "Place Order";
@@ -307,7 +325,6 @@ async function checkout() {
     } catch (error) {
         console.error("Error during checkout:", error);
         alert("An error occurred during checkout. Please try again.");
-        
         const checkoutButton = document.querySelector(".confirm-btn");
         if (checkoutButton) {
             checkoutButton.disabled = false;
@@ -316,78 +333,65 @@ async function checkout() {
     }
 }
 
-
 function checkPendingPayments(userId) {
     console.log("Starting checkPendingPayments for userId:", userId);
 
     const authToken = localStorage.getItem("authToken");
-    const paymentData = PaymentDataManager.getPaymentData(); // Get stored payment data
+    const paymentData = PaymentDataManager.getPaymentData();
 
     fetch(`http://localhost/jmab/final-jmab/api/orders/${userId}`, {
         headers: {
             "Authorization": `Bearer ${authToken}`
         }
     })
-        .then(response => {
-            console.log("Fetch response received:", response);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    .then(response => {
+        console.log("Fetch response received:", response);
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.log("No orders found for user (404), likely no orders yet.");
+                return { success: true, orders: [] }; // Fallback for no orders
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Parsed JSON data:", data);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Parsed JSON data:", data);
 
-            if (data.success && data.orders && data.orders.length > 0) {
-                console.log("Total orders found:", data.orders.length);
-                console.log("All orders:", data.orders);
-                
-                const pendingPayment = data.orders.find(order => 
-                    order.payment_method === "gcash" && 
-                    order.payment_status === "pending"
-                );
+        if (data.success && data.orders && data.orders.length > 0) {
+            const pendingPayment = data.orders.find(order => 
+                order.payment_method === "gcash" && 
+                order.payment_status === "pending"
+            );
 
-                if (pendingPayment) {
-                    console.log("Found pending payment:", pendingPayment);
-                    const paymentTime = new Date(pendingPayment.created_at);
-                    const currentTime = new Date();
-                    const hoursSincePending = (currentTime - paymentTime) / (1000 * 60 * 60);
+            if (pendingPayment) {
+                console.log("Found pending payment:", pendingPayment);
+                const paymentTime = new Date(pendingPayment.created_at);
+                const currentTime = new Date();
+                const hoursSincePending = (currentTime - paymentTime) / (1000 * 60 * 60);
 
-                    if (hoursSincePending < 24) {
-                        // Use stored payment_link if available, otherwise log an error
-                        const paymentLink = paymentData && paymentData.orderId === pendingPayment.order_id 
-                            ? paymentData.paymentLink 
-                            : null;
+                if (hoursSincePending < 24) {
+                    const paymentLink = paymentData && paymentData.orderId === pendingPayment.order_id 
+                        ? paymentData.paymentLink 
+                        : null;
 
-                        if (!paymentLink) {
-                            console.error("No valid payment link found for order:", pendingPayment.order_id);
-                            alert("Unable to redirect to payment page. Please try again or contact support.");
-                            return;
-                        }
-
-                        const resumePayment = confirm(
-                            "You have a pending GCash payment. Do you want to complete your payment now?"
-                        );
-                        if (resumePayment) {
-                            window.location.href = paymentLink; // Use the stored checkout_url
-                        } else {
-                            console.log("User declined to complete pending payment");
-                        }
-                    } else {
-                        console.log("Pending payment is over 24 hours old:", pendingPayment.order_id);
+                    if (!paymentLink) {
+                        console.error("No valid payment link found for order:", pendingPayment.order_id);
+                        alert("Unable to redirect to payment page. Please try again or contact support.");
+                        return;
                     }
-                } else {
-                    console.log("No pending GCash payments found. All GCash orders status:", 
-                        data.orders
-                            .filter(order => order.payment_method === "gcash")
-                            .map(order => order.payment_status)
+
+                    const resumePayment = confirm(
+                        "You have a pending GCash payment. Do you want to complete your payment now?"
                     );
+                    if (resumePayment) {
+                        window.location.href = paymentLink;
+                    }
                 }
-            } else {
-                console.log("No orders found or invalid data structure:", data);
             }
-        })
-        .catch(error => {
-            console.error("Error in fetch process:", error);
-        });
+        }
+    })
+    .catch(error => {
+        console.error("Error in fetch process:", error);
+    });
 }

@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Confirmation dialog element (unchanged)
     const confirmationDialog = document.createElement('div');
     confirmationDialog.className = 'confirmation-dialog';
     confirmationDialog.innerHTML = `
@@ -44,7 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const selectAllCheckbox = document.getElementById("select-all");
     if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener("change", toggleSelectAll);
+        selectAllCheckbox.addEventListener("change", function () {
+            toggleSelectAll();
+            updateOrderSummary();
+        });
     }
 
     const deleteButton = document.getElementById("delete-selected");
@@ -93,6 +95,8 @@ async function fetchUserCart() {
         }
 
         const data = await response.json();
+        console.log("Cart API Response:", data);
+
         if (data.success && data.cart && data.cart.length > 0) {
             displayCartItems(data.cart);
         } else {
@@ -114,6 +118,13 @@ function displayCartItems(cartItems) {
         cartItem.classList.add("cart-item");
         cartItem.dataset.cartId = item.cart_id;
 
+        const rawPrice = item.variant_price;
+        console.log(`Raw price for ${item.product_name}:`, rawPrice);
+        const unitPrice = !isNaN(parseFloat(rawPrice)) && rawPrice !== null ? parseFloat(rawPrice) : 0;
+        const quantity = item.quantity || 1;
+        const totalPrice = unitPrice * quantity; // Calculate total price for this item
+        const size = item.variant_size || "N/A";
+
         cartItem.innerHTML = `
             <input type="checkbox" class="item-checkbox">
             <div class="item-details">
@@ -121,12 +132,13 @@ function displayCartItems(cartItems) {
                 <div class="item-info">
                     <h3>${item.product_name}</h3>
                     <p>Brand: ${item.product_brand || "Unknown"}</p>
+                    <p>Size: ${size}</p>
                 </div>
             </div>
-            <div class="item-price">₱${parseFloat(item.product_price).toFixed(2)}</div>
+            <div class="item-price" data-unit-price="${unitPrice}">₱${totalPrice.toFixed(2)}</div>
             <div class="quantity">
                 <button class="qty-btn decrease">-</button>
-                <input type="number" value="${item.quantity}" min="1" class="qty-input">
+                <input type="number" value="${quantity}" min="1" class="qty-input">
                 <button class="qty-btn increase">+</button>
             </div>
         `;
@@ -151,7 +163,8 @@ function attachEventListeners() {
         button.addEventListener("click", function () {
             const cartId = this.closest(".cart-item").dataset.cartId;
             const inputField = this.previousElementSibling;
-            updateQuantity(cartId, parseInt(inputField.value) + 1);
+            const newQuantity = parseInt(inputField.value) + 1;
+            updateQuantity(cartId, newQuantity);
         });
     });
 
@@ -159,8 +172,10 @@ function attachEventListeners() {
         button.addEventListener("click", function () {
             const cartId = this.closest(".cart-item").dataset.cartId;
             const inputField = this.nextElementSibling;
-            if (parseInt(inputField.value) > 1) {
-                updateQuantity(cartId, parseInt(inputField.value) - 1);
+            const currentQuantity = parseInt(inputField.value);
+            if (currentQuantity > 1) {
+                const newQuantity = currentQuantity - 1;
+                updateQuantity(cartId, newQuantity);
             }
         });
     });
@@ -168,12 +183,12 @@ function attachEventListeners() {
     document.querySelectorAll(".qty-input").forEach(input => {
         input.addEventListener("change", function () {
             const cartId = this.closest(".cart-item").dataset.cartId;
-            if (parseInt(this.value) < 1) this.value = 1;
+            const value = parseInt(this.value);
+            this.value = isNaN(value) || value < 1 ? 1 : value;
             updateQuantity(cartId, parseInt(this.value));
         });
     });
 
-    // Add event listener for checkbox changes
     document.querySelectorAll(".item-checkbox").forEach(checkbox => {
         checkbox.addEventListener("change", updateOrderSummary);
     });
@@ -190,14 +205,27 @@ function updateOrderSummary() {
     cartItems.forEach(item => {
         const checkbox = item.querySelector(".item-checkbox");
         if (checkbox.checked) {
-            const price = parseFloat(item.querySelector(".item-price").textContent.replace("₱", ""));
-            const quantity = parseInt(item.querySelector(".qty-input").value);
-            subtotal += price * quantity;
+            const unitPrice = parseFloat(item.querySelector(".item-price").dataset.unitPrice) || 0;
+            const quantity = parseInt(item.querySelector(".qty-input").value) || 1;
+            const itemSubtotal = unitPrice * quantity;
+            subtotal += itemSubtotal;
+
+            // Update the displayed total price for this item
+            item.querySelector(".item-price").textContent = `₱${itemSubtotal.toFixed(2)}`;
+
+            console.log(`Item: ${item.querySelector("h3").textContent}`);
+            console.log("Unit Price:", unitPrice);
+            console.log("Quantity:", quantity);
+            console.log("Item Subtotal:", itemSubtotal);
         }
     });
 
-    subtotalElement.textContent = `₱${subtotal.toFixed(2)}`;
-    totalElement.textContent = `₱${(subtotal + shippingFee).toFixed(2)}`;
+    console.log("Total Subtotal:", subtotal);
+
+    subtotal = isNaN(subtotal) ? 0 : subtotal;
+
+    if (subtotalElement) subtotalElement.textContent = `₱${subtotal.toFixed(2)}`;
+    if (totalElement) totalElement.textContent = `₱${(subtotal + shippingFee).toFixed(2)}`;
 }
 
 async function removeFromCart(cartId) {
@@ -266,7 +294,7 @@ function showDeleteSelectedConfirmation() {
 
     showConfirmationDialog(
         "Remove Items",
-        `Are you sure you want to remove this item from your cart?`,
+        "Are you sure you want to remove these items from your cart?",
         removeSelectedItems
     );
 }
@@ -306,7 +334,7 @@ function toggleSelectAll() {
     itemCheckboxes.forEach(checkbox => {
         checkbox.checked = selectAllCheckbox.checked;
     });
-    updateOrderSummary(); // Update summary when select all changes
+    updateOrderSummary();
 }
 
 async function updateQuantity(cartId, quantity) {
@@ -323,10 +351,10 @@ async function updateQuantity(cartId, quantity) {
         });
 
         if (!response.ok) throw new Error("Failed to update quantity");
-        fetchUserCart();
+        fetchUserCart(); // Refreshes the cart display
     } catch (error) {
         console.error("Error updating quantity:", error);
-        alert("Quantity exceed from available stock.");
+        alert("Quantity exceeds available stock.");
     }
 }
 

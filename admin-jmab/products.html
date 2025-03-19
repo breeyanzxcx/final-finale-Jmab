@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J-Mab Admin</title>
-    <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
+    <link rel="icon" type="image/x-icon" href="../images/J-mab Logo.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -193,7 +193,6 @@ main {
 }
 
 h3 {
-    padding-top: 80px;
     font-size: 32px;
     color: var(--primary);
     font-weight: 600;
@@ -555,6 +554,198 @@ button:hover {
     cursor: pointer;
     width: 50%;
 }
+
+/* Product Form Enhancements */
+#productFormContainer {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+    max-width: 90%;
+    margin: 0 auto 40px;
+    transition: all 0.3s ease;
+}
+
+#createProductForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#createProductForm div {
+    margin-bottom: 15px;
+}
+
+#createProductForm label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--primary);
+    text-align: left;
+    width: auto;
+}
+
+#createProductForm input[type="text"],
+#createProductForm input[type="number"],
+#createProductForm input[type="url"],
+#createProductForm textarea,
+#createProductForm select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+#createProductForm input:focus,
+#createProductForm textarea:focus,
+#createProductForm select:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(21, 219, 160, 0.2);
+}
+
+#createProductForm input::placeholder,
+#createProductForm textarea::placeholder {
+    color: #aaa;
+}
+
+#createProductForm textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+#createProductForm select {
+    cursor: pointer;
+    background-color: white;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+    appearance: none;
+}
+
+#variantsContainer {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    border: 1px solid #eee;
+}
+
+#variantsContainer:empty {
+    display: none;
+}
+
+#addVariantButton {
+    background-color: #e8f5e9;
+    color: #4caf50;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    margin-top: 10px;
+    width: auto;
+}
+
+#addVariantButton:hover {
+    background-color: #c8e6c9;
+    transform: translateY(-2px);
+}
+
+#addVariantButton:before {
+    content: "+";
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+#createProductForm input[type="submit"],
+#cancelButton {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#createProductForm input[type="submit"] {
+    background-color: var(--primary);
+    color: white;
+    margin-right: 10px;
+}
+
+#createProductForm input[type="submit"]:hover {
+    background-color: #01579B;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#cancelButton {
+    background-color: #f5f5f5;
+    color: #666;
+}
+
+#cancelButton:hover {
+    background-color: #e0e0e0;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+    #createProductForm {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    #createProductForm div:nth-child(3),  /* Description field */
+    #createProductForm div:nth-child(7),  /* Image URL field */
+    #variantsContainer,
+    #addVariantButton,
+    #createProductForm div:last-child {   /* Form buttons */
+        grid-column: span 2;
+    }
+}
+
+/* Animation for form appearance */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#productFormContainer[style*="display: block"] {
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* Toggle visibility of additional fields */
+#sizeField, 
+#voltageField {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    opacity: 1;
+}
+
+#sizeField[style*="display: none"], 
+#voltageField[style*="display: none"] {
+    opacity: 0;
+    max-height: 0;
+    margin: 0;
+    padding: 0;
+}
 </style>
 </head>
 
@@ -578,121 +769,96 @@ button:hover {
         </div>
     </section>
 
-<main>
-    <h1>Add new product</h1>
-    <div class="top-bar">
-        <button id="addProductButton">Add Product</button>
-        <div class="category-buttons">
-            <button id="allButton">All Products</button>
-            <button id="tireButton">Tire</button>
-            <button id="oilButton">Oil</button>
-            <button id="lubricantButton">Lubricant</button>
-            <button id="batteryButton">Battery</button>
-        </div>
-        <div class="search-container">
-            <input type="text" id="productSearch" placeholder="Search for products...">
-            <i class="fas fa-search"></i>
-        </div>
-    </div>
-
-<div id="productFormContainer" style="display: none;">
-    <h3>Product Details</h3>
-    <form id="createProductForm">
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div>
-            <label for="description">Description:</label>
-            <textarea id="description" name="description"></textarea>
-        </div>
-        <div>
-            <label for="category">Category:</label>
-            <select id="category" name="category" required>
-                <option value="">Select Category</option>
-                <option value="Tires">Tires</option>
-                <option value="Batteries">Batteries</option>
-                <option value="Oils">Oils</option>
-                <option value="Lubricants">Lubricants</option>
-                <!-- Add more categories as needed -->
-            </select>
-        </div>
-        <div id="sizeField" style="display:none;">
-            <label for="size">Size:</label>
-            <input type="text" id="size" name="size">
-        </div>
-        <div id="voltageField" style="display:none;">
-            <label for="voltage">Voltage:</label>
-            <input type="text" id="voltage" name="voltage">
-        </div>
-        <div>
-            <label for="price">Price:</label>
-            <input type="number" id="price" name="price" required>
-        </div>
-        <div>
-            <label for="stock">Stock:</label>
-            <input type="number" id="stock" name="stock" required>
-        </div>
-        <div>
-            <label for="image_url">Image URL:</label>
-            <input type="url" id="image_url" name="image_url" required>
-        </div>
-        <div>
-            <label for="brand">Brand:</label>
-            <input type="text" id="brand" name="brand" required>
-        </div>
-        <input type="submit" value="Create Product"> 
-        <input type="button" value="Cancel" id="cancelButton">
-    </form>
-</div>
-
-   <div class="flex-container">
-        <div class="tire-title"><h3>Tire section</h3>
-        </div>
-            <div class="tire-section">
-                <div class="item-container">
-                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
-                   
-                </div>
-            </div>  
-    </div>
-
-
-    <div class="flex-container" >
-        <div class="Battery-title"><h3>Battery section</h3>
-        </div>
-            <div class="Battery-section">
-                <div class="item-container">
-                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
-                   
-                </div>
-            </div>   
-    </div>
-
-
-    <div class="flex-container" >
-        <div class="Lubricant-title"><h3>Lubricant section</h3>
-        </div>
-            <div class="Lubricant-section">
-                <div class="item-container">
-                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
-                    
-                </div>
-            </div>   
-    </div>
-
-
-    <div class="flex-container" >
-        <div class="Oil-title"><h3>Oil section</h3>
-        </div>
-            <div class="Oil-section">
-                <div class="item-container">
-                    <!--DITO MAKAKARGA YUNG MGA PRODUCTS FROM DB-->
-                    
-                </div>
+    <main>
+        <h1>Add new product</h1>
+        <div class="top-bar">
+            <button id="addProductButton">Add Product</button>
+            <div class="category-buttons">
+                <button id="allButton">All Products</button>
+                <button id="tireButton">Tire</button>
+                <button id="oilButton">Oil</button>
+                <button id="lubricantButton">Lubricant</button>
+                <button id="batteryButton">Battery</button>
             </div>
-    </div>
-</main>
+            <div class="search-container">
+                <input type="text" id="productSearch" placeholder="Search for products...">
+                <i class="fas fa-search"></i>
+            </div>
+        </div>
+
+        <div id="productFormContainer" style="display: none;">
+            <h3>Product Details</h3>
+            <form id="createProductForm">
+                <!-- Main Product Fields -->
+                <div>
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+                <div>
+                    <label for="category">Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Tires">Tires</option>
+                        <option value="Batteries">Batteries</option>
+                        <option value="Oils">Oils</option>
+                        <option value="Lubricants">Lubricants</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="image_url">Image URL:</label>
+                    <input type="url" id="image_url" name="image_url" required>
+                </div>
+                <div>
+                    <label for="brand">Brand:</label>
+                    <input type="text" id="brand" name="brand" required>
+                </div>
+        
+                <!-- Variants Section -->
+                <div id="variantsContainer">
+                    <!-- Variants will be dynamically added here -->
+                </div>
+        
+                <!-- Add Variant Button -->
+                <button type="button" id="addVariantButton">+ Add Variant</button>
+        
+                <!-- Form Buttons -->
+                <input type="submit" value="Create Product"> 
+                <input type="button" value="Cancel" id="cancelButton">
+            </form>
+        </div>
+
+        <div class="flex-container">
+            <div class="tire-title"><h3>Tire section</h3></div>
+            <div class="tire-section">
+                <!-- Tire products will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="flex-container">
+            <div class="Battery-title"><h3>Battery section</h3></div>
+            <div class="Battery-section">
+                <!-- Battery products will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="flex-container">
+            <div class="Lubricant-title"><h3>Lubricant section</h3></div>
+            <div class="Lubricant-section">
+                <!-- Lubricant products will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="flex-container">
+            <div class="Oil-title"><h3>Oil section</h3></div>
+            <div class="Oil-section">
+                <!-- Oil products will be dynamically added here -->
+            </div>
+        </div>
+    </main>
 <script src="JS/products.js"></script>
 </body>
 </html>

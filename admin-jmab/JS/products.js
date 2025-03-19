@@ -25,9 +25,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const productFormContainer = document.getElementById('productFormContainer');
     const addProductButton = document.getElementById('addProductButton');
     const cancelButton = document.getElementById('cancelButton');
+    
+    // Variants elements
+    const variantsContainer = document.getElementById('variantsContainer');
+    const addVariantButton = document.getElementById('addVariantButton');
 
     let isEditing = false;
     let currentProductId = null;
+    let variants = [];
 
     // Show form smoothly
     addProductButton.addEventListener('click', function() {
@@ -50,14 +55,89 @@ document.addEventListener('DOMContentLoaded', (event) => {
         voltageField.style.display = this.value === 'Batteries' ? 'block' : 'none';
     });
 
+    // Add variant functionality
+    if (addVariantButton) {
+        addVariantButton.addEventListener('click', function() {
+            addVariantRow();
+        });
+    }
+
+    // Function to add a variant row to the form
+    function addVariantRow(variantData = null) {
+        const variantRow = document.createElement('div');
+        variantRow.className = 'variant-row';
+        
+        // Generate a unique ID for this variant
+        const variantId = variantData ? variantData.variant_id : 'new_' + Date.now();
+        
+        variantRow.innerHTML = `
+            <input type="hidden" name="variant_id" value="${variantId}">
+            <div class="form-group">
+                <label>Size:</label>
+                <input type="text" name="variant_size" value="${variantData ? variantData.size : ''}" required>
+            </div>
+            <div class="form-group">
+                <label>Price:</label>
+                <input type="number" name="variant_price" step="0.01" value="${variantData ? variantData.price : ''}" required>
+            </div>
+            <div class="form-group">
+                <label>Stock:</label>
+                <input type="number" name="variant_stock" value="${variantData ? variantData.stock : '0'}" required>
+            </div>
+            <button type="button" class="remove-variant-btn">Remove</button>
+        `;
+        
+        // Add event listener for the remove button
+        const removeButton = variantRow.querySelector('.remove-variant-btn');
+        removeButton.addEventListener('click', function() {
+            variantRow.remove();
+        });
+        
+        // Add the row to the variants container
+        variantsContainer.appendChild(variantRow);
+    }
+
+    // Function to collect variant data from the form
+    function collectVariantsData() {
+        const variantRows = variantsContainer.querySelectorAll('.variant-row');
+        const variantsData = [];
+        
+        variantRows.forEach(row => {
+            const variantId = row.querySelector('input[name="variant_id"]').value;
+            const size = row.querySelector('input[name="variant_size"]').value;
+            const price = parseFloat(row.querySelector('input[name="variant_price"]').value);
+            const stock = parseInt(row.querySelector('input[name="variant_stock"]').value);
+            
+            variantsData.push({
+                variant_id: variantId,
+                size: size,
+                price: price,
+                stock: stock
+            });
+        });
+        
+        return variantsData;
+    }
+
     // Product form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const formData = new FormData(form);
         const productData = Object.fromEntries(formData.entries());
+        
+        // Remove fields not needed based on category
         if (productData.category !== 'Tires') delete productData.size;
         if (productData.category !== 'Batteries') delete productData.voltage;
+        
+        // Collect variants data
+        productData.variants = collectVariantsData();
+
+        // Ensure at least one variant is added
+        if (productData.variants.length === 0) {
+            alert('Please add at least one variant.');
+            return;
+        }
 
         try {
             const token = localStorage.getItem('authToken');
@@ -141,13 +221,39 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     productElement.dataset.productId = productId;
     
                     // Truncate the description if it's too long
-                    const maxDescriptionLength = 50; // Adjust this value as needed
+                    const maxDescriptionLength = 50;
                     const truncatedDescription = product.description && product.description.length > maxDescriptionLength
                         ? product.description.substring(0, maxDescriptionLength) + '...'
                         : product.description || 'No description available';
     
+                    // Check if product is out of stock by checking variants
+                    let isOutOfStock = true;
+                    if (product.variants && product.variants.length > 0) {
+                        // Product is in stock if any variant has stock > 0
+                        isOutOfStock = !product.variants.some(variant => variant.stock > 0);
+                    } else {
+                        // For backward compatibility with products without variants
+                        isOutOfStock = product.stock === 0;
+                    }
+    
+                    // Find price range for display
+                    let priceDisplay = '';
+                    if (product.variants && product.variants.length > 0) {
+                        const prices = product.variants.map(variant => parseFloat(variant.price));
+                        const minPrice = Math.min(...prices);
+                        const maxPrice = Math.max(...prices);
+                        
+                        if (minPrice === maxPrice) {
+                            priceDisplay = `₱${minPrice}`;
+                        } else {
+                            priceDisplay = `₱${minPrice} - ₱${maxPrice}`;
+                        }
+                    } else {
+                        priceDisplay = `₱${product.price}`;
+                    }
+    
                     // Add out-of-stock overlay if stock is 0
-                    const outOfStockOverlay = product.stock === 0
+                    const outOfStockOverlay = isOutOfStock
                         ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>`
                         : '';
     
@@ -157,10 +263,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         <h4>${product.name}</h4>
                         <p>${truncatedDescription}</p>
                         <p>Brand: ${product.brand || 'Not specified'}</p>
-                        <p>Stock: ${product.stock}</p>
+                        <p>Variants: ${product.variants ? product.variants.length : 0}</p>
                         ${product.size ? `<p>Size: ${product.size}</p>` : ''}
                         ${product.voltage ? `<p>Voltage: ${product.voltage}</p>` : ''}
-                        <p>Price: ₱${product.price}</p>
+                        <p>Price: ${priceDisplay}</p>
                         <div class="product-actions">
                             <button class="edit-product-btn" data-id="${productId}">Edit</button>
                             <button class="delete-product-btn" data-id="${productId}">Delete</button>
@@ -168,7 +274,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     `;
     
                     // Add a class for out-of-stock products
-                    if (product.stock === 0) {
+                    if (isOutOfStock) {
                         productElement.classList.add('out-of-stock');
                     }
     
@@ -185,7 +291,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 document.querySelectorAll('.edit-product-btn').forEach(button => {
                     button.addEventListener('click', function() {
                         const productId = this.getAttribute('data-id');
-                        console.log('Edit Product ID:', productId); // Debugging step
+                        console.log('Edit Product ID:', productId);
                 
                         if (!productId) {
                             console.error('Edit button missing product ID');
@@ -258,18 +364,33 @@ document.addEventListener('DOMContentLoaded', (event) => {
             if (data.success && data.products) {
                 const product = data.products; // Adjust to use 'products' key
         
+                // Set basic product details
                 document.getElementById('name').value = product.name || '';
                 document.getElementById('description').value = product.description || '';
                 document.getElementById('category').value = product.category || '';
-                document.getElementById('price').value = product.price || '';
-                document.getElementById('stock').value = product.stock || '';
                 document.getElementById('image_url').value = product.image_url || '';
                 document.getElementById('brand').value = product.brand || '';
         
+                // Trigger category change to show/hide size and voltage fields
                 categorySelect.dispatchEvent(new Event('change'));
         
+                // Set size and voltage if applicable
                 if (product.size) document.getElementById('size').value = product.size;
                 if (product.voltage) document.getElementById('voltage').value = product.voltage;
+                
+                // Clear existing variants
+                variantsContainer.innerHTML = '';
+                
+                // Add existing variants
+                if (product.variants && Array.isArray(product.variants)) {
+                    product.variants.forEach(variant => {
+                        addVariantRow(variant);
+                    });
+                }
+                // If no variants, add an empty one
+                if (!product.variants || product.variants.length === 0) {
+                    addVariantRow();
+                }
         
                 isEditing = true;
                 currentProductId = productId;
@@ -335,11 +456,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // Reset form function
     function resetForm() {
-        form.reset();
-        isEditing = false;
+        form.reset(); 
+        isEditing = false; 
         currentProductId = null;
-        sizeField.style.display = 'none';
-        voltageField.style.display = 'none';
+        
+        // Clear variants
+        variantsContainer.innerHTML = '';
+        // Add one empty variant row
+        addVariantRow();
     }
 
     // UPDATED: Product search functionality with respect to the current category filter

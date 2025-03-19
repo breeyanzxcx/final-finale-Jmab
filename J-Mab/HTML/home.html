@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>J-MAB Products</title>
+  <title>Home</title>
   <link rel="stylesheet" href="../CSS/home.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -18,99 +17,163 @@
     </div> 
 
     <div class="nav-links">
-      <a id="hehe" href="./home.html"class="active">HOME</a>
-      <a id="hehe" href="./productPage.html?category=tires">PRODUCTS</a>
-      <a id="hehe" href="./about.html">ABOUT</a>
+      <a href="./home.html" class="active">HOME</a>
+      <a href="./productPage.html?category=tires">PRODUCTS</a>
+      <a href="./about.html">ABOUT</a>
     </div>
 
     <div class="action-icons">
       <a href="../HTML/userCart.html">
-          <img src="../imahe/cart.png" alt="Cart Icon">
+        <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
-      <a href="../HTML/">
-          <img src="../imahe/notifications.png" alt="Notification Icon">
+      <a href="#" class="notification-icon" onclick="toggleNotificationDropdown(event)">
+        <img src="../imahe/notifications.png" alt="Notification Icon">
       </a>
-      
+
+      <!-- Notification Dropdown -->
+      <div class="notification-container">
+        <div class="notification-icon" id="notificationIcon">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationBadge">0</span>
+        </div>
+        
+        <div class="notification-dropdown" id="notificationDropdown">
+            <h4>Notifications</h4>
+            <ul id="notificationList">
+                <li class="notification-empty">Loading notifications...</li>
+            </ul>
+        </div>
+    </div>
+
       <div class="profile-button" onclick="toggleDropdown()">
         <img src="../imahe/prof.png" alt="Profile Icon">
-    </div>
-    <div class="profile-dropdown" id="profileDropdown">
-      <a href="../HTML/profile.html">My Profile</a>
-      <a href="#" id="logout">Logout</a>
-    </div>
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="../HTML/profile.html">My Profile</a>
+        <a href="#" id="logout">Logout</a>
+      </div>
     </div>
   </nav>
 
-    <section>
-        <div class="topSection">
-            <div class="sectionText">
-                <h1 class="headline">Your <span class="highlight">Trusted Partner</span> for Quality Tires,<br> Batteries, Oils & Lubricants</h1>
-                <p class="tagline">Where durability meets performance</p>
-                <a style="text-decoration: none" href="./productPage.html?category=tires" class="shop-btn">View Products</a>
-            </div>
-        </div>
-    </section>
-    
-    <section class="product-categories">
-        <div class="container">
-            <h2 class="section-title">Our Product Categories</h2>
-            <div class="category-grid">
-                <a href="./productPage.html?category=tires" class="category-card">
-                    <img src="../Products/Tire(4).png" alt="Tires">
-                    <h3>Tires</h3>
-                    <p>Premium Tires for All Vehicles</p>
-                </a>
-                <a href="./productPage.html?category=batteries" class="category-card">
-                    <img src="../Products/battery(3).png" alt="Batteries">
-                    <h3>Batteries</h3>
-                    <p>Reliable Power for Your Vehicle</p>
-                </a>
-                <a href="./productPage.html?category=oils" class="category-card">
-                    <img src="../Products/oil(1).png" alt="Oils">
-                    <h3>Oils</h3>
-                    <p>High-Performance Automotive Fluids</p>
-                </a>
-                <a href="./productPage.html?category=lubricants" class="category-card">
-                    <img src="../Products/lubricant(1).png" alt="Lubricants">
-                    <h3>Lubricants</h3>
-                    <p>High-Performance Automotive Fluids</p>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Custom Logout Pop-Up -->
-    <div id="logoutPopup" class="popup">
-        <div class="popup-content">
-            <h3>Logout Confirmation</h3>
-            <p>Are you sure you want to log out?</p>
-            <div class="popup-buttons">
-                <button id="confirmLogout" class="popup-btn confirm">Yes</button>
-                <button id="cancelLogout" class="popup-btn cancel">No</button>
-            </div>
-        </div>
+  <section>
+    <div class="topSection">
+      <div class="sectionText">
+        <h1 class="headline">Your <span class="highlight">Trusted Partner</span> for Quality Tires,<br> Batteries, Oils & Lubricants</h1>
+        <p class="tagline">Where durability meets performance</p>
+        <a href="./productPage.html?category=tires" class="shop-btn">View Products</a>
+      </div>
     </div>
+  </section>
 
-    <script src="../JS/logout.js"></script>
-    <script>
-        const userId = localStorage.getItem("userId"); 
-        const authToken = localStorage.getItem("authToken");
+  <section class="product-categories">
+    <div class="container">
+      <h2 class="section-title">Our Product Categories</h2>
+      <div class="category-grid">
+        <a href="./productPage.html?category=tires" class="category-card">
+          <img src="../Products/Tire(4).png" alt="Tires">
+          <h3>Tires</h3>
+          <p>Premium Tires for All Vehicles</p>
+        </a>
+        <a href="./productPage.html?category=batteries" class="category-card">
+          <img src="../Products/battery(3).png" alt="Batteries">
+          <h3>Batteries</h3>
+          <p>Reliable Power for Your Vehicle</p>
+        </a>
+        <a href="./productPage.html?category=oils" class="category-card">
+          <img src="../Products/oil(1).png" alt="Oils">
+          <h3>Oils</h3>
+          <p>High-Performance Automotive Fluids</p>
+        </a>
+        <a href="./productPage.html?category=lubricants" class="category-card">
+          <img src="../Products/lubricant(1).png" alt="Lubricants">
+          <h3>Lubricants</h3>
+          <p>High-Performance Automotive Fluids</p>
+        </a>
+      </div>
+    </div>
+  </section>
 
-        console.log("User ID:", userId);
-        console.log("Auth Token:", authToken);
+  <!-- Custom Logout Pop-Up -->
+  <div id="logoutPopup" class="popup">
+    <div class="popup-content">
+      <h3>Logout Confirmation</h3>
+      <p>Are you sure you want to log out?</p>
+      <div class="popup-buttons">
+        <button id="confirmLogout" class="popup-btn confirm">Yes</button>
+        <button id="cancelLogout" class="popup-btn cancel">No</button>
+      </div>
+    </div>
+  </div>
 
-        function toggleDropdown() {
-            const dropdown = document.getElementById('profileDropdown');
-            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
-        }
+  <script src="../JS/logout.js"></script>
+  <script src="../JS/notification.js"></script>
+  <script>
+    function toggleDropdown() {
+      const dropdown = document.getElementById('profileDropdown');
+      dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+    }
 
-        window.addEventListener('click', function (e) {
-            const profileButton = document.querySelector('.profile-button');
-            const dropdown = document.getElementById('profileDropdown');
-            if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-            }
+    function toggleNotificationDropdown(event) {
+      event.preventDefault();
+      const dropdown = document.getElementById("notificationDropdown");
+      dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+
+      if (dropdown.style.display === "block") {
+        fetchNotifications();
+      }
+    }
+    
+    async function fetchNotifications() {
+      const userId = localStorage.getItem("userId");
+      const authToken =localStorage.getItem("authToken");
+      if (!userId) {
+        console.error("User ID not found in localStorage.");
+        return;
+      }
+
+      try {
+        
+        const response = await fetch(`http://localhost/jmab/final-jmab/api/notifications/user/${userId}`, {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${authToken}`
+          }
         });
-    </script>
+
+        const data = await response.json();
+        
+
+        const notificationList = document.getElementById("notificationList");
+        notificationList.innerHTML = "";
+
+        if (data.success && data.notifications.length > 0) {
+          data.notifications.forEach(notification => {
+            const li = document.createElement("li");
+            li.textContent = `${notification.title}: ${notification.message}`;
+            notificationList.appendChild(li);
+          });
+        } else {
+          notificationList.innerHTML = "<li>No new notifications.</li>";
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    }
+
+    window.addEventListener('click', function (e) {
+      const profileButton = document.querySelector('.profile-button');
+      const dropdown = document.getElementById('profileDropdown');
+      const notificationDropdown = document.getElementById("notificationDropdown");
+
+      if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+
+      if (!e.target.closest('.notification-icon') && !notificationDropdown.contains(e.target)) {
+        notificationDropdown.style.display = "none";
+      }
+    });
+  </script>
 </body>
 </html>

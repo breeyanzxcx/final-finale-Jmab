@@ -100,13 +100,24 @@ function displayUserOrders(orders) {
 
 function createOrderCard(reference, orders) {
     const firstOrder = orders[0];
-    console.log('First order:', firstOrder); // Debugging line
+    console.log('First order:', firstOrder);
 
     const orderCard = document.createElement('div');
     orderCard.className = 'order-card';
     
-    const totalItems = orders.reduce((sum, order) => sum + parseInt(order.quantity || 1), 0);
-    const totalPrice = orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0);
+    const totalItems = orders.reduce((sum, order) => {
+        const quantity = parseInt(order.quantity || 1);
+        return sum + (isNaN(quantity) ? 1 : quantity);
+    }, 0);
+
+    const totalPrice = orders.reduce((sum, order) => {
+        const price = parseFloat(order.variant_price || order.product_price || 0); // Support variant_price
+        const quantity = parseInt(order.quantity || 1);
+        return sum + (isNaN(price) ? 0 : price * (isNaN(quantity) ? 1 : quantity));
+    }, 0);
+
+    console.log('Total Items:', totalItems);
+    console.log('Total Price:', totalPrice);
     
     const statusClass = firstOrder.status.toLowerCase().replace(/ /g, '-');
     orderCard.classList.add(statusClass);
@@ -125,6 +136,7 @@ function createOrderCard(reference, orders) {
     orderContent.className = 'order-content';
     
     orders.forEach(order => {
+        const price = parseFloat(order.variant_price || order.product_price || 0); // Support variant_price
         const productItem = document.createElement('div');
         productItem.className = 'product-item';
         productItem.innerHTML = `
@@ -134,7 +146,7 @@ function createOrderCard(reference, orders) {
             <div class="product-details">
                 <h4>${order.product_name}</h4>
                 <p>${order.product_brand}</p>
-                <p>₱${parseFloat(order.product_price).toFixed(2)} x ${order.quantity || 1}</p>
+                <p>₱${price.toFixed(2)} x ${order.quantity || 1}</p>
             </div>
         `;
         orderContent.appendChild(productItem);
@@ -314,4 +326,128 @@ window.addEventListener('storage', function(event) {
 
 if (!localStorage.getItem("userId")) {
     getUserId();
+}
+
+function handleProductVariants(product) {
+    const sizeSelect = document.getElementById('size');
+    
+    // Helper function to safely parse and format prices
+    function formatPrice(priceValue) {
+        const price = parseFloat(priceValue);
+        return isNaN(price) ? '0.00' : price.toFixed(2);
+    }
+    
+    if (product.variants && product.variants.length > 0) {
+        sizeSelect.innerHTML = '';
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select a variant';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        sizeSelect.appendChild(defaultOption);
+        
+        // Sort variants by price
+        const sortedVariants = [...product.variants].sort((a, b) => {
+            const priceA = parseFloat(a.price) || 0;
+            const priceB = parseFloat(b.price) || 0;
+            return priceA - priceB;
+        });
+        
+        // Create options for each variant
+        sortedVariants.forEach(variant => {
+            const option = document.createElement('option');
+            option.value = variant.variant_id;
+            
+            // Safely parse price
+            const price = parseFloat(variant.price) || 0;
+            option.textContent = `${variant.size} - ₱${formatPrice(variant.price)}`;
+            
+            // Store data for later use
+            option.dataset.price = price;
+            option.dataset.stock = variant.stock || 0;
+            option.dataset.size = variant.size || 'N/A';
+            
+            // Handle out of stock variants
+            const stock = parseInt(variant.stock) || 0;
+            option.disabled = stock <= 0;
+            if (stock <= 0) option.textContent += ' (Out of Stock)';
+            
+            sizeSelect.appendChild(option);
+        });
+        
+        // Handle variant selection change
+        sizeSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const selectedPrice = parseFloat(selectedOption.dataset.price) || 0;
+            const selectedStock = parseInt(selectedOption.dataset.stock) || 0;
+            
+            // Always use the formatPrice helper to avoid "Pnan"
+            document.getElementById('product-price').textContent = `₱${formatPrice(selectedPrice)}`;
+            
+            // Update stock info
+            const stockInfo = document.getElementById('stock-info') || document.createElement('p');
+            stockInfo.id = 'stock-info';
+            stockInfo.textContent = `Stock: ${selectedStock}`;
+            if (!stockInfo.parentElement) {
+                document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
+            }
+            
+            // Update quantity input max value
+            const qtyInput = document.querySelector('.qty-input');
+            qtyInput.setAttribute('max', selectedStock);
+            if (parseInt(qtyInput.value) > selectedStock) qtyInput.value = selectedStock;
+            
+            // Update button states
+            const addToCartButton = document.querySelector('.add-to-cart');
+            const buyNowButton = document.querySelector('.buy-now');
+            
+            if (selectedStock <= 0) {
+                addToCartButton.disabled = true;
+                addToCartButton.textContent = 'OUT OF STOCK';
+                buyNowButton.disabled = true;
+                buyNowButton.textContent = 'OUT OF STOCK';
+            } else {
+                addToCartButton.disabled = false;
+                addToCartButton.textContent = 'Add to Cart';
+                buyNowButton.disabled = false;
+                buyNowButton.textContent = 'Buy Now';
+            }
+        });
+        
+        // Set initial price and stock from first available variant
+        const firstInStock = sortedVariants.find(v => (parseInt(v.stock) || 0) > 0) || sortedVariants[0];
+        if (firstInStock) {
+            // Use formatPrice helper consistently
+            document.getElementById('product-price').textContent = `₱${formatPrice(firstInStock.price)}`;
+            
+            const stockInfo = document.createElement('p');
+            stockInfo.id = 'stock-info';
+            stockInfo.textContent = `Stock: ${parseInt(firstInStock.stock) || 0}`;
+            document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
+        }
+    } else {
+        // Handle products without variants
+        sizeSelect.innerHTML = '<option value="">N/A</option>';
+        
+        // Use formatPrice helper consistently
+        document.getElementById('product-price').textContent = `₱${formatPrice(product.price)}`;
+        
+        const stockInfo = document.createElement('p');
+        stockInfo.id = 'stock-info';
+        stockInfo.textContent = `Stock: ${parseInt(product.stock) || 0}`;
+        document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
+        
+        // Update button states
+        const addToCartButton = document.querySelector('.add-to-cart');
+        const buyNowButton = document.querySelector('.buy-now');
+        const stock = parseInt(product.stock) || 0;
+        if (stock <= 0) {
+            addToCartButton.disabled = true;
+            addToCartButton.textContent = 'OUT OF STOCK';
+            buyNowButton.disabled = true;
+            buyNowButton.textContent = 'OUT OF STOCK';
+        }
+    }
 }
