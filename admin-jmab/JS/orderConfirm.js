@@ -1,47 +1,110 @@
+// Global confirmation modal variables
+let currentOrderId = null;
+let currentNewStatus = null;
+
+function showConfirmationModal(message, orderId, newStatus) {
+    const confirmationModal = document.getElementById("confirmationModal");
+    const confirmationMessage = document.getElementById("confirmationMessage");
+
+    if (confirmationModal && confirmationMessage) {
+        confirmationMessage.textContent = message;
+        currentOrderId = orderId;
+        currentNewStatus = newStatus;
+        confirmationModal.style.display = "flex";
+    } else {
+        console.error("Confirmation modal or message element not found.");
+    }
+}
+
+function hideConfirmationModal() {
+    const confirmationModal = document.getElementById("confirmationModal");
+    if (confirmationModal) {
+        confirmationModal.style.display = "none";
+    } else {
+        console.error("Confirmation modal element not found.");
+    }
+}
+
+// Event listeners for confirmation buttons (outside DOMContentLoaded for global access)
+const confirmYes = document.getElementById("confirmYes");
+const confirmNo = document.getElementById("confirmNo");
+
+if (confirmYes) {
+    confirmYes.addEventListener("click", function () {
+        hideConfirmationModal();
+        if (currentOrderId && currentNewStatus) {
+            updateOrderStatus(currentOrderId, currentNewStatus);
+        }
+    });
+}
+
+if (confirmNo) {
+    confirmNo.addEventListener("click", function () {
+        hideConfirmationModal();
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     fetchOrders();
 
+    // Logout functionality
     document.getElementById("logout").addEventListener("click", function (e) {
         e.preventDefault();
         if (confirm("Are you sure you want to log out?")) {
             window.location.href = "../J-Mab/HTML/sign-in.php";
         }
     });
-});
 
-// Confirmation Logic
-const confirmationModal = document.getElementById("confirmationModal");
-const confirmationMessage = document.getElementById("confirmationMessage");
-const confirmYes = document.getElementById("confirmYes");
-const confirmNo = document.getElementById("confirmNo");
+    // Name/Model sync logic
+    const nameInput = document.getElementById("name");
+    const modelInput = document.getElementById("model");
 
-let currentOrderId = null;
-let currentNewStatus = null;
-
-// Function to show the confirmation 
-function showConfirmationModal(message, orderId, newStatus) {
-    confirmationMessage.textContent = message;
-    currentOrderId = orderId;
-    currentNewStatus = newStatus;
-    confirmationModal.style.display = "flex";
-}
-
-// Function to hide the confirmation modal
-function hideConfirmationModal() {
-    confirmationModal.style.display = "none";
-}
-
-// Handle "Yes" button click
-confirmYes.addEventListener("click", function () {
-    hideConfirmationModal();
-    if (currentOrderId && currentNewStatus) {
-        updateOrderStatus(currentOrderId, currentNewStatus); // Proceed with the action
+    if (nameInput && modelInput) {
+        nameInput.addEventListener("input", function () {
+            modelInput.value = nameInput.value; // Sync the model with name
+        });
     }
-});
 
-// Handle "No" button click
-confirmNo.addEventListener("click", function () {
-    hideConfirmationModal(); 
+    // Form submission handling
+    const createProductForm = document.getElementById("createProductForm");
+    if (createProductForm) {
+        createProductForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const productData = {
+                name: nameInput.value,
+                model: modelInput.value, // Will be same as name
+                description: document.getElementById("description").value,
+                category: document.getElementById("category").value,
+                image_url: document.getElementById("image_url").value,
+                brand: document.getElementById("brand").value,
+            };
+
+            fetch("http://localhost/jmab/final-jmab/api/products", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                },
+                body: JSON.stringify(productData),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        console.log("Product created:", data);
+                        alert("Product added successfully!");
+                        createProductForm.reset();
+                    } else {
+                        console.error("Failed to create product:", data.message);
+                        alert("Failed to add product: " + data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error creating product:", error);
+                    alert("An error occurred while creating the product.");
+                });
+        });
+    }
 });
 
 async function fetchOrders() {
@@ -57,8 +120,8 @@ async function fetchOrders() {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`
-            }
+                Authorization: `Bearer ${authToken}`,
+            },
         });
 
         if (!response.ok) {
@@ -66,7 +129,7 @@ async function fetchOrders() {
         }
 
         const data = await response.json();
-        console.log("API Response:", data); // Log the API response
+        console.log("API Response:", data);
         if (data.success) {
             displayOrders(data.orders);
         } else {
@@ -85,12 +148,18 @@ function displayOrders(orders) {
         return;
     }
 
-    ordersTableBody.innerHTML = ""; // Clear previous content
+    ordersTableBody.innerHTML = "";
 
-    // Group orders by reference_number
     const groupedOrders = {};
-    orders.forEach(order => {
+    orders.forEach((order) => {
         if (!groupedOrders[order.reference_number]) {
+            console.log("Processing order:", order);
+
+            let productDetails = order.product_details || { name: "N/A", model: "N/A", quantity: 0 };
+            if (typeof order.product_details === "string") {
+                productDetails = parseProductDetailsString(order.product_details);
+            }
+
             groupedOrders[order.reference_number] = {
                 user_id: order.user_id,
                 first_name: order.first_name,
@@ -98,17 +167,15 @@ function displayOrders(orders) {
                 total_price: parseFloat(order.total_price) || 0,
                 payment_method: order.payment_method,
                 status: order.status,
-                product_details: order.product_details || "N/A", // Handle null product_details
-                order_id: order.order_id
+                product_details: productDetails,
+                order_id: order.order_id,
             };
         }
     });
 
-    // Render orders
     Object.entries(groupedOrders).forEach(([reference_number, order]) => {
         const row = document.createElement("tr");
 
-        // Apply refined styles to statuses
         let statusClass;
         switch (order.status.toLowerCase()) {
             case "pending":
@@ -131,9 +198,17 @@ function displayOrders(orders) {
                 break;
         }
 
-        // Handle null or undefined product_details
-        const productDetails = order.product_details || "N/A";
-        const formattedProductDetails = productDetails.replace(/, /g, "<br>");
+        let formattedProductDetails = "N/A";
+        if (order.product_details) {
+            if (typeof order.product_details === "string") {
+                formattedProductDetails = order.product_details;
+            } else if (typeof order.product_details === "object") {
+                const details = order.product_details;
+                const productName = details.name || "N/A";
+                const productQuantity = details.quantity !== undefined ? details.quantity : 0;
+                formattedProductDetails = `${productName} (${productQuantity})`;
+            }
+        }
 
         row.innerHTML = `
             <td>${reference_number}</td>
@@ -151,37 +226,55 @@ function displayOrders(orders) {
     });
 }
 
+function parseProductDetailsString(detailsString) {
+    if (!detailsString) return { name: "N/A", model: "N/A", quantity: 0 };
+
+    const items = detailsString.split(", ");
+    let formattedDetails = "";
+
+    items.forEach((item, index) => {
+        const match = item.match(/(.*) - (.*) - (.*) \(x(\d+)\)/);
+        if (match) {
+            const [, name, , variant, quantity] = match;
+            formattedDetails += `${name} - ${variant} (${quantity})`;
+        } else {
+            formattedDetails += item;
+        }
+        if (index < items.length - 1) formattedDetails += ", ";
+    });
+
+    return formattedDetails;
+}
 
 function getStatusActions(status, orderId) {
-    let actions = '';
+    let actions = "";
 
-    if (status === 'pending') {
+    if (status === "pending") {
         actions = `
             <button class="accept-btn" onclick="showConfirmationModal('Are you sure you want to accept this order?', ${orderId}, 'processing')">Accept</button>
             <button class="decline-btn" onclick="showConfirmationModal('Are you sure you want to cancel this order?', ${orderId}, 'cancelled')">Decline</button>
         `;
-    } else if (status === 'processing') {
+    } else if (status === "processing") {
         actions = `
             <button class="out-for-delivery-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Out for Delivery?', ${orderId}, 'out for delivery')">Out for Delivery</button>
         `;
-    } else if (status === 'out for delivery') {
+    } else if (status === "out for delivery") {
         actions = `
             <button class="delivered-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Delivered?', ${orderId}, 'delivered')">Delivered</button>
             <button class="didnt-receive-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Failed Delivery?', ${orderId}, 'failed delivery')">Didn't Receive</button>
         `;
-    } else if (status === 'failed delivery') {
+    } else if (status === "failed delivery") {
         actions = `
             <button class="retry-delivery-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Out for Delivery?', ${orderId}, 'out for delivery')">Out for Delivery Again</button>
             <button class="cancel-btn" onclick="showConfirmationModal('Are you sure you want to cancel this order?', ${orderId}, 'cancelled')">Cancel</button>
         `;
-    } else if (status === 'cancelled' || status === 'delivered') {
+    } else if (status === "cancelled" || status === "delivered") {
         actions = `<span>No actions</span>`;
     }
 
     return actions;
 }
 
-// Function to update order status
 function updateOrderStatus(orderId, newStatus) {
     const authToken = localStorage.getItem("authToken");
 
@@ -189,24 +282,22 @@ function updateOrderStatus(orderId, newStatus) {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${authToken}`
+            Authorization: `Bearer ${authToken}`,
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus }),
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(`Order ${orderId} updated to ${newStatus}`);
-            fetchOrders(); // Refresh admin panel orders
-
-            // Notify profile page to refresh
-            localStorage.setItem("orderUpdated", "true");
-        } else {
-            alert(`Failed to update order: ${data.errors.join(", ")}`);
-        }
-    })
-    .catch(error => {
-        console.error("Error updating order:", error);
-        alert("An error occurred while updating the order.");
-    });
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                alert(`Order ${orderId} updated to ${newStatus}`);
+                fetchOrders();
+                localStorage.setItem("orderUpdated", "true");
+            } else {
+                alert(`Failed to update order: ${data.errors.join(", ")}`);
+            }
+        })
+        .catch((error) => {
+            console.error("Error updating order:", error);
+            alert("An error occurred while updating the order.");
+        });
 }
