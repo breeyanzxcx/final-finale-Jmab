@@ -5,169 +5,370 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none; /* Remove underlines globally */
         }
+
+        :root {
+            --primary: #02254B;
+            --accent: #15DBa0;
+            --bg-light: #F5F5F5;
+            --bg-dark: #DCD7C9;
+            --text-dark: #333;
+            --text-light: #fff;
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 240px;
+            --transition: all 0.3s ease;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
-        header {
-            background-color: #4285f4;
-            color: white;
-            padding: 1rem;
             display: flex;
-            justify-content: space-between;
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background: var(--primary);
+            transition: var(--transition);
+            color: var(--text-light);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 0 15px;
+        }
+
+        #sidebar .logo-container {
+            display: flex;
             align-items: center;
+            padding: 20px;
+            gap: 5px;
         }
-        .logout-btn {
-            background-color: transparent;
-            color: white;
-            border: 1px solid white;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border-radius: 4px;
+
+        #sidebar .logo-container img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
         }
+
+        #sidebar .admin-text {
+            font-weight: 600;
+            font-size: 30px;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+
+        #sidebar hr {
+            border: none;
+            height: 2px;
+            background: var(--accent);
+            margin: 15px 0;
+            opacity: 0.5;
+            margin-bottom: 50px;
+        }
+
+        #sidebar .side-menu {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        #sidebar .side-menu li {
+            margin: 8px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #sidebar .side-menu li a {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            padding: 14px 20px;
+            color: var(--text-light);
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        #sidebar .side-menu li a i {
+            margin-right: 15px;
+            width: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+
+        #sidebar .side-menu li a:hover,
+        #sidebar .side-menu li a.active {
+            background-color: rgba(21, 219, 160, 0.2);
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        #sidebar .side-menu li a:hover i,
+        #sidebar .side-menu li a.active i {
+            transform: scale(1.1);
+            color: var(--accent);
+        }
+
+        #sidebar .logout-container {
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 30px);
+        }
+
+        #sidebar .logout-container a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255,0,0,0.1);
+            color: #ff4d4d;
+            padding: 14px;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        #sidebar .logout-container a i {
+            margin-right: 10px;
+        }
+
+        #sidebar .logout-container a:hover {
+            background-color: rgba(255,0,0,0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Main Content */
+        main {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            min-height: 100vh;
+            background-color: var(--bg-light);
+            width: calc(100% - var(--sidebar-width));
+            transition: var(--transition);
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 1rem;
         }
+
         .user-info {
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(45deg, var(--primary), #034b8a);
+            color: var(--text-light);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
         }
+
+        .user-info:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
         .messaging-section {
             display: flex;
-            gap: 1rem;
-            height: calc(100vh - 200px);
+            gap: 20px;
+            height: calc(100vh - 250px);
         }
+
         .users-list {
             flex: 1;
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
             overflow-y: auto;
+            transition: var(--transition);
         }
+
         .conversation {
             flex: 2;
             display: flex;
             flex-direction: column;
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
         }
+
         .message-header {
             padding: 1rem;
-            border-bottom: 1px solid #eee;
-            font-weight: bold;
+            border-bottom: 2px solid var(--accent);
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--primary);
+            background-color: rgba(21, 219, 160, 0.05);
         }
+
         .messages-container {
             flex: 1;
-            padding: 1rem;
+            padding: 1.5rem;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 1rem;
         }
+
         .message-input {
             display: flex;
             padding: 1rem;
             border-top: 1px solid #eee;
+            background-color: #fafafa;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
         }
+
         .message-input input {
             flex: 1;
-            padding: 0.5rem;
+            padding: 0.75rem;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: var(--transition);
         }
+
+        .message-input input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 5px rgba(21, 219, 160, 0.3);
+        }
+
         .message-input button {
-            margin-left: 0.5rem;
-            padding: 0.5rem 1rem;
-            background-color: #4285f4;
-            color: white;
+            margin-left: 10px;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(45deg, var(--primary), #034b8a);
+            color: var(--text-light);
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
         }
+
+        .message-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
         .user-item {
             padding: 1rem;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f0f0f0;
             cursor: pointer;
+            transition: var(--transition);
         }
+
         .user-item:hover, .user-item.active {
-            background-color: #f0f7ff;
+            background-color: rgba(21, 219, 160, 0.1);
+            color: var(--primary);
         }
+
         .message {
             max-width: 70%;
-            padding: 0.75rem;
-            border-radius: 8px;
+            padding: 1rem;
+            border-radius: 10px;
             margin-bottom: 0.5rem;
             word-wrap: break-word;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
         }
+
+        .message:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
         .sent {
             align-self: flex-end;
-            background-color: #dcf8c6;
+            background: linear-gradient(45deg, #dcf8c6, #bceb9e);
+            color: var(--text-dark);
         }
+
         .received {
             align-self: flex-start;
-            background-color: #f1f0f0;
+            background: linear-gradient(45deg, #f1f0f0, #e0e0e0);
+            color: var(--text-dark);
         }
+
         .message-info {
             font-size: 0.75rem;
-            color: #888;
-            margin-top: 0.25rem;
+            color: #666;
+            margin-top: 0.5rem;
+            opacity: 0.8;
         }
+
         .no-user-selected {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
             color: #888;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Admin Dashboard</h1>
-        <button id="logout-btn" class="logout-btn">Logout</button>
-    </header>
-    
-    <div class="container">
-        <div class="user-info" id="user-info">
-            <!-- User info will be populated here -->
+    <section id="sidebar">
+        <div class="logo-container">
+            <img src="../images/ICONS.png" class="logo" alt="Logo">
+            <p class="admin-text">J-MAB</p>
         </div>
-        
-        <div class="messaging-section">
-            <div class="users-list" id="users-list">
-                <div class="user-item" data-id="all">All Messages</div>
-                <!-- Users will be listed here -->
+        <hr>
+        <ul class="side-menu">
+            <li><a href="/JMAB/admin-jmab/dashboard.html"><i class="fas fa-gauge"></i><span>Dashboard</span></a></li>
+            <li><a href="/JMAB/admin-jmab/products.html"><i class="fas fa-box"></i><span>Products</span></a></li>
+            <li><a href="/JMAB/admin-jmab/orderConfirm.html"><i class="fas fa-shopping-cart"></i><span>Orders</span></a></li>
+            <li><a href="/JMAB/admin-jmab/customerTransaction.html"><i class="fas fa-user-circle"></i><span>Customers</span></a></li>
+            <li><a href="/JMAB/admin-jmab/message.html" class="active"><i class="fas fa-envelope"></i><span>Message Customer</span></a></li>
+            <li><a href="/JMAB/admin-jmab/Users.html"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
+        </ul>
+        <div class="logout-container">
+            <a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+        </div>
+    </section>
+
+    <main>     
+        <div class="container">
+            <div class="user-info" id="user-info">
+                <!-- User info will be populated here -->
             </div>
             
-            <div class="conversation">
-                <div class="message-header" id="conversation-header">
-                    Select a user to start messaging
+            <div class="messaging-section">
+                <div class="users-list" id="users-list">
+                    <div class="user-item" data-id="all">All Messages</div>
+                    <!-- Users will be listed here -->
                 </div>
                 
-                <div class="messages-container" id="messages-container">
-                    <div class="no-user-selected">
-                        <p>Select a user to view conversation</p>
+                <div class="conversation">
+                    <div class="message-header" id="conversation-header">
+                        Select a user to start messaging
                     </div>
-                </div>
-                
-                <div class="message-input">
-                    <input type="text" id="message-input" placeholder="Type a message...">
-                    <button id="send-btn">Send</button>
+                    
+                    <div class="messages-container" id="messages-container">
+                        <div class="no-user-selected">
+                            <p>Select a user to view conversation</p>
+                        </div>
+                    </div>
+                    
+                    <div class="message-input">
+                        <input type="text" id="message-input" placeholder="Type a message...">
+                        <button id="send-btn">Send</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
         let currentUser;
@@ -209,30 +410,26 @@
         });
         
         function setupWebSocket() {
-            // Connect to WebSocket server (adjust URL as needed)
             ws = new WebSocket('ws://localhost:8080');
 
             ws.onopen = function() {
                 console.log('WebSocket connected');
-                // Authenticate with token
                 ws.send(JSON.stringify({ type: 'auth', token: token }));
             };
 
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 if (data.type === 'message') {
-                    // Handle incoming message
                     if (selectedUserId === 'all') {
-                        fetchAllMessages(); // Refresh all messages
+                        fetchAllMessages();
                     } else if (data.sender_id == selectedUserId || data.receiver_id == selectedUserId) {
-                        fetchMessages(selectedUserId); // Refresh current conversation
+                        fetchMessages(selectedUserId);
                     }
                 }
             };
 
             ws.onclose = function() {
                 console.log('WebSocket disconnected');
-                // Attempt to reconnect after a delay
                 setTimeout(setupWebSocket, 2000);
             };
 
@@ -397,7 +594,6 @@
                 message: message
             };
             
-            // Send via REST API to persist the message
             fetch('http://localhost/jmab/final-jmab/api/messages', {
                 method: 'POST',
                 headers: {
@@ -410,7 +606,6 @@
             .then(data => {
                 if (data.success) {
                     messageInput.value = '';
-                    // Send via WebSocket to notify others
                     ws.send(JSON.stringify({
                         type: 'message',
                         sender_id: currentUser.id,
@@ -418,7 +613,7 @@
                         message: message,
                         timestamp: new Date().toISOString()
                     }));
-                    fetchMessages(selectedUserId); // Refresh locally
+                    fetchMessages(selectedUserId);
                 } else {
                     console.error('Failed to send message:', data.errors);
                     alert('Failed to send: ' + data.errors.join(', '));
