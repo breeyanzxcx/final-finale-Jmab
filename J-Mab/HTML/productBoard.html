@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>J-MAB Products</title>
   <link rel="stylesheet" href="../CSS/product_board.css">
+  <link rel="stylesheet" href="../CSS/message.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -27,6 +28,11 @@
       <a href="../HTML/userCart.html">
           <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
+
+      <a href="#" onclick="toggleMessenger(event)">
+        <img src="../imahe/message.png" alt="Message Icon">
+      </a>
+
       <a href="../HTML/">
           <img src="../imahe/notifications.png" alt="Notification Icon">
       </a>
@@ -41,6 +47,32 @@
     </div>
   </nav>
 
+    <!-- Messenger Popup -->
+    <div class="messenger-wrapper">
+        <div class="messenger-box" id="messengerBox">
+          <div class="messenger-header">
+            <select id="contactSelect">
+              <option value="support">Customer Support</option>
+              <option value="john">John Doe</option>
+              <option value="jane">Jane Smith</option>
+              <option value="mike">Mike Johnson</option>
+            </select>
+            <div class="messenger-actions">
+              <span onclick="toggleMessenger(event)">×</span>
+            </div>
+          </div>
+          <div class="messenger-body" id="messengerBody">
+            <ul class="message-list" id="messageList">
+              <!-- Messages will be populated by JS -->
+            </ul>
+          </div>
+          <div class="message-input">
+            <input type="text" id="messageInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    
     <main>
         <div class="product-container">
             <button id="returnBtn">⬅ Return</button>
@@ -87,6 +119,7 @@
     <script src="../JS/rating.js"></script>
     <script src="../JS/returnbutton.js"></script>
     <script src="../JS/logout.js"></script>
+    <script src="../JS/message.js"></script>
     <script>
         function toggleDropdown() {
             const dropdown = document.getElementById('profileDropdown');

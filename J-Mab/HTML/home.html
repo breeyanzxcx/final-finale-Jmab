@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home</title>
   <link rel="stylesheet" href="../CSS/home.css">
+  <link rel="stylesheet" href="../CSS/message.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
@@ -26,24 +27,23 @@
       <a href="../HTML/userCart.html">
         <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
-      <a href="#" class="notification-icon" onclick="toggleNotificationDropdown(event)">
-        <img src="../imahe/notifications.png" alt="Notification Icon">
+
+      <a href="#" onclick="toggleMessenger(event)">
+        <img src="../imahe/message.png" alt="Message Icon">
       </a>
 
-      <!-- Notification Dropdown -->
-      <div class="notification-container">
-        <div class="notification-icon" id="notificationIcon">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationBadge">0</span>
-        </div>
-        
+      <div class="notification-wrapper">
+        <a href="#" class="notification-icon" onclick="toggleNotificationDropdown(event)">
+          <img src="../imahe/notifications.png" alt="Notification Icon">
+          <span class="notification-badge">0</span>
+        </a> 
         <div class="notification-dropdown" id="notificationDropdown">
-            <h4>Notifications</h4>
-            <ul id="notificationList">
-                <li class="notification-empty">Loading notifications...</li>
-            </ul>
+          <h4>Notifications</h4>
+          <ul id="notificationList">
+            <li class="notification-empty">Loading notifications...</li>
+          </ul>
         </div>
-    </div>
+      </div>
 
       <div class="profile-button" onclick="toggleDropdown()">
         <img src="../imahe/prof.png" alt="Profile Icon">
@@ -54,6 +54,32 @@
       </div>
     </div>
   </nav>
+
+  <!-- Messenger Popup -->
+  <div class="messenger-wrapper">
+    <div class="messenger-box" id="messengerBox">
+      <div class="messenger-header">
+        <select id="contactSelect">
+          <option value="support">Customer Support</option>
+          <option value="john">John Doe</option>
+          <option value="jane">Jane Smith</option>
+          <option value="mike">Mike Johnson</option>
+        </select>
+        <div class="messenger-actions">
+          <span onclick="toggleMessenger(event)">×</span>
+        </div>
+      </div>
+      <div class="messenger-body" id="messengerBody">
+        <ul class="message-list" id="messageList">
+          <!-- Messages will be populated by JS -->
+        </ul>
+      </div>
+      <div class="message-input">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
 
   <section>
     <div class="topSection">
@@ -107,6 +133,7 @@
 
   <script src="../JS/logout.js"></script>
   <script src="../JS/notification.js"></script>
+  <script src="../JS/message.js"></script>
   <script>
     function toggleDropdown() {
       const dropdown = document.getElementById('profileDropdown');
@@ -117,33 +144,27 @@
       event.preventDefault();
       const dropdown = document.getElementById("notificationDropdown");
       dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-
-      if (dropdown.style.display === "block") {
-        fetchNotifications();
-      }
+      if (dropdown.style.display === "block") fetchNotifications();
     }
-    
+
     async function fetchNotifications() {
       const userId = localStorage.getItem("userId");
-      const authToken =localStorage.getItem("authToken");
+      const authToken = localStorage.getItem("authToken");
       if (!userId) {
         console.error("User ID not found in localStorage.");
         return;
       }
 
       try {
-        
         const response = await fetch(`http://localhost/jmab/final-jmab/api/notifications/user/${userId}`, {
           method: "GET",
           headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${authToken}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`
           }
         });
 
         const data = await response.json();
-        
-
         const notificationList = document.getElementById("notificationList");
         notificationList.innerHTML = "";
 
@@ -165,6 +186,8 @@
       const profileButton = document.querySelector('.profile-button');
       const dropdown = document.getElementById('profileDropdown');
       const notificationDropdown = document.getElementById("notificationDropdown");
+      const messengerBox = document.getElementById('messengerBox');
+      const messageIcon = document.querySelector('.action-icons a[href="#"] img[src="../imahe/message.png"]');
 
       if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = 'none';
@@ -172,6 +195,12 @@
 
       if (!e.target.closest('.notification-icon') && !notificationDropdown.contains(e.target)) {
         notificationDropdown.style.display = "none";
+      }
+
+      if (messengerBox.style.display === 'block' && 
+          !messengerBox.contains(e.target) && 
+          !messageIcon.contains(e.target)) {
+        messengerBox.style.display = 'none';
       }
     });
   </script>

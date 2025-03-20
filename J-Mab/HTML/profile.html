@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>J-MAB</title>
   <link rel="stylesheet" href="../CSS/profile.css">
+  <link rel="stylesheet" href="../CSS/message.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -27,6 +28,11 @@
       <a href="../HTML/userCart.html">
           <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
+
+      <a href="#" onclick="toggleMessenger(event)">
+        <img src="../imahe/message.png" alt="Message Icon">
+      </a>
+
       <a href="../HTML/">
           <img src="../imahe/notifications.png" alt="Notification Icon">
       </a>
@@ -40,6 +46,32 @@
       </div>
     </div>
   </nav>
+    <!-- Messenger Popup -->
+    <div class="messenger-wrapper">
+      <div class="messenger-box" id="messengerBox">
+        <div class="messenger-header">
+          <select id="contactSelect">
+            <option value="support">Customer Support</option>
+            <option value="john">John Doe</option>
+            <option value="jane">Jane Smith</option>
+            <option value="mike">Mike Johnson</option>
+          </select>
+          <div class="messenger-actions">
+            <span onclick="toggleMessenger(event)">×</span>
+          </div>
+        </div>
+        <div class="messenger-body" id="messengerBody">
+          <ul class="message-list" id="messageList">
+            <!-- Messages will be populated by JS -->
+          </ul>
+        </div>
+        <div class="message-input">
+          <input type="text" id="messageInput" placeholder="Type a message...">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  
   <div class="container">
     <div class="sidebar">
       <h3>MY ACCOUNT</h3>
@@ -127,8 +159,9 @@
         <div class="image-box">
           <div class="profile-image-container">
             <div class="profile-image">
-              <img src="../imahe/profile-pic.png" alt="Profile Picture" class="profile-pic">
-              <button type="button" class="upload-btn">SELECT IMAGE</button>
+              <img src="../imahe/profile(blue).png" alt="Profile Picture" class="profile-pic" id="profilePic">
+              <input type="file" id="imageUpload" accept=".jpg,.png" style="display: none;">
+              <button type="button" class="upload-btn" onclick="document.getElementById('imageUpload').click()">SELECT IMAGE</button>
               <p class="center">File size maximum 1MB, File extension .JPG, .PNG</p>
             </div>
           </div>
@@ -155,5 +188,6 @@
 
   <script src="../JS/logout.js"></script>
   <script src="../JS/profile.js"></script>
+  <script src="../JS/message.js"></script>
 </body>
 </html>
