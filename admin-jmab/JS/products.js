@@ -20,8 +20,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Product Form Elements
     const form = document.getElementById('createProductForm');
     const categorySelect = document.getElementById('category');
-    const sizeField = document.getElementById('sizeField');
-    const voltageField = document.getElementById('voltageField');
     const productFormContainer = document.getElementById('productFormContainer');
     const addProductButton = document.getElementById('addProductButton');
     const cancelButton = document.getElementById('cancelButton');
@@ -29,10 +27,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Variants elements
     const variantsContainer = document.getElementById('variantsContainer');
     const addVariantButton = document.getElementById('addVariantButton');
+    const variantSelectorContainer = document.createElement('div');
+    variantSelectorContainer.id = 'variant-selector-container';
+    
+    // Add a label for the variant selector
+    const variantLabel = document.createElement('label');
+    variantLabel.setAttribute('for', 'variant-select');
+    variantLabel.textContent = 'Variants';
+    variantLabel.style.display = 'block'; // Ensure it’s on its own line
+    variantLabel.style.fontWeight = 'bold';
+    variantLabel.style.marginBottom = '5px';
+    
+    const variantSelect = document.createElement('select');
+    variantSelect.id = 'variant-select';
+    
+    variantSelectorContainer.appendChild(variantLabel); // Add label before the select
+    variantSelectorContainer.appendChild(variantSelect);
+    variantsContainer.before(variantSelectorContainer); // Place selector above variants
 
     let isEditing = false;
     let currentProductId = null;
-    let variants = [];
 
     // Show form smoothly
     addProductButton.addEventListener('click', function() {
@@ -49,16 +63,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
         resetForm();
     });
 
-    // Show/hide fields based on category
-    categorySelect.addEventListener('change', function() {
-        sizeField.style.display = this.value === 'Tires' ? 'block' : 'none';
-        voltageField.style.display = this.value === 'Batteries' ? 'block' : 'none';
-    });
-
-    // Add variant functionality
+    // Add variant button functionality
     if (addVariantButton) {
         addVariantButton.addEventListener('click', function() {
             addVariantRow();
+            updateVariantSelector();
+            variantSelect.value = variantSelect.options[variantSelect.options.length - 1].value; // Select the new variant
+            displaySelectedVariant();
         });
     }
 
@@ -67,10 +78,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const variantRow = document.createElement('div');
         variantRow.className = 'variant-row';
         
-        // Generate a unique ID for this variant
         const variantId = variantData ? variantData.variant_id : 'new_' + Date.now();
+        variantRow.dataset.variantId = variantId;
         
-        variantRow.innerHTML = `
+        let variantFields = `
             <input type="hidden" name="variant_id" value="${variantId}">
             <div class="form-group">
                 <label>Size:</label>
@@ -87,15 +98,61 @@ document.addEventListener('DOMContentLoaded', (event) => {
             <button type="button" class="remove-variant-btn">Remove</button>
         `;
         
-        // Add event listener for the remove button
+        variantRow.innerHTML = variantFields;
+        variantsContainer.appendChild(variantRow);
+        
         const removeButton = variantRow.querySelector('.remove-variant-btn');
         removeButton.addEventListener('click', function() {
             variantRow.remove();
+            updateVariantSelector();
+            if (variantSelect.options.length > 0) {
+                variantSelect.value = variantSelect.options[0].value;
+            }
+            displaySelectedVariant();
         });
-        
-        // Add the row to the variants container
-        variantsContainer.appendChild(variantRow);
     }
+
+    // Function to update the variant selector dropdown
+    function updateVariantSelector() {
+        const variantRows = variantsContainer.querySelectorAll('.variant-row');
+        variantSelect.innerHTML = ''; // Clear existing options
+        
+        if (variantRows.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No variants available';
+            variantSelect.appendChild(option);
+            variantSelect.disabled = true;
+        } else {
+            variantRows.forEach((row, index) => {
+                const variantId = row.dataset.variantId;
+                const sizeInput = row.querySelector('input[name="variant_size"]');
+                const size = sizeInput ? sizeInput.value : `Variant ${index + 1}`;
+                const option = document.createElement('option');
+                option.value = variantId;
+                option.textContent = size || `Variant ${index + 1}`;
+                variantSelect.appendChild(option);
+            });
+            variantSelect.disabled = false;
+        }
+    }
+
+    // Function to display the selected variant
+    function displaySelectedVariant() {
+        const variantRows = variantsContainer.querySelectorAll('.variant-row');
+        const selectedVariantId = variantSelect.value;
+
+        variantRows.forEach(row => {
+            if (row.dataset.variantId === selectedVariantId) {
+                row.style.display = 'block';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Event listener for variant selector
+    variantSelect.addEventListener('change', displaySelectedVariant);
 
     // Function to collect variant data from the form
     function collectVariantsData() {
@@ -125,10 +182,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
         const formData = new FormData(form);
         const productData = Object.fromEntries(formData.entries());
-        
-        // Remove fields not needed based on category
-        if (productData.category !== 'Tires') delete productData.size;
-        if (productData.category !== 'Batteries') delete productData.voltage;
         
         // Collect variants data
         productData.variants = collectVariantsData();
@@ -220,23 +273,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     productElement.classList.add('item-container');
                     productElement.dataset.productId = productId;
     
-                    // Truncate the description if it's too long
                     const maxDescriptionLength = 50;
                     const truncatedDescription = product.description && product.description.length > maxDescriptionLength
                         ? product.description.substring(0, maxDescriptionLength) + '...'
                         : product.description || 'No description available';
     
-                    // Check if product is out of stock by checking variants
                     let isOutOfStock = true;
                     if (product.variants && product.variants.length > 0) {
-                        // Product is in stock if any variant has stock > 0
                         isOutOfStock = !product.variants.some(variant => variant.stock > 0);
                     } else {
-                        // For backward compatibility with products without variants
                         isOutOfStock = product.stock === 0;
                     }
     
-                    // Find price range for display
                     let priceDisplay = '';
                     if (product.variants && product.variants.length > 0) {
                         const prices = product.variants.map(variant => parseFloat(variant.price));
@@ -252,7 +300,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         priceDisplay = `₱${product.price}`;
                     }
     
-                    // Add out-of-stock overlay if stock is 0
                     const outOfStockOverlay = isOutOfStock
                         ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>`
                         : '';
@@ -264,8 +311,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         <p>${truncatedDescription}</p>
                         <p>Brand: ${product.brand || 'Not specified'}</p>
                         <p>Variants: ${product.variants ? product.variants.length : 0}</p>
-                        ${product.size ? `<p>Size: ${product.size}</p>` : ''}
-                        ${product.voltage ? `<p>Voltage: ${product.voltage}</p>` : ''}
                         <p>Price: ${priceDisplay}</p>
                         <div class="product-actions">
                             <button class="edit-product-btn" data-id="${productId}">Edit</button>
@@ -273,7 +318,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         </div>
                     `;
     
-                    // Add a class for out-of-stock products
                     if (isOutOfStock) {
                         productElement.classList.add('out-of-stock');
                     }
@@ -287,12 +331,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
                     }
                 });
     
-                // Add event listeners to the edit and delete buttons
                 document.querySelectorAll('.edit-product-btn').forEach(button => {
                     button.addEventListener('click', function() {
                         const productId = this.getAttribute('data-id');
                         console.log('Edit Product ID:', productId);
-                
                         if (!productId) {
                             console.error('Edit button missing product ID');
                             return;
@@ -360,37 +402,29 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const data = await response.json();
             console.log('API Response:', data);
         
-            // Check for 'products' instead of 'product'
             if (data.success && data.products) {
-                const product = data.products; // Adjust to use 'products' key
+                const product = data.products; 
         
-                // Set basic product details
                 document.getElementById('name').value = product.name || '';
                 document.getElementById('description').value = product.description || '';
                 document.getElementById('category').value = product.category || '';
                 document.getElementById('image_url').value = product.image_url || '';
                 document.getElementById('brand').value = product.brand || '';
         
-                // Trigger category change to show/hide size and voltage fields
-                categorySelect.dispatchEvent(new Event('change'));
-        
-                // Set size and voltage if applicable
-                if (product.size) document.getElementById('size').value = product.size;
-                if (product.voltage) document.getElementById('voltage').value = product.voltage;
-                
-                // Clear existing variants
                 variantsContainer.innerHTML = '';
                 
-                // Add existing variants
                 if (product.variants && Array.isArray(product.variants)) {
                     product.variants.forEach(variant => {
                         addVariantRow(variant);
                     });
                 }
-                // If no variants, add an empty one
                 if (!product.variants || product.variants.length === 0) {
                     addVariantRow();
                 }
+        
+                updateVariantSelector();
+                variantSelect.value = variantSelect.options[0].value;
+                displaySelectedVariant();
         
                 isEditing = true;
                 currentProductId = productId;
@@ -460,20 +494,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
         isEditing = false; 
         currentProductId = null;
         
-        // Clear variants
         variantsContainer.innerHTML = '';
-        // Add one empty variant row
         addVariantRow();
+        updateVariantSelector();
+        variantSelect.value = variantSelect.options[0].value;
+        displaySelectedVariant();
     }
 
-    // UPDATED: Product search functionality with respect to the current category filter
+    // Product search functionality with respect to the current category filter
     document.getElementById('productSearch').addEventListener('input', function() {
         let filter = this.value.toLowerCase().trim();
         
-        // Determine which sections are currently visible (based on category selection)
         let visibleSections = [];
         
-        // Check which sections are displayed
         if (document.querySelector('.tire-section').style.display !== 'none') {
             visibleSections.push('.tire-section');
         }
@@ -489,7 +522,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         
         let anyResultsFound = false;
 
-        // Apply search filter only to visible sections
         visibleSections.forEach(sectionSelector => {
             const section = document.querySelector(sectionSelector);
             const products = section.querySelectorAll('.item-container');
@@ -507,18 +539,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 const brand = brandElement.textContent.toLowerCase();
 
                 if (name.includes(filter) || description.includes(filter) || brand.includes(filter)) {
-                    product.style.display = 'flex'; // Show matching products
+                    product.style.display = 'flex';
                     product.style.opacity = '1';
                     product.style.transition = 'opacity 0.2s ease-in-out';
                     sectionHasResults = true;
                     anyResultsFound = true;
                 } else {
-                    product.style.display = 'none'; // Hide non-matching products
+                    product.style.display = 'none';
                     product.style.opacity = '0';
                 }
             });
 
-            // If no products match in this section, optionally hide the section title too
             const titleSelector = sectionSelector.replace('section', 'title');
             const title = document.querySelector(titleSelector);
             
@@ -527,7 +558,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
         });
         
-        // Optionally add a "no results found" message
         let noResultsMessage = document.getElementById('no-results-message');
         
         if (!anyResultsFound && filter.length > 0) {
@@ -547,16 +577,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     });
 
-    // UPDATED: Filter function for category selection that respects search
+    // Filter function for category selection that respects search
     function filterProducts(category) {
         const sections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
         const titles = document.querySelectorAll('.tire-title, .Battery-title, .Lubricant-title, .Oil-title');
 
-        // Hide all sections initially
         sections.forEach(section => section.style.display = 'none');
         titles.forEach(title => title.style.display = 'none');
 
-        // Remove any existing no results message
         const noResultsMessage = document.getElementById('no-results-message');
         if (noResultsMessage) {
             noResultsMessage.style.display = 'none';
@@ -592,10 +620,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 console.log(`Unknown category: ${category}`);
         }
         
-        // Re-apply any current search filter after changing category
         const searchInput = document.getElementById('productSearch');
         if (searchInput && searchInput.value.trim() !== '') {
-            // Trigger the input event to re-filter with current search term
             searchInput.dispatchEvent(new Event('input'));
         }
     }

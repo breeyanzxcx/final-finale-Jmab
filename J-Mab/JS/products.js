@@ -178,7 +178,6 @@ async function loadProducts(selectedCategory = "tires") {
         // Check if product is out of stock by checking variants
         let isOutOfStock = true;
         if (product.variants && product.variants.length > 0) {
-          // Product is in stock if any variant has stock > 0
           isOutOfStock = !product.variants.some(variant => variant.stock > 0);
         }
         
@@ -194,14 +193,16 @@ async function loadProducts(selectedCategory = "tires") {
           lowestPrice = Math.min(...prices).toFixed(2);
         }
 
-        // Create product card HTML <div class="rating">  ${generateRatingStars(product.average_rating || 0)}  <span class="rating-value">(${product.average_rating || 0})</span>       </div>
-           
+        // Create product card HTML
         productElement.innerHTML = `
           <img src="${product.image_url}" alt="${product.name}">
           <h4>${product.name}</h4>
           <p class="description">${truncateText(product.description, 100)}</p>
           <p class="price">₱${lowestPrice}</p>
-          
+          <div class="rating">
+            ${generateRatingStars(product.average_rating || 0)}
+            <span class="rating-value">(${product.average_rating || 0})</span>
+          </div>
           ${isOutOfStock ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>` : ""}
         `;
 

@@ -66,6 +66,7 @@ async function fetchOrders() {
         }
 
         const data = await response.json();
+        console.log("API Response:", data); // Log the API response
         if (data.success) {
             displayOrders(data.orders);
         } else {
@@ -97,7 +98,7 @@ function displayOrders(orders) {
                 total_price: parseFloat(order.total_price) || 0,
                 payment_method: order.payment_method,
                 status: order.status,
-                product_details: order.product_details,
+                product_details: order.product_details || "N/A", // Handle null product_details
                 order_id: order.order_id
             };
         }
@@ -130,12 +131,16 @@ function displayOrders(orders) {
                 break;
         }
 
+        // Handle null or undefined product_details
+        const productDetails = order.product_details || "N/A";
+        const formattedProductDetails = productDetails.replace(/, /g, "<br>");
+
         row.innerHTML = `
             <td>${reference_number}</td>
             <td>${order.first_name} ${order.last_name}</td>
             <td>₱${order.total_price.toFixed(2)}</td>
             <td>${order.payment_method.toUpperCase()}</td>
-            <td>${order.product_details.replace(/, /g, "<br>")}</td>
+            <td>${formattedProductDetails}</td>
             <td><span class="status-label ${statusClass}">${order.status}</span></td>
             <td>
                 ${getStatusActions(order.status, order.order_id)}
