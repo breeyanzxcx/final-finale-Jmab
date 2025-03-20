@@ -249,11 +249,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 const errorText = await response.text();
                 console.error('Failed to update address:', errorText);
-                alert('Failed to update address: ' + errorText);
+                showNotificationPopup('Failed to update address: ' + errorText);
             }
         } catch (error) {
             console.error('Error updating address:', error);
-            alert('Error updating address: ' + error.message);
+            showNotificationPopup('Error updating address: ' + error.message);
         }
     });
 
@@ -298,15 +298,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     addAddressModal.style.display = 'block';
                 } else {
                     console.error(`Address with ID ${addressId} not found`);
-                    alert(`Address with ID ${addressId} not found`);
+                    showNotificationPopup(`Address with ID ${addressId} not found`);
                 }
             } else {
                 console.error('Invalid response format:', data);
-                alert('Failed to load address data');
+                showNotificationPopup('Failed to load address data');
             }
         } catch (error) {
             console.error('Error fetching address for edit:', error);
-            alert('Error loading address: ' + error.message);
+            showNotificationPopup('Error loading address: ' + error.message);
         }
     }
 
@@ -343,11 +343,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 await fetchAddresses();
             } else {
                 console.error('Failed to delete address:', responseText);
-                alert('Failed to delete address: ' + responseText);
+                showNotificationPopup('Failed to delete address: ' + responseText);
             }
         } catch (error) {
             console.error('Error deleting address:', error);
-            alert('Error deleting address: ' + error.message);
+            showNotificationPopup('Error deleting address: ' + error.message);
         }
     }
 
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
             deleteAddress(currentAddressId);
         } else {
             console.error('No address ID selected for deletion');
-            alert('No address selected to delete');
+            showNotificationPopup('No address selected to delete');
         }
     });
 
@@ -373,4 +373,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial fetch of addresses
     fetchAddresses();
+
+    // Notification popup function
+    function showNotificationPopup(message, callback = null) {
+        const popup = document.getElementById("notificationPopup");
+        const messageElement = document.getElementById("notificationMessage");
+        const okButton = document.getElementById("notificationOkBtn");
+
+        messageElement.textContent = message;
+        popup.style.display = "flex";
+
+        okButton.onclick = function() {
+            popup.style.display = "none";
+            if (callback) callback();
+        };
+    }
 });
