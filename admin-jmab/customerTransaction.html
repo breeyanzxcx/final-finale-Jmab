@@ -308,12 +308,12 @@
         
         #transaction-view li {
             padding: 12px;
-            background: #ffe5e5;
-            color: #d32f2f;
+            background: #70c64b;
+            color: white;
             margin-bottom: 8px;
             border-radius: 6px;
             font-weight: 500;
-            border-left: 4px solid #d32f2f;
+            border-left: 4px solid #2733da;
         }
         
         .transaction-header {
@@ -326,23 +326,31 @@
             text-align: center;
         }
         
-        #close-view-btn {
-            position:relative;
-            bottom: 20px;
-            background: var(--danger);
+        #return-to-transactions-btn {
+            margin-top: 20px;
+            border-radius: 5px;
+            padding: 10px 20px;
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
             cursor: pointer;
-            transition: var(--transition);
-            font-size: 15px;
-            font-weight: 500;
         }
 
-        #close-view-btn:hover {
-            background: var(--danger-hover);
-            transform: translateY(-3px);
+        #return-to-transactions-btn:hover {
+            background-color: #086cd7;
+        }
+        #close-transactions-btn{
+            margin-top: 20px;
+            border-radius: 5px;
+            padding: 10px 20px;
+            background-color: #ca0d0d;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        #close-transactions-btn:hover{
+            background-color: #ab261c;
         }
 
         .view-order-details-btn {
@@ -368,12 +376,9 @@
             align-items: center; 
             justify-content: space-between; 
             padding: 12px;
-            background: #ffe5e5;
-            color: #d32f2f;
             margin-bottom: 8px;
             border-radius: 6px;
             font-weight: 500;
-            border-left: 4px solid #d32f2f;
         }
     </style>
 </head>
@@ -423,7 +428,6 @@
 
         <div id="transaction-view">
             <div id="transaction-view-content"></div>
-            <button id="close-view-btn">Close</button>
         </div>
     </main>
     <script src="JS/customerTransaction.js"></script>

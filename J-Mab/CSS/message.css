@@ -138,3 +138,16 @@
   .message-input button:hover {
     background: #0147A1;
   }
+
+  .messenger-header {
+    display: flex;
+    align-items: center; 
+  }
+
+  #adminSelector:hover {
+    background: #0147A1; 
+  }
+
+  .admin-item:hover {
+    background-color: #0147A1; 
+  }

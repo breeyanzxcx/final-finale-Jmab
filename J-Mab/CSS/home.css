@@ -35,7 +35,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   padding: 15px 30px;
   background-color: #02254b;
   color: white;
@@ -527,6 +526,7 @@ body {
   padding: 10px 15px;
   border-bottom: 1px solid #eee;
   font-size: 13px;
+  color: black;
 }
 
 .notification-dropdown ul li:hover {
@@ -555,7 +555,7 @@ body {
 
 .notification-dropdown ul li p {
   margin: 0 0 4px 0;
-  color: #666;
+  color: black;
 }
 
 .notification-dropdown ul li small {

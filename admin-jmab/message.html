@@ -316,6 +316,37 @@
             color: #888;
             font-style: italic;
         }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 16px;
+            position: fixed;
+            z-index: 10000;
+            left: 50%;
+            bottom: 30px;
+            font-size: 16px;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
     </style>
 </head>
 <body>
@@ -340,27 +371,20 @@
 
     <main>     
         <div class="container">
-            <div class="user-info" id="user-info">
-                <!-- User info will be populated here -->
-            </div>
-            
+            <div class="user-info" id="user-info"></div>
             <div class="messaging-section">
                 <div class="users-list" id="users-list">
                     <div class="user-item" data-id="all">All Messages</div>
-                    <!-- Users will be listed here -->
                 </div>
-                
                 <div class="conversation">
                     <div class="message-header" id="conversation-header">
                         Select a user to start messaging
                     </div>
-                    
                     <div class="messages-container" id="messages-container">
                         <div class="no-user-selected">
                             <p>Select a user to view conversation</p>
                         </div>
                     </div>
-                    
                     <div class="message-input">
                         <input type="text" id="message-input" placeholder="Type a message...">
                         <button id="send-btn">Send</button>
@@ -371,266 +395,474 @@
     </main>
 
     <script>
-        let currentUser;
+        // Configuration
+        const API_BASE_URL = "http://localhost/jmab/final-jmab/api";
+        const WS_URL = "http://192.168.100.74:8080";
+    
+        // Globals
+        let currentUser = null;
         let selectedUserId = null;
         let allUsers = [];
-        let token;
-        let ws; // WebSocket connection
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is logged in and is admin
-            token = localStorage.getItem('authToken');
-            currentUser = JSON.parse(localStorage.getItem('user'));
-            
-            if (!token || !currentUser) {
-                window.location.href = 'sign-in.html';
-                return;
-            }
-            
-            if (currentUser.roles !== 'admin') {
-                window.location.href = 'message.html';
-                return;
-            }
-            
-            // Display user info
-            displayUserInfo();
-            
-            // Fetch all users
-            fetchUsers();
-            
-            // Initialize WebSocket connection
-            setupWebSocket();
-            
-            // Add event listeners
-            document.getElementById('logout-btn').addEventListener('click', logout);
-            document.getElementById('send-btn').addEventListener('click', sendMessage);
-            document.getElementById('message-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') sendMessage();
-            });
-        });
+        let authToken = null;
+        let webSocket = null;
+        let isConnected = false;
+        let isConnecting = false;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        let messagesList = [];
+        let lastMessageId = 0;
+        let pendingMessages = new Map();
         
-        function setupWebSocket() {
-            ws = new WebSocket('ws://localhost:8080');
-
-            ws.onopen = function() {
-                console.log('WebSocket connected');
-                ws.send(JSON.stringify({ type: 'auth', token: token }));
+    
+        // API Service (unchanged)
+        const apiService = {
+            getUsers: async function() {
+                const response = await fetch(`${API_BASE_URL}/users`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.status === 401) throw new Error("Unauthorized");
+                return await response.json();
+            },
+            sendMessage: async function(messageRequest) {
+                const response = await fetch(`${API_BASE_URL}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(messageRequest)
+                });
+                if (response.status === 401) throw new Error("Unauthorized");
+                return await response.json();
+            },
+            getConversation: async function(senderId, receiverId) {
+                const response = await fetch(`${API_BASE_URL}/messages/conversation/${senderId}/${receiverId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.status === 401) throw new Error("Unauthorized");
+                return await response.json();
+            },
+            getAllMessages: async function() {
+                const response = await fetch(`${API_BASE_URL}/messages`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.status === 401) throw new Error("Unauthorized");
+                return await response.json();
+            }
+        };
+    
+        // WebSocket Management (unchanged)
+        function connectWebSocket() {
+            if (isConnected || isConnecting || !authToken) return;
+            isConnecting = true;
+            webSocket = new WebSocket(WS_URL);
+    
+            webSocket.onopen = function() {
+                isConnected = true;
+                isConnecting = false;
+                reconnectAttempts = 0;
+                console.log(`WebSocket connected for admin ${currentUser.id}`);
+                webSocket.send(JSON.stringify({
+                    userId: currentUser.id,
+                    token: authToken
+                }));
             };
-
-            ws.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                if (data.type === 'message') {
-                    if (selectedUserId === 'all') {
-                        fetchAllMessages();
-                    } else if (data.sender_id == selectedUserId || data.receiver_id == selectedUserId) {
-                        fetchMessages(selectedUserId);
+    
+            webSocket.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === "auth") {
+                        if (!data.success) {
+                            console.error("WebSocket auth failed");
+                            closeWebSocket();
+                        }
+                        return;
                     }
+                    console.log("WebSocket received:", data);
+                    
+                    // Case 1: This is our own message echoed back with tempId
+                    if (data.tempId && pendingMessages.has(data.tempId)) {
+                        // Just update our pending message with any server data, but don't display again
+                        const tempMessage = pendingMessages.get(data.tempId);
+                        if (tempMessage) {
+                            Object.assign(tempMessage, data);
+                        }
+                        return; // Skip displaying this message
+                    }
+                    
+                    // Case 2: This is a server-processed message with an ID
+                    if (data.id) {
+                        // Check if this might be a server confirmation of a pending message
+                        // by comparing sender_id, receiver_id, message content and approximate time
+                        for (let [tempId, pendingMsg] of pendingMessages.entries()) {
+                            if (pendingMsg.sender_id == data.sender_id && 
+                                pendingMsg.receiver_id == data.receiver_id && 
+                                pendingMsg.message == data.message) {
+                                
+                                // This appears to be our message that got confirmed by the server
+                                const tempElement = document.querySelector(`[data-message-id="${tempId}"]`);
+                                if (tempElement) {
+                                    // Update the existing element with the server ID
+                                    tempElement.dataset.messageId = data.id;
+                                    pendingMessages.delete(tempId);
+                                    return; // Skip displaying this message as we already have it
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Case 3: This is a genuinely new message from someone else
+                    if ((selectedUserId === 'all' || 
+                            (data.sender_id == selectedUserId && data.receiver_id == currentUser.id) || 
+                            (data.sender_id == currentUser.id && data.receiver_id == selectedUserId)) &&
+                            !document.querySelector(`[data-message-id="${data.id}"]`)) {
+                        appendMessage(data, selectedUserId === 'all');
+                    }
+                } catch (e) {
+                    console.error("Error parsing WebSocket message:", e);
                 }
             };
-
-            ws.onclose = function() {
-                console.log('WebSocket disconnected');
-                setTimeout(setupWebSocket, 2000);
+    
+            webSocket.onerror = function(error) {
+                console.error("WebSocket error:", error);
+                isConnected = false;
+                isConnecting = false;
+                scheduleReconnect();
             };
-
-            ws.onerror = function(error) {
-                console.error('WebSocket error:', error);
+    
+            webSocket.onclose = function(event) {
+                console.log("WebSocket closed:", event.reason);
+                isConnected = false;
+                isConnecting = false;
+                if (event.code !== 1000) scheduleReconnect();
             };
         }
-        
+    
+        function scheduleReconnect() {
+            if (reconnectAttempts >= maxReconnectAttempts) {
+                console.error("Max reconnect attempts reached");
+                return;
+            }
+            const delay = 5000 * (reconnectAttempts + 1);
+            reconnectAttempts++;
+            setTimeout(connectWebSocket, delay);
+        }
+    
+        function closeWebSocket() {
+            if (webSocket) {
+                webSocket.close(1000, "Normal closure");
+                webSocket = null;
+            }
+            isConnected = false;
+            isConnecting = false;
+            reconnectAttempts = 0;
+        }
+    
+        // Initialization
+        document.addEventListener('DOMContentLoaded', initialize);
+    
+        async function initialize() {
+            authToken = localStorage.getItem('authToken');
+            currentUser = JSON.parse(localStorage.getItem('user'));
+    
+            if (!authToken || !currentUser || currentUser.roles !== 'admin') {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+                return;
+            }
+    
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('send-btn').addEventListener('click', sendMessage);
+            document.getElementById('message-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+    
+            displayUserInfo();
+            await fetchUsers();
+            connectWebSocket();
+        }
+    
         function displayUserInfo() {
-            const userInfoElement = document.getElementById('user-info');
-            userInfoElement.innerHTML = `
+            document.getElementById('user-info').innerHTML = `
                 <h2>Welcome, ${currentUser.first_name} ${currentUser.last_name}</h2>
                 <p>Email: ${currentUser.email}</p>
                 <p>Role: ${currentUser.roles}</p>
             `;
         }
-        
-        function fetchUsers() {
-            fetch('http://localhost/jmab/final-jmab/api/users', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(response => response.json())
-            .then(data => {
+    
+        async function fetchUsers() {
+            try {
+                const data = await apiService.getUsers();
                 if (data.success) {
-                    allUsers = data.users;
-                    displayUsers(data.users);
+                    allUsers = data.users.filter(u => u.id !== currentUser.id);
+                    displayUsers(allUsers);
                 } else {
-                    console.error('Failed to fetch users:', data.errors);
+                    showToast("Failed to load users");
                 }
-            })
-            .catch(error => console.error('Error:', error));
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                if (error.message === "Unauthorized") {
+                    handleUnauthorized();
+                } else {
+                    showToast("Error loading users");
+                }
+            }
         }
-        
+    
         function displayUsers(users) {
-            const usersListElement = document.getElementById('users-list');
-            let usersHtml = '<div class="user-item active" data-id="all">All Messages</div>';
+            const usersList = document.getElementById('users-list');
+            let html = '<div class="user-item active" data-id="all">All Messages</div>';
             
             users.forEach(user => {
-                if (user.id !== currentUser.id) {
-                    usersHtml += `
-                        <div class="user-item" data-id="${user.id}">
-                            ${user.first_name} ${user.last_name} (${user.roles})
-                        </div>
-                    `;
-                }
+                html += `
+                    <div class="user-item" data-id="${user.id}">
+                        ${user.first_name} ${user.last_name} (${user.roles})
+                    </div>
+                `;
             });
             
-            usersListElement.innerHTML = usersHtml;
-            
+            usersList.innerHTML = html;
+    
             document.querySelectorAll('.user-item').forEach(item => {
                 item.addEventListener('click', function() {
                     document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
                     
                     selectedUserId = this.getAttribute('data-id');
+                    document.getElementById('message-input').disabled = selectedUserId === 'all';
                     
                     if (selectedUserId === 'all') {
                         document.getElementById('conversation-header').textContent = 'All Messages';
                         fetchAllMessages();
                     } else {
                         const user = allUsers.find(u => u.id == selectedUserId);
-                        if (user) {
-                            document.getElementById('conversation-header').textContent = `${user.first_name} ${user.last_name}`;
-                        }
-                        fetchMessages(selectedUserId);
+                        document.getElementById('conversation-header').textContent = 
+                            user ? `${user.first_name} ${user.last_name}` : 'Conversation';
+                        fetchConversation(currentUser.id, selectedUserId);
                     }
                 });
             });
         }
-        
-        function fetchAllMessages() {
-            fetch('http://localhost/jmab/final-jmab/api/messages', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) displayAllMessages(data.messages);
-                else console.error('Failed to fetch messages:', data.errors);
-            })
-            .catch(error => console.error('Error:', error));
+    
+        async function fetchAllMessages() {
+            try {
+                const data = await apiService.getAllMessages();
+                if (data.success) {
+                    messagesList = data.messages || [];
+                    renderMessages(true);
+                } else {
+                    showToast("Failed to load messages");
+                }
+            } catch (error) {
+                console.error("Error fetching all messages:", error);
+                showToast("Error loading messages");
+            }
         }
-        
-        function fetchMessages(userId) {
-            fetch(`http://localhost/jmab/final-jmab/api/messages/user/${userId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) displayMessages(data.messages);
-                else console.error('Failed to fetch messages:', data.errors);
-            })
-            .catch(error => console.error('Error:', error));
+    
+        async function fetchConversation(senderId, receiverId) {
+            try {
+                const data = await apiService.getConversation(senderId, receiverId);
+                console.log("Conversation data:", data); // Debug log
+                if (data.success) {
+                    messagesList = data.messages || [];
+                    renderMessages(false);
+                } else {
+                    showToast("Failed to load conversation");
+                }
+            } catch (error) {
+                console.error("Error fetching conversation:", error);
+                showToast("Error loading conversation");
+            }
         }
-        
-        function displayAllMessages(messages) {
-            const messagesContainer = document.getElementById('messages-container');
-            if (!messages || messages.length === 0) {
-                messagesContainer.innerHTML = '<div class="no-user-selected"><p>No messages found</p></div>';
+    
+        function renderMessages(isAllMessages) {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = ''; // Clear existing content
+            
+            if (!messagesList || messagesList.length === 0) {
+                container.innerHTML = '<div class="no-user-selected"><p>No messages found</p></div>';
                 return;
             }
+    
+            // Sort messages by timestamp
+            messagesList.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             
-            let messagesHtml = '';
-            messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            messages.forEach(message => {
-                const isSent = parseInt(message.sender_id) === currentUser.id;
-                const sender = allUsers.find(u => u.id == message.sender_id);
-                const receiver = allUsers.find(u => u.id == message.receiver_id);
-                const senderName = sender ? `${sender.first_name} ${sender.last_name}` : `User ${message.sender_id}`;
-                const receiverName = receiver ? `${receiver.first_name} ${receiver.last_name}` : `User ${message.receiver_id}`;
-                const formattedDate = new Date(message.timestamp).toLocaleString();
-                
-                messagesHtml += `
-                    <div class="message ${isSent ? 'sent' : 'received'}">
-                        <div>${message.message}</div>
-                        <div class="message-info">
-                            ${isSent ? 'You' : senderName} to ${isSent ? receiverName : 'You'} | ${formattedDate}
-                        </div>
-                    </div>
-                `;
+            // Render each message
+            messagesList.forEach(message => {
+                const messageDiv = createMessageElement(message, isAllMessages);
+                container.appendChild(messageDiv);
             });
             
-            messagesContainer.innerHTML = messagesHtml;
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
         }
-        
-        function displayMessages(messages) {
-            const messagesContainer = document.getElementById('messages-container');
-            if (!messages || messages.length === 0) {
-                messagesContainer.innerHTML = '<div class="no-user-selected"><p>No messages found</p></div>';
-                return;
+    
+        function createMessageElement(message, isAllMessages) {
+            if (!message) return null;
+            
+            const isSent = parseInt(message.sender_id) === currentUser.id;
+            const timestamp = formatTimestamp(message.timestamp);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageDiv.dataset.messageId = message.id || message.tempId;
+
+            if (isAllMessages) {
+                const sender = allUsers.find(u => u.id == message.sender_id) || { first_name: 'User', last_name: '' };
+                const receiver = allUsers.find(u => u.id == message.receiver_id) || { first_name: 'User', last_name: '' };
+                messageDiv.innerHTML = `
+                    <div>${message.message || ''}</div>
+                    <div class="message-info">
+                        ${isSent ? 'You' : `${sender.first_name} ${sender.last_name}`} to 
+                        ${isSent ? `${receiver.first_name} ${receiver.last_name}` : 'You'} | ${timestamp}
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div>${message.message || ''}</div>
+                    <div class="message-info">${timestamp}</div>
+                `;
             }
-            
-            let messagesHtml = '';
-            messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            messages.forEach(message => {
-                const isSent = parseInt(message.sender_id) === currentUser.id;
-                const formattedDate = new Date(message.timestamp).toLocaleString();
-                
-                messagesHtml += `
-                    <div class="message ${isSent ? 'sent' : 'received'}">
-                        <div>${message.message}</div>
-                        <div class="message-info">${formattedDate}</div>
-                    </div>
-                `;
-            });
-            
-            messagesContainer.innerHTML = messagesHtml;
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            return messageDiv;
         }
-        
-        function sendMessage() {
-            const messageInput = document.getElementById('message-input');
-            const message = messageInput.value.trim();
+    
+        function appendMessage(message, isAllMessages, isNew = true) {
+            if (!message) return;
+
+            const container = document.getElementById('messages-container');
+            const messageId = message.id || message.tempId;
             
-            if (!message || !selectedUserId || selectedUserId === 'all') return;
+            // Check if this message already exists
+            const existingMessage = container.querySelector(`[data-message-id="${messageId}"]`);
+            if (existingMessage) return; // Skip if already exists
             
-            const messageData = {
+            if (isNew && message.id) {
+                messagesList.push(message);
+            }
+
+            const messageDiv = createMessageElement(message, isAllMessages);
+            if (messageDiv) {
+                container.appendChild(messageDiv);
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+    
+        function addLocalMessage(text) {
+            const tempId = `temp-${Date.now()}`; // Unique temporary ID
+            const tempMessage = {
+                tempId: tempId,
                 sender_id: currentUser.id,
                 receiver_id: selectedUserId,
-                message: message
+                message: text,
+                timestamp: new Date().toISOString(),
+                status: "sent",
+                is_read: 0
             };
             
-            fetch('http://localhost/jmab/final-jmab/api/messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(messageData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    messageInput.value = '';
-                    ws.send(JSON.stringify({
-                        type: 'message',
-                        sender_id: currentUser.id,
-                        receiver_id: selectedUserId,
-                        message: message,
-                        timestamp: new Date().toISOString()
-                    }));
-                    fetchMessages(selectedUserId);
-                } else {
-                    console.error('Failed to send message:', data.errors);
-                    alert('Failed to send: ' + data.errors.join(', '));
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error sending message.');
-            });
+            pendingMessages.set(tempId, tempMessage);
+            appendMessage(tempMessage, selectedUserId === 'all');
+            return tempId;
         }
-        
+    
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+
+            if (!message || !selectedUserId || selectedUserId === 'all') {
+                if (selectedUserId === 'all') showToast("Cannot send to all messages");
+                return;
+            }
+
+            const tempId = addLocalMessage(message);
+            input.value = '';
+
+            const messageRequest = {
+                sender_id: currentUser.id,
+                receiver_id: selectedUserId,
+                message: message,
+                tempId: tempId // Include tempId for WebSocket tracking
+            };
+
+            try {
+                const timestamp = new Date().toISOString();
+                if (webSocket && isConnected) {
+                    webSocket.send(JSON.stringify({
+                        ...messageRequest,
+                        timestamp: timestamp,
+                        token: authToken
+                    }));
+                }
+
+                const response = await apiService.sendMessage(messageRequest);
+                if (!response.success) {
+                    showToast("Failed to send message: " + (response.errors?.join(', ') || "Unknown error"));
+                    fetchConversation(currentUser.id, selectedUserId);
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+                fetchConversation(currentUser.id, selectedUserId);
+                showToast("Error sending message: " + error.message);
+            }
+        }
+    
+        function formatTimestamp(timestamp) {
+            try {
+                return new Date(timestamp).toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            } catch (e) {
+                return new Date().toLocaleTimeString([], { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+        }
+    
+        function showToast(message) {
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                document.body.appendChild(toast);
+            }
+            
+            toast.textContent = message;
+            toast.className = 'show';
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+    
+        function handleUnauthorized() {
+            closeWebSocket();
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            showToast("Session expired. Please log in again.");
+            setTimeout(() => {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }, 2000);
+        }
+    
         function logout() {
-            if (ws) ws.close();
+            closeWebSocket();
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             window.location.href = '../J-Mab/HTML/sign-in.php';
         }
+    
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                authToken = localStorage.getItem('authToken');
+                currentUser = JSON.parse(localStorage.getItem('user'));
+                if (!authToken || !currentUser || currentUser.roles !== 'admin') {
+                    handleUnauthorized();
+                } else if (!isConnected) {
+                    connectWebSocket();
+                }
+            }
+        });
+    
+        window.addEventListener('beforeunload', closeWebSocket);
     </script>
 </body>
 </html>
