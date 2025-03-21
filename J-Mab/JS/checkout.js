@@ -6,8 +6,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const authToken = localStorage.getItem("authToken");
 
     if (!userId || !authToken) {
-        alert("Please log in to proceed with checkout.");
-        window.location.href = "../HTML/sign-in.php";
+        showNotificationPopup("Please log in to proceed with checkout.", () => {
+            window.location.href = "../HTML/sign-in.php";
+        });
         return;
     }
 
@@ -105,7 +106,6 @@ async function fetchBuyNowItem(productId, quantity) {
         if (data.success && data.products) {
             const product = data.products.find(p => String(p.product_id) === String(productId));
             if (product) {
-                // Use variant_price if available (assuming product has variants)
                 const price = product.variants && product.variants.length > 0 
                     ? parseFloat(product.variants[0].price) || 0 
                     : parseFloat(product.price) || 0;
@@ -144,7 +144,7 @@ async function fetchSelectedCartItems() {
                 selectedCartIds.includes(item.cart_id.toString())
             ).map(item => ({
                 ...item,
-                price: parseFloat(item.variant_price) || 0 // Use variant_price from cart API
+                price: parseFloat(item.variant_price) || 0
             }));
             
             if (selectedItems.length > 0) {
@@ -167,15 +167,12 @@ function displaySelectedItems(items) {
     container.innerHTML = "";
 
     items.forEach(item => {
-        // Ensure we have a valid price
         let itemPrice = 0;
         if (item.price !== undefined && item.price !== null) {
             itemPrice = parseFloat(item.price);
         } else if (item.variant_price !== undefined && item.variant_price !== null) {
             itemPrice = parseFloat(item.variant_price);
         }
-        
-        // If price is NaN after parsing, default to 0
         if (isNaN(itemPrice)) itemPrice = 0;
 
         const normalizedItem = {
@@ -202,6 +199,7 @@ function displaySelectedItems(items) {
         container.appendChild(itemElement);
     });
 }
+
 function updateOrderSummary(price, quantity) {
     const parsedPrice = parseFloat(price) || 0;
     const parsedQuantity = parseInt(quantity) || 1;
@@ -219,8 +217,6 @@ function updateOrderSummaryFromCart(cartItems) {
         } else if (item.variant_price !== undefined && item.variant_price !== null) {
             itemPrice = parseFloat(item.variant_price);
         }
-        
-        // If price is NaN after parsing, default to 0
         if (isNaN(itemPrice)) itemPrice = 0;
         
         const quantity = parseInt(item.quantity) || 1;
@@ -242,7 +238,7 @@ async function checkout() {
     };
 
     if (!shippingInfo.full_name || !shippingInfo.address_id) {
-        alert("Please fill in all shipping information fields, including selecting an address.");
+        showNotificationPopup("Please fill in all shipping information fields, including selecting an address.");
         return;
     }
 
@@ -259,19 +255,16 @@ async function checkout() {
         };
 
         if (productId) {
-            // "Buy Now" order
             orderData.product_id = parseInt(productId);
             orderData.quantity = quantity;
-            // Assuming variant_id is needed for Buy Now, you'd need to pass it from the product page
-            const sizeSelect = document.getElementById("size"); // Not available in checkout, needs fixing
+            const sizeSelect = document.getElementById("size");
             if (sizeSelect) {
-                orderData.variant_id = sizeSelect.value; // This won't work here, see note below
+                orderData.variant_id = sizeSelect.value;
             }
         } else if (selectedCartIds.length > 0) {
-            // Cart-based order
             orderData.cart_ids = selectedCartIds.map(id => parseInt(id));
         } else {
-            alert("No items selected for checkout.");
+            showNotificationPopup("No items selected for checkout.");
             return;
         }
 
@@ -308,15 +301,17 @@ async function checkout() {
                 if (confirm("You will now be redirected to complete your payment via GCash. Click OK to proceed.")) {
                     window.location.href = result.payment_link;
                 } else {
-                    alert("You can complete your payment later from your account page.");
-                    window.location.href = "account.html";
+                    showNotificationPopup("You can complete your payment later from your account page.", () => {
+                        window.location.href = "account.html";
+                    });
                 }
             } else {
-                alert("Order placed successfully! Redirecting to your cart...");
-                window.location.href = "../HTML/userCart.html";
+                showNotificationPopup("Order placed successfully! Redirecting to your cart...", () => {
+                    window.location.href = "../HTML/userCart.html";
+                });
             }
         } else {
-            alert(result.errors ? result.errors.join(", ") : "Failed to place order.");
+            showNotificationPopup(result.errors ? result.errors.join(", ") : "Failed to place order.");
             if (checkoutButton) {
                 checkoutButton.disabled = false;
                 checkoutButton.textContent = "Place Order";
@@ -324,7 +319,7 @@ async function checkout() {
         }
     } catch (error) {
         console.error("Error during checkout:", error);
-        alert("An error occurred during checkout. Please try again.");
+        showNotificationPopup("An error occurred during checkout. Please try again.");
         const checkoutButton = document.querySelector(".confirm-btn");
         if (checkoutButton) {
             checkoutButton.disabled = false;
@@ -349,7 +344,7 @@ function checkPendingPayments(userId) {
         if (!response.ok) {
             if (response.status === 404) {
                 console.log("No orders found for user (404), likely no orders yet.");
-                return { success: true, orders: [] }; // Fallback for no orders
+                return { success: true, orders: [] };
             }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -377,7 +372,7 @@ function checkPendingPayments(userId) {
 
                     if (!paymentLink) {
                         console.error("No valid payment link found for order:", pendingPayment.order_id);
-                        alert("Unable to redirect to payment page. Please try again or contact support.");
+                        showNotificationPopup("Unable to redirect to payment page. Please try again or contact support.");
                         return;
                     }
 
@@ -394,4 +389,18 @@ function checkPendingPayments(userId) {
     .catch(error => {
         console.error("Error in fetch process:", error);
     });
+}
+
+function showNotificationPopup(message, callback = null) {
+    const popup = document.getElementById("notificationPopup");
+    const messageElement = document.getElementById("notificationMessage");
+    const okButton = document.getElementById("notificationOkBtn");
+
+    messageElement.textContent = message;
+    popup.style.display = "flex";
+
+    okButton.onclick = function() {
+        popup.style.display = "none";
+        if (callback) callback();
+    };
 }

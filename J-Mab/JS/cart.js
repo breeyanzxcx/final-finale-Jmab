@@ -23,12 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const cartItems = document.querySelectorAll(".cart-item");
 
             if (cartItems.length === 0) {
-                alert("Your cart is empty. Please add items before proceeding to checkout.");
+                showNotificationPopup("Your cart is empty. Please add items before proceeding to checkout.");
                 return;
             }
 
             if (selectedItems.length === 0) {
-                alert("Please select at least one item to proceed to checkout.");
+                showNotificationPopup("Please select at least one item to proceed to checkout.");
                 return;
             }
             
@@ -70,8 +70,9 @@ async function fetchUserCart() {
     const authToken = localStorage.getItem("authToken");
 
     if (!userId || !authToken) {
-        alert("Please log in to proceed with checkout.");
-        window.location.href = "../HTML/sign-in.php";
+        showNotificationPopup("Please log in to proceed with checkout.", () => {
+            window.location.href = "../HTML/sign-in.php";
+        });
         return;
     }
 
@@ -122,7 +123,7 @@ function displayCartItems(cartItems) {
         console.log(`Raw price for ${item.product_name}:`, rawPrice);
         const unitPrice = !isNaN(parseFloat(rawPrice)) && rawPrice !== null ? parseFloat(rawPrice) : 0;
         const quantity = item.quantity || 1;
-        const totalPrice = unitPrice * quantity; // Calculate total price for this item
+        const totalPrice = unitPrice * quantity;
         const size = item.variant_size || "N/A";
 
         cartItem.innerHTML = `
@@ -210,7 +211,6 @@ function updateOrderSummary() {
             const itemSubtotal = unitPrice * quantity;
             subtotal += itemSubtotal;
 
-            // Update the displayed total price for this item
             item.querySelector(".item-price").textContent = `₱${itemSubtotal.toFixed(2)}`;
 
             console.log(`Item: ${item.querySelector("h3").textContent}`);
@@ -248,7 +248,7 @@ async function removeFromCart(cartId) {
                 showSuccessMessage("Item removed successfully!");
             } catch (error) {
                 console.error("Error removing item:", error);
-                alert("Failed to remove item. Please try again.");
+                showNotificationPopup("Failed to remove item. Please try again.");
             }
         }
     );
@@ -276,19 +276,19 @@ async function removeSelectedItems() {
         if (allSuccess) {
             showSuccessMessage("Selected items removed successfully!");
         } else {
-            alert("Some items could not be removed. Please try again.");
+            showNotificationPopup("Some items could not be removed. Please try again.");
         }
         fetchUserCart();
     } catch (error) {
         console.error("Error removing selected items:", error);
-        alert("An error occurred while removing the items.");
+        showNotificationPopup("An error occurred while removing the items.");
     }
 }
 
 function showDeleteSelectedConfirmation() {
     const selectedItems = document.querySelectorAll(".item-checkbox:checked");
     if (selectedItems.length === 0) {
-        alert("No items selected for deletion.");
+        showNotificationPopup("No items selected for deletion.");
         return;
     }
 
@@ -351,10 +351,10 @@ async function updateQuantity(cartId, quantity) {
         });
 
         if (!response.ok) throw new Error("Failed to update quantity");
-        fetchUserCart(); // Refreshes the cart display
+        fetchUserCart();
     } catch (error) {
         console.error("Error updating quantity:", error);
-        alert("Quantity exceeds available stock.");
+        showNotificationPopup("Quantity exceeds available stock.");
     }
 }
 
@@ -364,4 +364,18 @@ function showSuccessMessage(message) {
     notification.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 3000);
+}
+
+function showNotificationPopup(message, callback = null) {
+    const popup = document.getElementById("notificationPopup");
+    const messageElement = document.getElementById("notificationMessage");
+    const okButton = document.getElementById("notificationOkBtn");
+
+    messageElement.textContent = message;
+    popup.style.display = "flex";
+
+    okButton.onclick = function() {
+        popup.style.display = "none";
+        if (callback) callback();
+    };
 }
