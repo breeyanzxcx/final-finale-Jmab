@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="../CSS/message.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -129,22 +129,21 @@
     </div>
 </div>
 
-<!-- Rating Modal -->
 <div id="ratingModal" class="popup">
-  <div class="popup-content">
-    <span class="close">&times;</span>
-    <h3>Rate Product</h3>
-    <p>Please rate your experience:</p>
-    <div class="star-rating">
-      <span class="star" data-value="1">&#9733;</span>
-      <span class="star" data-value="2">&#9733;</span>
-      <span class="star" data-value="3">&#9733;</span>
-      <span class="star" data-value="4">&#9733;</span>
-      <span class="star" data-value="5">&#9733;</span>
+    <div class="popup-content">
+      <span class="close">×</span>
+      <h3>Rate Product</h3>
+      <p>Please rate your experience:</p>
+      <div class="star-rating">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
+      <button id="submitRating" class="popup-btn confirm">Submit Rating</button>
     </div>
-    <button id="submitRating" class="popup-btn confirm">Submit Rating</button>
   </div>
-</div>
 
   <script src="../JS/orderDisplay.js"></script>
   <script src="../JS/logout.js"></script>
@@ -165,3 +164,4 @@
     });
   </script>
 </body>
+</html>

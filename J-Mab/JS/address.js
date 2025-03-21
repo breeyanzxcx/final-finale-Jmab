@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         "Sison", "Sual", "Tayug", "Umingan", "Urbiztondo", "Villasis"
     ];
 
-    // Barangays data (your provided list)
+    // Barangays data
     const barangays = {
         "Agno": ["Allabon", "Aloleng", "Bangan-Oda", "Baruan", "Bobo", "Cayawan", "Dangley", "Gayusan", "Macaboboni", "Magsaysay", "Namatucan", "Patar", "Poblacion East", "Poblacion West", "San Juan", "Tupa", "Viga"],
         "Aguilar": ["Balaybuaya", "Bantayan", "Bayaoas", "Baybay", "Bucao", "Calsib", "Laoag", "Manlocboc", "Nipaya", "Pangaridan", "Poblacion", "Pogonsili", "San Jose", "Tampac"],
@@ -162,7 +162,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="address-details">
                     <p><strong>${address.home_address}</strong></p>
                     <p>${address.barangay}, ${address.city}, Pangasinan</p>
-                    ${address.is_default === 1 ? '<span class="default-tag">Default</span>' : ''}
                 </div>
                 <button class="edit-button" data-id="${address.id}">Edit</button>
             `;
@@ -179,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const userId = localStorage.getItem('userId');
         const token = localStorage.getItem('authToken');
         const addressId = document.getElementById('addressId').value;
-        const isDefault = document.getElementById('setDefault').checked ? 1 : 0;
 
         let currentAddresses = [];
         try {
@@ -200,31 +198,17 @@ document.addEventListener('DOMContentLoaded', function() {
             home_address: document.getElementById('street').value,
             barangay: document.getElementById('barangay').value,
             city: document.getElementById('city').value,
-            province: "Pangasinan",
-            is_default: isDefault
+            province: "Pangasinan"
         };
 
         let updatedAddresses;
         if (addressId) {
             addressData.id = addressId;
-            updatedAddresses = currentAddresses.map(addr => {
-                if (addr.id == addressId) {
-                    return addressData;
-                }
-                return {
-                    ...addr,
-                    is_default: isDefault ? 0 : addr.is_default
-                };
-            });
+            updatedAddresses = currentAddresses.map(addr => 
+                addr.id == addressId ? addressData : addr
+            );
         } else {
-            updatedAddresses = [...currentAddresses];
-            if (isDefault) {
-                updatedAddresses = updatedAddresses.map(addr => ({
-                    ...addr,
-                    is_default: 0
-                }));
-            }
-            updatedAddresses.push(addressData);
+            updatedAddresses = [...currentAddresses, addressData];
         }
 
         const payload = {
@@ -245,6 +229,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 addAddressModal.style.display = 'none';
                 await fetchAddresses();
+                const successMessage = addressId ? 
+                    'Address successfully updated!' : 
+                    'Address successfully added!';
+                showNotificationPopup(successMessage);
                 console.log('Address updated successfully');
             } else {
                 const errorText = await response.text();
@@ -277,21 +265,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('street').value = address.home_address || '';
                     document.getElementById('city').value = address.city || '';
 
-                    // Update barangay dropdown based on selected city
                     barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
                     if (barangays[address.city]) {
                         barangays[address.city].forEach(barangay => {
                             const option = document.createElement('option');
                             option.value = barangay;
                             option.textContent = barangay;
-                            if (barangay === address.barangay) {
-                                option.selected = true;
-                            }
+                            if (barangay === address.barangay) option.selected = true;
                             barangaySelect.appendChild(option);
                         });
                     }
 
-                    document.getElementById('setDefault').checked = address.is_default === 1;
                     document.getElementById('addressId').value = address.id;
                     deleteAddressButton.style.display = 'block';
                     currentAddressId = address.id;

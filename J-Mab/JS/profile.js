@@ -78,39 +78,51 @@ document.getElementById('profileForm').addEventListener('submit', function (even
 });
 
 function fetchUserProfile(userId) {
-  const token = localStorage.getItem('authToken');
-  fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
-      method: 'GET',
-      headers: {
-          'Authorization': `Bearer ${token}`
-      }
-  })
-      .then(response => response.json())
-      .then(data => {
-          if (data.success) {
-              localStorage.setItem('user', JSON.stringify(data.user));
-              loadProfileData();
-          } else {
-              console.error('Failed to fetch user profile:', data.message);
-          }
-      })
-      .catch(error => console.error('Error fetching user profile:', error));
+    const token = localStorage.getItem('authToken');
+    fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            loadProfileData(); // Update UI with fetched data
+        } else {
+            console.error('Failed to fetch user profile:', data.message);
+        }
+    })
+    .catch(error => console.error('Error fetching user profile:', error));
 }
 
 function loadProfileData() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) {
-        document.getElementById('firstName').value = user.first_name || '';
-        document.getElementById('lastName').value = user.last_name || '';
-        document.getElementById('email').value = user.email || '';
-        document.getElementById('phone').value = user.phone_number || '';
-        document.getElementById('birthday').value = user.birthday || '';
+        const firstNameEl = document.getElementById('firstName');
+        if (firstNameEl) firstNameEl.value = user.first_name || '';
+
+        const lastNameEl = document.getElementById('lastName');
+        if (lastNameEl) lastNameEl.value = user.last_name || '';
+
+        const emailEl = document.getElementById('email');
+        if (emailEl) emailEl.value = user.email || '';
+
+        const phoneEl = document.getElementById('phone');
+        if (phoneEl) phoneEl.value = user.phone_number || '';
+
+        const birthdayEl = document.getElementById('birthday');
+        if (birthdayEl) birthdayEl.value = user.birthday || '';
+
         if (user.gender) {
-            document.getElementById(user.gender.toLowerCase()).checked = true;
+            const genderEl = document.getElementById(user.gender.toLowerCase());
+            if (genderEl) genderEl.checked = true;
         }
-        // Load profile picture if exists
+
         if (user.profile_picture) {
-            document.getElementById('profilePic').src = user.profile_picture;
+            const profilePicEl = document.getElementById('profilePic');
+            if (profilePicEl) profilePicEl.src = user.profile_picture;
         }
     }
 }
@@ -181,11 +193,11 @@ function updateProfileImage(base64Image) {
 document.addEventListener('DOMContentLoaded', function () {
   const user = JSON.parse(localStorage.getItem('user'));
   if (user && user.id) {
-      fetchUserProfile(user.id);
+      loadProfileData(); // Load from localStorage immediately
+      fetchUserProfile(user.id); // Fetch updated data
   } else {
       console.error('No user data found in localStorage');
   }
-  // Add event listener for image upload
   document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
 });
 

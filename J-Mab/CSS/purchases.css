@@ -701,3 +701,7 @@ a {
 .star:hover {
   color: #FFD700;
 }
+
+.star.hover {
+  color: #FFD700;
+}

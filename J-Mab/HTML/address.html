@@ -47,148 +47,141 @@
     </div>
   </nav>
 
-    <!-- Messenger Popup -->
-    <div class="messenger-wrapper">
-      <div class="messenger-box" id="messengerBox">
-        <div class="messenger-header">
-          <select id="contactSelect">
-            <option value="support">Customer Support</option>
-            <option value="john">John Doe</option>
-            <option value="jane">Jane Smith</option>
-            <option value="mike">Mike Johnson</option>
+  <!-- Messenger Popup -->
+  <div class="messenger-wrapper">
+    <div class="messenger-box" id="messengerBox">
+      <div class="messenger-header">
+        <select id="contactSelect">
+          <option value="support">Customer Support</option>
+          <option value="john">John Doe</option>
+          <option value="jane">Jane Smith</option>
+          <option value="mike">Mike Johnson</option>
+        </select>
+        <div class="messenger-actions">
+          <span onclick="toggleMessenger(event)">×</span>
+        </div>
+      </div>
+      <div class="messenger-body" id="messengerBody">
+        <ul class="message-list" id="messageList">
+          <!-- Messages will be populated by JS -->
+        </ul>
+      </div>
+      <div class="message-input">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <h3>MY ACCOUNT</h3>
+      <a href="../HTML/profile.html">
+        <img src="../imahe/profile(blue).png" alt="Profile Icon" class="sidebar-icon"> PROFILE
+      </a>
+      <a href="../HTML/address.html" class="active">
+        <img src="../imahe/location(blue).png" alt="Address Icon" class="sidebar-icon"> ADDRESSES
+      </a>
+      <h3>MY PURCHASES</h3>
+      <a href="../HTML/purchases.html">
+        <img src="../imahe/bag(blue).png" alt="Items Icon" class="sidebar-icon"> ALL ITEMS
+      </a>
+      <a href="../HTML/toPay.html">
+        <img src="../imahe/dollar(blue).png" alt="Pay Icon" class="sidebar-icon"> TO PAY
+      </a>
+      <a href="../HTML/toShip.html">
+        <img src="../imahe/package(blue).png" alt="Ship Icon" class="sidebar-icon"> TO SHIP
+      </a>
+      <a href="../HTML/toReceive.html">
+        <img src="../imahe/truck(blue).png" alt="Receive Icon" class="sidebar-icon"> TO RECEIVE
+      </a>
+      <a href="../HTML/toRate.html">
+        <img src="../imahe/star(blue).png" alt="Rate Icon" class="sidebar-icon"> TO RATE
+      </a>
+      <a href="../HTML/cancelled.html">
+        <img src="../imahe/canceled(blue).png" alt="Cancel Icon" class="sidebar-icon"> CANCELLED
+      </a>
+    </div>
+
+    <div class="content">
+      <div class="header">
+        <h2>My Addresses</h2>
+        <div>
+          <button class="add-button">+ ADD ADDRESS</button>
+        </div>
+      </div>
+      <div id="addressesContainer"></div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Address Modal -->
+  <div class="modal" id="addAddressModal">
+    <div class="modal-content">
+      <button class="close-button">×</button>
+      <h2 id="modalTitle">ADD ADDRESS</h2>
+      <form id="addressForm">
+        <div class="form-group">
+          <label for="province">PROVINCE</label>
+          <input type="text" name="province" id="province" value="Pangasinan" readonly>
+        </div>
+        <div class="form-group">
+          <label for="city">CITY/MUNICIPALITY</label>
+          <select name="city" id="city" required>
+            <option value="">Select City/Municipality</option>
+            <!-- Options will be populated via JavaScript -->
           </select>
-          <div class="messenger-actions">
-            <span onclick="toggleMessenger(event)">×</span>
-          </div>
         </div>
-        <div class="messenger-body" id="messengerBody">
-          <ul class="message-list" id="messageList">
-            <!-- Messages will be populated by JS -->
-          </ul>
+        <div class="form-group">
+          <label for="barangay">BARANGAY</label>
+          <select name="barangay" id="barangay" required>
+            <option value="">Select Barangay</option>
+            <!-- Options will be populated via JavaScript -->
+          </select>
         </div>
-        <div class="message-input">
-          <input type="text" id="messageInput" placeholder="Type a message...">
-          <button onclick="sendMessage()">Send</button>
+        <div class="form-group">
+          <label for="street">STREET NAME</label>
+          <input type="text" name="street" id="street" required>
         </div>
+        <input type="hidden" name="addressId" id="addressId" value="">
+        <button type="submit" class="save-button">SAVE</button>
+        <button type="button" class="delete-button" id="deleteAddressButton">DELETE</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="confirmation-modal" id="confirmationModal">
+    <div class="confirmation-modal-content">
+      <h2>Are you sure you want to delete this address?</h2>
+      <div class="confirmation-buttons">
+        <button id="confirmDeleteButton">Yes</button>
+        <button id="cancelDeleteButton" class="cancel-button">Cancel</button>
       </div>
     </div>
-  
+  </div>
 
-    <div class="container">
-        <div class="sidebar">
-          <h3>MY ACCOUNT</h3>
-          <a href="../HTML/profile.html">
-            <img src="../imahe/profile(blue).png" alt="Profile Icon" class="sidebar-icon"> PROFILE
-          </a>
-          <a href="../HTML/address.html" class="active">
-            <img src="../imahe/location(blue).png" alt="Address Icon" class="sidebar-icon"> ADDRESSES
-          </a>
-          <h3>MY PURCHASES</h3>
-          <a href="../HTML/purchases.html">
-            <img src="../imahe/bag(blue).png" alt="Items Icon" class="sidebar-icon"> ALL ITEMS
-          </a>
-          <a href="../HTML/toPay.html">
-            <img src="../imahe/dollar(blue).png" alt="Pay Icon" class="sidebar-icon"> TO PAY
-          </a>
-          <a href="../HTML/toShip.html">
-            <img src="../imahe/package(blue).png" alt="Ship Icon" class="sidebar-icon"> TO SHIP
-          </a>
-          <a href="../HTML/toReceive.html">
-            <img src="../imahe/truck(blue).png" alt="Receive Icon" class="sidebar-icon"> TO RECEIVE
-          </a>
-          <a href="../HTML/toRate.html">
-            <img src="../imahe/star(blue).png" alt="Rate Icon" class="sidebar-icon"> TO RATE
-          </a>
-          <a href="../HTML/cancelled.html">
-            <img src="../imahe/canceled(blue).png" alt="Cancel Icon" class="sidebar-icon"> CANCELLED
-          </a>
-        </div>
-
-          <div class="content">
-            <div class="header">
-                <h2>My Addresses</h2>
-                <div>
-                    <button class="add-button">+ ADD ADDRESS</button>
-                </div>
-            </div>
-
-            <div id="addressesContainer">
-            </div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Address Modal -->
-    <div class="modal" id="addAddressModal">
-        <div class="modal-content">
-            <button class="close-button">×</button>
-            <h2 id="modalTitle">ADD ADDRESS</h2>
-            <form id="addressForm">
-                <div class="form-group">
-                    <label for="province">PROVINCE</label>
-                    <input type="text" name="province" id="province" value="Pangasinan" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="city">CITY/MUNICIPALITY</label>
-                    <select name="city" id="city" required>
-                        <option value="">Select City/Municipality</option>
-                        <!-- Options will be populated via JavaScript -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="barangay">BARANGAY</label>
-                    <select name="barangay" id="barangay" required>
-                        <option value="">Select Barangay</option>
-                        <!-- Options will be populated via JavaScript -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="street">STREET NAME</label>
-                    <input type="text" name="street" id="street" required>
-                </div>
-                <div class="form-group checkbox-group">
-                    <label for="setDefault">SET AS DEFAULT ADDRESS</label>
-                    <input type="checkbox" name="setDefault" id="setDefault" class="boxcheck">
-                </div>
-                <input type="hidden" name="addressId" id="addressId" value="">
-                <button type="submit" class="save-button">SAVE</button>
-                <button type="button" class="delete-button" id="deleteAddressButton">DELETE</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div class="confirmation-modal" id="confirmationModal">
-        <div class="confirmation-modal-content">
-            <h2>Are you sure you want to delete this address?</h2>
-            <div class="confirmation-buttons">
-                <button id="confirmDeleteButton">Yes</button>
-                <button id="cancelDeleteButton" class="cancel-button">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Custom Logout Pop-Up -->
-    <div id="logoutPopup" class="popup">
-      <div class="popup-content">
-          <h3>Logout Confirmation</h3>
-          <p>Are you sure you want to log out?</p>
-          <div class="popup-buttons">
-              <button id="confirmLogout" class="popup-btn confirm">Yes</button>
-              <button id="cancelLogout" class="popup-btn cancel">No</button>
-          </div>
+  <!-- Custom Logout Pop-Up -->
+  <div id="logoutPopup" class="popup">
+    <div class="popup-content">
+      <h3>Logout Confirmation</h3>
+      <p>Are you sure you want to log out?</p>
+      <div class="popup-buttons">
+        <button id="confirmLogout" class="popup-btn confirm">Yes</button>
+        <button id="cancelLogout" class="popup-btn cancel">No</button>
       </div>
     </div>
+  </div>
 
-    <!-- Notification Popup -->
-    <div id="notificationPopup" class="notification-popup">
-        <div class="notification-content">
-            <p id="notificationMessage"></p>
-            <button id="notificationOkBtn" class="notification-btn">OK</button>
-        </div>
+  <!-- Notification Popup -->
+  <div id="notificationPopup" class="notification-popup">
+    <div class="notification-content">
+      <p id="notificationMessage"></p>
+      <button id="notificationOkBtn" class="notification-btn">OK</button>
     </div>
-  
-    <script src="../JS/logout.js"></script>
-    <script src="../JS/address.js"></script>
-    <script src="../JS/message.js"></script>
+  </div>
+
+  <script src="../JS/logout.js"></script>
+  <script src="../JS/address.js"></script>
+  <script src="../JS/message.js"></script>
 </body>
 </html>

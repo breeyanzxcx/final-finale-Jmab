@@ -477,21 +477,6 @@ h2 {
   box-shadow: 0 0 5px rgba(2, 37, 75, 0.5);
 }
 
-.checkbox-group {
-  display: flex;
-  align-items: center;
-}
-
-.checkbox-group input {
-  width: auto;
-  margin-right: 10px;
-}
-
-.boxcheck {
-  margin-left: 20px;
-  margin-bottom: 8px;
-}
-
 .save-button {
   background-color: #02254B;
   color: white;
@@ -614,16 +599,6 @@ h2 {
 .address-details strong {
   color: #02254B;
   font-weight: 600;
-}
-
-.default-tag {
-  background-color: #FFD700;
-  color: #02254B;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 12px;
-  font-weight: 500;
-  margin-left: 10px;
 }
 
 .edit-button {

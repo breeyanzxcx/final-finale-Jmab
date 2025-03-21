@@ -1,31 +1,24 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Initialize all rating functionality
     initializeRating();
 });
 
 function initializeRating() {
-    // Set up rate buttons
     const rateButtons = document.querySelectorAll('.rate-btn');
     rateButtons.forEach(button => {
         button.addEventListener('click', function() {
             const orderId = this.getAttribute('data-order-id');
             const userId = this.getAttribute('data-user-id');
             const productId = this.getAttribute('data-product-id');
-            console.log('Opening modal with:', { orderId, userId, productId });
             openRatingModal(orderId, userId, productId);
         });
     });
 
-    // Set up submit button
     const submitButton = document.getElementById('submitRating');
     if (submitButton) {
-        // Remove any existing event listeners (to be safe)
         submitButton.replaceWith(submitButton.cloneNode(true));
-        // Get the fresh reference and add event listener
         document.getElementById('submitRating').addEventListener('click', submitRating);
     }
 
-    // Set up modal close button
     const closeButton = document.querySelector('.close');
     if (closeButton) {
         closeButton.addEventListener('click', function() {
@@ -33,7 +26,6 @@ function initializeRating() {
         });
     }
 
-    // Set up clicking outside modal to close
     window.addEventListener('click', function(event) {
         const modal = document.getElementById('ratingModal');
         if (event.target === modal) {
@@ -41,18 +33,30 @@ function initializeRating() {
         }
     });
 
-    // Set up star rating system
     const stars = document.querySelectorAll('.star');
     stars.forEach(star => {
         star.addEventListener('click', function() {
-            const rating = this.getAttribute('data-value');
+            const rating = parseInt(this.getAttribute('data-value'));
             stars.forEach(s => s.classList.remove('active'));
-            this.classList.add('active');
+            for (let i = 0; i < rating; i++) {
+                stars[i].classList.add('active');
+            }
             document.getElementById('ratingModal').setAttribute('data-rating', rating);
+        });
+
+        star.addEventListener('mouseover', function() {
+            const rating = parseInt(this.getAttribute('data-value'));
+            stars.forEach(s => s.classList.remove('hover'));
+            for (let i = 0; i < rating; i++) {
+                stars[i].classList.add('hover');
+            }
+        });
+
+        star.addEventListener('mouseout', function() {
+            stars.forEach(s => s.classList.remove('hover'));
         });
     });
 
-    // Hide modal initially
     const ratingModal = document.getElementById('ratingModal');
     if (ratingModal) {
         ratingModal.style.display = 'none';
@@ -94,7 +98,6 @@ async function submitRating() {
         return;
     }
 
-    // Disable submit button to prevent double submission
     const submitButton = document.getElementById('submitRating');
     if (submitButton) {
         submitButton.disabled = true;
@@ -132,7 +135,6 @@ async function submitRating() {
         console.error('Error submitting rating:', error);
         alert('An error occurred while submitting your rating.');
     } finally {
-        // Re-enable submit button
         if (submitButton) {
             submitButton.disabled = false;
         }
