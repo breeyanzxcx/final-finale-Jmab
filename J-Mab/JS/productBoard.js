@@ -153,20 +153,7 @@ function handleProductVariants(product) {
             if (parseInt(qtyInput.value) > selectedStock) qtyInput.value = selectedStock;
             
             // Update button states
-            const addToCartButton = document.querySelector('.add-to-cart');
-            const buyNowButton = document.querySelector('.buy-now');
-            
-            if (selectedStock <= 0) {
-                addToCartButton.disabled = true;
-                addToCartButton.textContent = 'OUT OF STOCK';
-                buyNowButton.disabled = true;
-                buyNowButton.textContent = 'OUT OF STOCK';
-            } else {
-                addToCartButton.disabled = false;
-                addToCartButton.textContent = 'Add to Cart';
-                buyNowButton.disabled = false;
-                buyNowButton.textContent = 'Buy Now';
-            }
+            updateButtonStates(selectedStock);
         });
         
         // Set initial price and stock from first available variant
@@ -179,6 +166,9 @@ function handleProductVariants(product) {
             stockInfo.id = 'stock-info';
             stockInfo.textContent = `Stock: ${parseInt(firstInStock.stock) || 0}`;
             document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
+            
+            // Update button states
+            updateButtonStates(parseInt(firstInStock.stock) || 0);
         }
     } else {
         // Handle products without variants
@@ -193,15 +183,30 @@ function handleProductVariants(product) {
         document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
         
         // Update button states
-        const addToCartButton = document.querySelector('.add-to-cart');
-        const buyNowButton = document.querySelector('.buy-now');
-        const stock = parseInt(product.stock) || 0;
-        if (stock <= 0) {
-            addToCartButton.disabled = true;
-            addToCartButton.textContent = 'OUT OF STOCK';
-            buyNowButton.disabled = true;
-            buyNowButton.textContent = 'OUT OF STOCK';
-        }
+        updateButtonStates(parseInt(product.stock) || 0);
+    }
+}
+
+function updateButtonStates(stock) {
+    const addToCartButton = document.querySelector('.add-to-cart');
+    const buyNowButton = document.querySelector('.buy-now');
+    
+    if (stock <= 0) {
+        addToCartButton.disabled = true;
+        addToCartButton.textContent = 'NO STOCK';
+        addToCartButton.classList.add('disabled-button');
+        
+        buyNowButton.disabled = true;
+        buyNowButton.textContent = 'NO STOCK';
+        buyNowButton.classList.add('disabled-button');
+    } else {
+        addToCartButton.disabled = false;
+        addToCartButton.textContent = 'Add to Cart';
+        addToCartButton.classList.remove('disabled-button');
+        
+        buyNowButton.disabled = false;
+        buyNowButton.textContent = 'Buy Now';
+        buyNowButton.classList.remove('disabled-button');
     }
 }
 

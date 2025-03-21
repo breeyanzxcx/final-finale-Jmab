@@ -636,3 +636,10 @@ main {
   font-size: 14px;
   color: #666;
 }
+
+.disabled-button {
+  background-color: #ccc !important;
+    color: #666 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
