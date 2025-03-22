@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile - J-Mab Admin</title>
+    <link rel="icon" type="image/x-icon" href="../images/J-mab Logo.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    * {
+        text-decoration: none;
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    :root {
+        --primary: #02254B;
+        --accent: #15DBa0;
+        --bg-light: #F5F5F5;
+        --bg-dark: #DCD7C9;
+        --text-dark: #333;
+        --text-light: #fff;
+        --danger: #dc3545;
+        --danger-hover: #c82333;
+        --primary-btn: #007bff;
+        --primary-btn-hover: #0056b3;
+        --transition: all 0.3s ease;
+        --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        --sidebar-width: 240px;
+    }
+    
+    body {
+        display: flex;
+        background-color: var(--bg-dark);
+    }
+    
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100%;
+        background: var(--primary);
+        transition: var(--transition);
+        color: var(--text-light); 
+        box-shadow: var(--shadow);
+        z-index: 1000;
+        padding: 0 15px;
+    }
+    
+    #sidebar .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start; 
+        padding: 20px;
+        gap: 5px; 
+    }
+    
+    #sidebar .logo-container img {
+        width: 60px; 
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    #sidebar .admin-text {
+        font-weight: 600;
+        font-size: 30px;
+        color: var(--accent);
+        letter-spacing: 0.5px;
+        white-space: nowrap; 
+    }
+    
+    #sidebar hr {
+        border: none;
+        height: 2px;
+        background: var(--accent);
+        margin: 15px 0;
+        opacity: 0.5;
+        margin-bottom: 50px;
+    }
+    
+    #sidebar .side-menu {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    
+    #sidebar .side-menu li {
+        position: relative;
+        margin: 8px 0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    #sidebar .side-menu li a {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        padding: 14px 20px;
+        color: var(--text-light);
+        transition: var(--transition);
+        border-radius: 10px;
+        font-weight: 500;
+    }
+    
+    #sidebar .side-menu li a i {
+        margin-right: 15px;
+        width: 25px;
+        text-align: center;
+        transition: transform 0.3s ease;
+        font-size: 18px;
+    }
+    
+    #sidebar .side-menu li a:hover,
+    #sidebar .side-menu li a.active {
+        background-color: rgba(21, 219, 160, 0.2);
+        color: var(--accent);
+        transform: translateX(5px);
+    }
+    
+    #sidebar .side-menu li a:hover i,
+    #sidebar .side-menu li a.active i {
+        transform: scale(1.1);
+        color: var(--accent);
+    }
+    
+    #sidebar .logout-container {
+        position: absolute;
+        bottom: 30px;
+        width: calc(100% - 30px);
+    }
+    
+    #sidebar .logout-container a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255,0,0,0.1);
+        color: #ff4d4d;
+        padding: 14px;
+        border-radius: 10px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+    
+    #sidebar .logout-container a i {
+        margin-right: 10px;
+    }
+    
+    #sidebar .logout-container a:hover {
+        background-color: rgba(255,0,0,0.2);
+        transform: translateY(-3px);
+    }
+    
+    main {
+        margin-left: var(--sidebar-width);
+        padding: 30px;
+        min-height: 100vh;
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+        width: calc(100% - var(--sidebar-width));
+        transition: var(--transition);
+    }
+    
+    h1 {
+        margin-bottom: 25px;
+        font-size: 32px;
+        color: var(--primary);
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 10px;
+    }
+    
+    h1:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 4px;
+        width: 60px;
+        background-color: var(--accent);
+        border-radius: 2px;
+    }
+
+    .profile-container {
+        display: flex;
+        gap: 30px;
+    }
+
+    .profile-card {
+        flex: 1;
+        background: white;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-header {
+        background: var(--primary);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        position: relative;
+    }
+
+    .profile-img-container {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 4px solid white;
+        object-fit: cover;
+        background-color: white;
+    }
+
+    .edit-profile-img {
+        position: absolute;
+        right: 10px;
+        bottom: 5px;
+        background: var(--accent);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .edit-profile-img:hover {
+        transform: scale(1.1);
+    }
+
+    .profile-name {
+        margin-top: 15px;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .profile-role {
+        font-size: 14px;
+        opacity: 0.8;
+        margin-top: 5px;
+    }
+
+    .profile-body {
+        padding: 30px;
+    }
+
+    .profile-info-group {
+        margin-bottom: 20px;
+    }
+
+    .profile-info-group h3 {
+        color: var(--primary);
+        margin-bottom: 15px;
+        font-size: 18px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-info-group h3:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        height: 2px;
+        width: 100%;
+        background-color: var(--accent);
+    }
+
+    .profile-row {
+        display: flex;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+
+    .profile-label {
+        width: 120px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .profile-value {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .editable-field {
+        display: flex;
+        align-items: center;
+    }
+
+    .editable-field input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+
+    .security-card {
+        flex: 1;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #033b7a;
+    }
+
+    .btn-accent {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-accent:hover {
+        background: #12b983;
+    }
+
+    .action-btns {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .form-row {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+    .form-input:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+
+    /* Custom File Upload Button */
+    .file-upload {
+        display: none;
+    }
+
+    .file-upload-label {
+        display: inline-block;
+        padding: 10px 20px;
+        background: var(--primary);
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .file-upload-label:hover {
+        background: #033b7a;
+    }
+
+    .popup {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .popup-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 400px;
+        max-width: 90%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .popup-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .close-popup {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .close-popup:hover {
+        color: var(--danger);
+    }
+
+    .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 12px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+    <section id="sidebar">
+        <div class="logo-container">
+            <img src="../images/ICONS.png" class="logo" alt="Logo">
+            <p class="admin-text">J-MAB</p>
+        </div>
+        <hr>
+        <ul class="side-menu">
+            <li><a href="/JMAB/admin-jmab/dashboard.html"><i class="fas fa-gauge"></i><span>Dashboard</span></a></li>
+            <li><a href="/JMAB/admin-jmab/products.html"><i class="fas fa-box"></i><span>Products</span></a></li>
+            <li><a href="/JMAB/admin-jmab/orderConfirm.html"><i class="fas fa-shopping-cart"></i><span>Orders</span></a></li>
+            <li><a href="/JMAB/admin-jmab/customerTransaction.html"><i class="fas fa-user-circle"></i><span>Customers</span></a></li>
+            <li><a href="/JMAB/admin-jmab/message.html"><i class="fas fa-envelope"></i><span>Message Customer</span></a></li>
+            <li><a href="/JMAB/admin-jmab/Users.html"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
+            <li><a href="/JMAB/admin-jmab/profile.html" class="active"><i class="fas fa-id-card"></i><span>Profile</span></a></li>
+        </ul>
+        <div class="logout-container">
+            <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+        </div>
+    </section>
+
+    <main>
+        <div id="profile-content" class="content-section">
+            <h1>PROFILE</h1>
+    
+            <div class="success-message" id="successMessage">
+                Profile updated successfully!
+            </div>
+            
+            <div class="profile-container">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-img-container">
+                            <img src="../images/admin-avatar.png" alt="Admin Profile" class="profile-img" id="profileImage">
+                            <div class="edit-profile-img" onclick="document.getElementById('profileImageUpload').click()">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <input type="file" id="profileImageUpload" class="file-upload" accept="image/*">
+                        </div>
+                        <h2 class="profile-name" id="adminName">Admin Name</h2>
+                        <p class="profile-role">Administrator</p>
+                    </div>
+                    
+                    <div class="profile-body">
+                        <div class="profile-info-group">
+                            <h3>Personal Information</h3>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">First Name</span>
+                                <div class="profile-value" id="firstNameValue"></div>
+                            </div>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">Last Name</span>
+                                <div class="profile-value" id="lastNameValue"></div>
+                            </div>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">Email</span>
+                                <div class="profile-value" id="emailValue"></div>
+                            </div>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">Gender</span>
+                                <div class="profile-value" id="genderValue"></div>
+                            </div>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">Birthday</span>
+                                <div class="profile-value" id="birthdayValue"></div>
+                            </div>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">Position</span>
+                                <div class="profile-value" id="positionValue">Admin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-card security-card">
+                    <div class="profile-header">
+                        <h2>Security Settings</h2>
+                    </div>
+                    
+                    <div class="profile-body">
+                        <div class="profile-info-group">
+                            <h3>Account Security</h3>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">Email</span>
+                                <div class="profile-value" id="usernameValue"></div>
+                            </div>
+                            
+                            <div class="profile-row">
+                                <span class="profile-label">Password</span>
+                                <div class="profile-value" id="passwordValue">••••••••</div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-btns">
+                            <button class="btn btn-primary" onclick="openChangePasswordPopup()">Change Password</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="JS/profile.js" defer></script>
+    </body>
+    </html>

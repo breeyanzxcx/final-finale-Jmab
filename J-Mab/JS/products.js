@@ -186,11 +186,20 @@ async function loadProducts(selectedCategory = "tires") {
           productElement.classList.add("out-of-stock");
         }
         
-        // Find lowest price among variants for display
-        let lowestPrice = "N/A";
+        // Determine price display based on variants
+        let priceDisplay = '';
         if (product.variants && product.variants.length > 0) {
           const prices = product.variants.map(variant => parseFloat(variant.price));
-          lowestPrice = Math.min(...prices).toFixed(2);
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
+          
+          if (minPrice === maxPrice) {
+            priceDisplay = `₱${minPrice}`;
+          } else {
+            priceDisplay = `₱${minPrice} - ₱${maxPrice}`;
+          }
+        } else {
+          priceDisplay = `₱${product.price}`;
         }
 
         // Create product card HTML
@@ -198,7 +207,7 @@ async function loadProducts(selectedCategory = "tires") {
           <img src="${product.image_url}" alt="${product.name}">
           <h4>${product.name}</h4>
           <p class="description">${truncateText(product.description, 100)}</p>
-          <p class="price">₱${lowestPrice}</p>
+          <p class="price">${priceDisplay}</p>
           <div class="rating">
             ${generateRatingStars(product.average_rating || 0)}
             <span class="rating-value">(${product.average_rating || 0})</span>
