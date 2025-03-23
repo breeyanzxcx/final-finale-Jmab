@@ -179,34 +179,60 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // Product form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
+    
         const formData = new FormData(form);
         const productData = Object.fromEntries(formData.entries());
-        
-        // Collect variants data
         productData.variants = collectVariantsData();
-
-        // Ensure at least one variant is added
+    
         if (productData.variants.length === 0) {
             alert('Please add at least one variant.');
             return;
         }
-
+    
         try {
             const token = localStorage.getItem('authToken');
             if (!token) {
                 alert('Please log in first.');
                 return;
             }
-
+    
             let url = 'http://localhost/jmab/final-jmab/api/products';
             let method = 'POST';
-
+    
             if (isEditing && currentProductId) {
+                // Handle product update
                 url = `http://localhost/jmab/final-jmab/api/products/${currentProductId}`;
                 method = 'PUT';
+    
+                // Handle variant updates separately
+                for (const variant of productData.variants) {
+                    if (variant.variant_id && !variant.variant_id.startsWith('new_')) {
+                        // Update existing variant
+                        await updateVariant(variant.variant_id, {
+                            size: variant.size,
+                            price: variant.price,
+                            stock: variant.stock
+                        });
+                    } else {
+                        // Create new variant
+                        await fetch(`http://localhost/jmab/final-jmab/api/products/${currentProductId}/variants`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                size: variant.size,
+                                price: variant.price,
+                                stock: variant.stock
+                            })
+                        });
+                    }
+                }
+                // Remove variants from productData since we handled them separately
+                delete productData.variants;
             }
-
+    
             const response = await fetch(url, {
                 method: method,
                 headers: {
@@ -215,10 +241,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 },
                 body: JSON.stringify(productData)
             });
-
+    
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                throw new Error(`Expected JSON, but received: ${text}`);
+            }
+    
             const result = await response.json();
-            console.log('API Response:', result);
-
+    
             if (result.success) {
                 alert(isEditing ? 'Product updated successfully!' : 'Product created successfully!');
                 form.reset();
@@ -231,7 +262,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(`An error occurred while ${isEditing ? 'updating' : 'creating'} the product.`);
+            alert(`An error occurred: ${error.message}`);
         }
     });
 
@@ -244,15 +275,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     });
 
-    // Load products with smooth transition
     async function loadProducts() {
-        tireSection.innerHTML = '<p class="loading">Loading products...</p>'; 
-        tireSection.style.opacity = '0.5';
-    
         try {
             const response = await fetch('http://localhost/jmab/final-jmab/api/products');
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                throw new Error(`Expected JSON, but received: ${text}`);
+            }
+
             const data = await response.json();
-    
             console.log('API Response:', data);
     
             if (data.success && Array.isArray(data.products)) {
@@ -362,11 +395,39 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
         } catch (error) {
             console.error('Error fetching products:', error);
-            alert('An error occurred while fetching products.');
+            alert(`An error occurred while fetching products: ${error.message}`);
         }
     }
 
-    // Edit product function
+    async function updateVariant(variantId, variantData) {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please log in first.');
+                return;
+            }
+    
+            const response = await fetch(`http://localhost/jmab/final-jmab/api/products/variants/${variantId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(variantData)
+            });
+    
+            const result = await response.json();
+    
+            if (!result.success) {
+                console.error('Variant update failed:', result.errors);
+            }
+            return result;
+        } catch (error) {
+            console.error('Error updating variant:', error);
+            throw error;
+        }
+    }
+    
     async function editProduct(productId) {
         if (!productId) {
             console.error('Invalid product ID for editing');
@@ -412,30 +473,32 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 document.getElementById('brand').value = product.brand || '';
         
                 variantsContainer.innerHTML = '';
-                
-                if (product.variants && Array.isArray(product.variants)) {
-                    product.variants.forEach(variant => {
-                        addVariantRow(variant);
-                    });
-                }
-                if (!product.variants || product.variants.length === 0) {
-                    addVariantRow();
-                }
-        
-                updateVariantSelector();
-                variantSelect.value = variantSelect.options[0].value;
-                displaySelectedVariant();
-        
-                isEditing = true;
-                currentProductId = productId;
-        
-                document.querySelector('input[type="submit"]').value = "Update Product";
-        
-                productFormContainer.style.display = 'block';
-                setTimeout(() => productFormContainer.style.opacity = '1', 10);
-        
-                productFormContainer.scrollIntoView({ behavior: 'smooth' });
-            } else {
+        if (product.variants && Array.isArray(product.variants)) {
+            product.variants.forEach(variant => {
+                addVariantRow({
+                    variant_id: variant.variant_id,
+                    size: variant.size,
+                    price: variant.price,
+                    stock: variant.stock
+                });
+            });
+        }
+        if (!product.variants || product.variants.length === 0) {
+            addVariantRow();
+        }
+
+        updateVariantSelector();
+        variantSelect.value = variantSelect.options[0].value;
+        displaySelectedVariant();
+
+        isEditing = true;
+        currentProductId = productId;
+        document.querySelector('input[type="submit"]').value = "Update Product";
+
+        productFormContainer.style.display = 'block';
+        setTimeout(() => productFormContainer.style.opacity = '1', 10);
+        productFormContainer.scrollIntoView({ behavior: 'smooth' });
+    } else {
                 alert('Error: ' + (data.message || 'Failed to fetch product details'));
             }
         } catch (error) {
