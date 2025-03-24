@@ -198,10 +198,6 @@ async function loadProducts(selectedCategory = "tires") {
                   <h4>${product.name}</h4>
                   <p class="description">${truncateText(product.description, 100)}</p>
                   <p class="price">${priceDisplay}</p>
-                  <div class="rating">
-                      ${generateRatingStars(averageRating)}
-                      <span class="rating-value">(${averageRating} - ${ratingCount} reviews)</span>
-                  </div>
                   ${isOutOfStock ? `<div class="out-of-stock-overlay">OUT OF STOCK</div>` : ""}
               `;
 

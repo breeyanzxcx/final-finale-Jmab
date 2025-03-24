@@ -10,11 +10,49 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; }
-    .modal-content { background: white; padding: 20px; border-radius: 8px; width: 300px; text-align: center; }
-    .modal-content input { width: 100%; padding: 8px; margin: 10px 0; }
-    .modal-content button { padding: 10px; width: 100%; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    .modal-content button:hover { background-color: #0056b3; }
+    #forgot-password-link{
+      color: black;
+    }
+    .modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0, 0, 0, 0.5); 
+      justify-content: center; 
+      align-items: center; 
+    }
+    .modal-content { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 8px; 
+      width: 300px; 
+      text-align: center; 
+    }
+    .modal-content input { 
+      width: 100%; 
+      padding: 8px; 
+      margin: 10px 0; 
+    }
+    .modal-content button { 
+      padding: 10px; 
+      width: 100%; 
+      background-color: #007bff; 
+      color: white; 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer; 
+    }
+    .modal-content button:hover { 
+      background-color: #0056b3; 
+    }
+
+    #forgot-email{
+      width: 90%;
+   
+    }
   </style>
 </head>
 <body>

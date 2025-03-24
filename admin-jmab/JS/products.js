@@ -30,20 +30,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const variantSelectorContainer = document.createElement('div');
     variantSelectorContainer.id = 'variant-selector-container';
     
-    // Add a label for the variant selector
     const variantLabel = document.createElement('label');
     variantLabel.setAttribute('for', 'variant-select');
     variantLabel.textContent = 'Variants';
-    variantLabel.style.display = 'block'; // Ensure it’s on its own line
+    variantLabel.style.display = 'block';
     variantLabel.style.fontWeight = 'bold';
     variantLabel.style.marginBottom = '5px';
     
     const variantSelect = document.createElement('select');
     variantSelect.id = 'variant-select';
     
-    variantSelectorContainer.appendChild(variantLabel); // Add label before the select
+    variantSelectorContainer.appendChild(variantLabel);
     variantSelectorContainer.appendChild(variantSelect);
-    variantsContainer.before(variantSelectorContainer); // Place selector above variants
+    variantsContainer.before(variantSelectorContainer);
 
     let isEditing = false;
     let currentProductId = null;
@@ -68,7 +67,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         addVariantButton.addEventListener('click', function() {
             addVariantRow();
             updateVariantSelector();
-            variantSelect.value = variantSelect.options[variantSelect.options.length - 1].value; // Select the new variant
+            variantSelect.value = variantSelect.options[variantSelect.options.length - 1].value;
             displaySelectedVariant();
         });
     }
@@ -102,20 +101,68 @@ document.addEventListener('DOMContentLoaded', (event) => {
         variantsContainer.appendChild(variantRow);
         
         const removeButton = variantRow.querySelector('.remove-variant-btn');
-        removeButton.addEventListener('click', function() {
-            variantRow.remove();
-            updateVariantSelector();
-            if (variantSelect.options.length > 0) {
-                variantSelect.value = variantSelect.options[0].value;
+        removeButton.addEventListener('click', async function() {
+            const variantId = variantRow.dataset.variantId;
+            console.log('Attempting to remove variant with ID:', variantId);
+
+            if (variantId && !variantId.startsWith('new_')) {
+                try {
+                    const token = localStorage.getItem('authToken');
+                    if (!token) {
+                        alert('Please log in first.');
+                        return;
+                    }
+
+                    removeButton.disabled = true;
+                    console.log('Sending DELETE request for variant:', variantId);
+                    const response = await fetch(`http://localhost/jmab/final-jmab/api/products/variants/${variantId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const result = await response.json();
+                    console.log('Delete Response:', result);
+
+                    if (result.success || (response.status === 400 && result.errors && result.errors.includes('Variant not found.'))) {
+                        variantRow.remove();
+                        updateVariantSelector();
+                        if (variantSelect.options.length > 0) {
+                            variantSelect.value = variantSelect.options[0].value;
+                        }
+                        displaySelectedVariant();
+                        alert('Variant removed successfully!');
+                        if (isEditing && currentProductId) {
+                            editProduct(currentProductId); // Refresh variant list
+                        } else {
+                            loadProducts(); // Refresh product list if not editing
+                        }
+                    } else {
+                        alert('Error deleting variant: ' + (result.errors ? result.errors.join('\n') : 'Unknown error'));
+                    }
+                    removeButton.disabled = false;
+                } catch (error) {
+                    console.error('Error deleting variant:', error);
+                    alert('An error occurred while deleting the variant: ' + error.message);
+                    removeButton.disabled = false;
+                }
+            } else {
+                variantRow.remove();
+                updateVariantSelector();
+                if (variantSelect.options.length > 0) {
+                    variantSelect.value = variantSelect.options[0].value;
+                }
+                displaySelectedVariant();
             }
-            displaySelectedVariant();
         });
     }
 
     // Function to update the variant selector dropdown
     function updateVariantSelector() {
         const variantRows = variantsContainer.querySelectorAll('.variant-row');
-        variantSelect.innerHTML = ''; // Clear existing options
+        variantSelect.innerHTML = '';
         
         if (variantRows.length === 0) {
             const option = document.createElement('option');
@@ -200,21 +247,17 @@ document.addEventListener('DOMContentLoaded', (event) => {
             let method = 'POST';
     
             if (isEditing && currentProductId) {
-                // Handle product update
                 url = `http://localhost/jmab/final-jmab/api/products/${currentProductId}`;
                 method = 'PUT';
     
-                // Handle variant updates separately
                 for (const variant of productData.variants) {
                     if (variant.variant_id && !variant.variant_id.startsWith('new_')) {
-                        // Update existing variant
                         await updateVariant(variant.variant_id, {
                             size: variant.size,
                             price: variant.price,
                             stock: variant.stock
                         });
                     } else {
-                        // Create new variant
                         await fetch(`http://localhost/jmab/final-jmab/api/products/${currentProductId}/variants`, {
                             method: 'POST',
                             headers: {
@@ -229,7 +272,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         });
                     }
                 }
-                // Remove variants from productData since we handled them separately
                 delete productData.variants;
             }
     
@@ -442,8 +484,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
             }
            
             console.log(`Fetching product details for ID: ${productId}`);
-            console.log('Token:', token);
-            
             const response = await fetch(`http://localhost/jmab/final-jmab/api/products/${productId}`, {
                 method: 'GET',
                 headers: {
@@ -452,16 +492,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 }
             });
             
-            console.log('Response Status:', response.status);
-            console.log('Response OK:', response.ok);
-            
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(`HTTP error! Status: ${response.status}, Details: ${errorText}`);
             }
     
             const data = await response.json();
-            console.log('API Response:', data);
+            console.log('Product Data:', data);
         
             if (data.success && data.products) {
                 const product = data.products; 
@@ -472,33 +509,34 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 document.getElementById('image_url').value = product.image_url || '';
                 document.getElementById('brand').value = product.brand || '';
         
-                variantsContainer.innerHTML = '';
-        if (product.variants && Array.isArray(product.variants)) {
-            product.variants.forEach(variant => {
-                addVariantRow({
-                    variant_id: variant.variant_id,
-                    size: variant.size,
-                    price: variant.price,
-                    stock: variant.stock
-                });
-            });
-        }
-        if (!product.variants || product.variants.length === 0) {
-            addVariantRow();
-        }
+                variantsContainer.innerHTML = ''; // Clear existing variants
+                if (product.variants && Array.isArray(product.variants)) {
+                    product.variants.forEach(variant => {
+                        console.log('Loading variant:', variant);
+                        addVariantRow({
+                            variant_id: variant.variant_id,
+                            size: variant.size,
+                            price: variant.price,
+                            stock: variant.stock
+                        });
+                    });
+                }
+                if (!product.variants || product.variants.length === 0) {
+                    addVariantRow();
+                }
 
-        updateVariantSelector();
-        variantSelect.value = variantSelect.options[0].value;
-        displaySelectedVariant();
+                updateVariantSelector();
+                variantSelect.value = variantSelect.options[0]?.value || '';
+                displaySelectedVariant();
 
-        isEditing = true;
-        currentProductId = productId;
-        document.querySelector('input[type="submit"]').value = "Update Product";
+                isEditing = true;
+                currentProductId = productId;
+                document.querySelector('input[type="submit"]').value = "Update Product";
 
-        productFormContainer.style.display = 'block';
-        setTimeout(() => productFormContainer.style.opacity = '1', 10);
-        productFormContainer.scrollIntoView({ behavior: 'smooth' });
-    } else {
+                productFormContainer.style.display = 'block';
+                setTimeout(() => productFormContainer.style.opacity = '1', 10);
+                productFormContainer.scrollIntoView({ behavior: 'smooth' });
+            } else {
                 alert('Error: ' + (data.message || 'Failed to fetch product details'));
             }
         } catch (error) {
@@ -507,7 +545,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
     
-    // Delete product function
     async function deleteProduct(productId) {
         if (!productId) {
             console.error('Cannot delete: Product ID is undefined or empty');
@@ -521,7 +558,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     
         try {
             const token = localStorage.getItem('authToken');
-            console.log('Token:', token); 
             if (!token) {
                 alert('Please log in first.');
                 return;
@@ -551,7 +587,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
-    // Reset form function
     function resetForm() {
         form.reset(); 
         isEditing = false; 
@@ -560,11 +595,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         variantsContainer.innerHTML = '';
         addVariantRow();
         updateVariantSelector();
-        variantSelect.value = variantSelect.options[0].value;
+        variantSelect.value = variantSelect.options[0]?.value || '';
         displaySelectedVariant();
     }
 
-    // Product search functionality with respect to the current category filter
     document.getElementById('productSearch').addEventListener('input', function() {
         let filter = this.value.toLowerCase().trim();
         
@@ -640,7 +674,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     });
 
-    // Filter function for category selection that respects search
     function filterProducts(category) {
         const sections = document.querySelectorAll('.tire-section, .Battery-section, .Lubricant-section, .Oil-section');
         const titles = document.querySelectorAll('.tire-title, .Battery-title, .Lubricant-title, .Oil-title');
@@ -689,7 +722,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
-    // Function to adjust container sizes based on category
     function adjustContainerSizes(category) {
         const tireContainers = document.querySelectorAll('.tire-section .item-container');
         const batteryContainers = document.querySelectorAll('.Battery-section .item-container');
@@ -745,6 +777,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
     
-    // Initialize product loading
     loadProducts();
 });
