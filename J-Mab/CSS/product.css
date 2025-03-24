@@ -582,3 +582,21 @@ a {
   font-style: italic;
   color: gray;
 }
+
+.rating {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+.star {
+  font-size: 20px;
+  color: #ccc;
+}
+.star.filled {
+  color: #FFD700; /* Gold color for filled stars */
+}
+.rating-value {
+  margin-left: 5px;
+  font-size: 14px;
+  color: #666;
+}

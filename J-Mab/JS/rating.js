@@ -8,8 +8,8 @@ function initializeRating() {
         button.addEventListener('click', function() {
             const orderId = this.getAttribute('data-order-id');
             const userId = this.getAttribute('data-user-id');
-            const productId = this.getAttribute('data-product-id');
-            openRatingModal(orderId, userId, productId);
+            const variantId = this.getAttribute('data-variant-id');
+            openRatingModal(orderId, userId, variantId);
         });
     });
 
@@ -63,7 +63,9 @@ function initializeRating() {
     }
 }
 
-function openRatingModal(orderId, userId, productId) {
+let onRatingSubmittedCallback = null;
+
+function openRatingModal(orderId, userId, variantId, callback) {
     const modal = document.getElementById('ratingModal');
     if (!modal) {
         console.error('Rating modal not found in the DOM');
@@ -72,25 +74,26 @@ function openRatingModal(orderId, userId, productId) {
     modal.style.display = 'flex';
     modal.setAttribute('data-order-id', orderId || '');
     modal.setAttribute('data-user-id', userId);
-    modal.setAttribute('data-product-id', productId);
+    modal.setAttribute('data-variant-id', variantId);
     modal.removeAttribute('data-rating');
     document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+    onRatingSubmittedCallback = callback;
 }
 
 async function submitRating() {
     const modal = document.getElementById('ratingModal');
-    const productId = modal.getAttribute('data-product-id');
+    const variantId = modal.getAttribute('data-variant-id');
     const userId = modal.getAttribute('data-user-id');
     const rating = modal.getAttribute('data-rating');
 
-    console.log('Submitting rating with:', { productId, userId, rating });
+    console.log('Submitting rating with:', { variantId, userId, rating });
 
     if (!rating) {
         alert('Please select a rating.');
         return;
     }
-    if (!productId || isNaN(parseInt(productId))) {
-        alert('Error: Invalid or missing product ID.');
+    if (!variantId || isNaN(parseInt(variantId))) {
+        alert('Error: Invalid or missing variant ID.');
         return;
     }
     if (!userId) {
@@ -104,7 +107,7 @@ async function submitRating() {
     }
 
     const payload = {
-        product_id: parseInt(productId),
+        variant_id: parseInt(variantId),
         user_id: parseInt(userId),
         rating: parseInt(rating)
     };
@@ -127,7 +130,10 @@ async function submitRating() {
         if (data.success) {
             alert('Thank you for your rating!');
             modal.style.display = 'none';
-            fetchUserOrders(); 
+            if (onRatingSubmittedCallback) {
+                onRatingSubmittedCallback(); // Update button immediately
+            }
+            fetchUserOrders(); // Refresh orders
         } else {
             alert(`Failed to submit rating: ${data.errors ? data.errors.join(', ') : 'Unknown error'}`);
         }

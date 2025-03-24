@@ -1,6 +1,39 @@
 document.addEventListener("DOMContentLoaded", function () {
     fetchUserOrders();
+    fetchUserRatings(); // Fetch ratings on page load
 });
+
+// Store rated variant IDs fetched from the backend
+let ratedVariants = new Set();
+
+async function fetchUserRatings() {
+    const authToken = localStorage.getItem("authToken");
+    const userId = localStorage.getItem("userId");
+    if (!authToken || !userId) return;
+
+    try {
+        const response = await fetch(`http://localhost/jmab/final-jmab/api/ratings/user/${userId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("User Ratings Response:", data);
+        if (data.success && Array.isArray(data.ratings)) {
+            data.ratings.forEach(rating => ratedVariants.add(String(rating.variant_id)));
+        }
+    } catch (error) {
+        console.error("Error fetching user ratings:", error);
+        // If endpoint fails, proceed without ratings (button will reset until rated again in session)
+    }
+}
 
 async function fetchUserOrders() {
     const authToken = localStorage.getItem("authToken");
@@ -111,7 +144,7 @@ function createOrderCard(reference, orders) {
     }, 0);
 
     const totalPrice = orders.reduce((sum, order) => {
-        const price = parseFloat(order.variant_price || order.product_price || 0); // Support variant_price
+        const price = parseFloat(order.variant_price || order.product_price || 0);
         const quantity = parseInt(order.quantity || 1);
         return sum + (isNaN(price) ? 0 : price * (isNaN(quantity) ? 1 : quantity));
     }, 0);
@@ -136,7 +169,7 @@ function createOrderCard(reference, orders) {
     orderContent.className = 'order-content';
     
     orders.forEach(order => {
-        const price = parseFloat(order.variant_price || order.product_price || 0); // Support variant_price
+        const price = parseFloat(order.variant_price || order.product_price || 0);
         const productItem = document.createElement('div');
         productItem.className = 'product-item';
         productItem.innerHTML = `
@@ -168,7 +201,7 @@ function createOrderCard(reference, orders) {
             <span>Total: ₱${totalPrice.toFixed(2)}</span>
         </div>
         <div class="order-actions">
-            ${getOrderActions(firstOrder.status, firstOrder.order_id, firstOrder.payment_method, firstOrder.product_id)}
+            ${getOrderActions(firstOrder.status, firstOrder.order_id, firstOrder.payment_method, firstOrder.variant_id || firstOrder.product_id)}
         </div>
     `;
     
@@ -188,8 +221,8 @@ function formatDate(dateString) {
     });
 }
 
-function getOrderActions(status, orderId, paymentMethod, productId) {
-    console.log('getOrderActions:', { status, orderId, paymentMethod, productId }); // Debugging line
+function getOrderActions(status, orderId, paymentMethod, id) {
+    console.log('getOrderActions:', { status, orderId, paymentMethod, id });
 
     let actions = '';
     switch (status.toLowerCase()) {
@@ -207,7 +240,8 @@ function getOrderActions(status, orderId, paymentMethod, productId) {
             actions = `<button class="action-btn receive-btn" data-order-id="${orderId}">Confirm Receipt</button>`;
             break;
         case 'delivered':
-            actions = `<button class="action-btn rate-btn" data-order-id="${orderId}" data-user-id="${localStorage.getItem('userId')}" data-product-id="${productId}">Rate Product</button>`;
+            const isRated = ratedVariants.has(String(id));
+            actions = `<button class="action-btn rate-btn" data-order-id="${orderId}" data-user-id="${localStorage.getItem('userId')}" data-variant-id="${id}" ${isRated ? 'disabled' : ''}>${isRated ? 'Product Rated' : 'Rate Product'}</button>`;
             break;
         case 'failed delivery':
             actions = `<button class="action-btn contact-btn" data-order-id="${orderId}">Contact Seller</button>`;
@@ -244,11 +278,17 @@ function addButtonEventListeners() {
     
     document.querySelectorAll('.rate-btn').forEach(button => {
         button.addEventListener('click', function() {
+            if (this.disabled) return; // Prevent clicking if already rated
             const orderId = this.getAttribute('data-order-id');
             const userId = this.getAttribute('data-user-id');
-            const productId = this.getAttribute('data-product-id');
-            console.log('Rate button clicked:', { orderId, userId, productId });
-            openRatingModal(orderId, userId, productId);
+            const variantId = this.getAttribute('data-variant-id');
+            console.log('Rate button clicked:', { orderId, userId, variantId });
+            openRatingModal(orderId, userId, variantId, () => {
+                // Callback after rating is submitted
+                button.textContent = 'Product Rated';
+                button.disabled = true;
+                ratedVariants.add(String(variantId));
+            });
         });
     });
     

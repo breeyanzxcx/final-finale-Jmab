@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     handleProductVariants(product);
                     setupQuantityControls();
                     setupCartButtons(product);
+                    displayProductRating(product);
                 } else {
                     showProductNotFound();
                 }
@@ -84,7 +85,6 @@ function setupCartPopup() {
 function handleProductVariants(product) {
     const sizeSelect = document.getElementById('size');
     
-    // Helper function to safely parse and format prices
     function formatPrice(priceValue) {
         const price = parseFloat(priceValue);
         return isNaN(price) ? '0.00' : price.toFixed(2);
@@ -93,7 +93,6 @@ function handleProductVariants(product) {
     if (product.variants && product.variants.length > 0) {
         sizeSelect.innerHTML = '';
         
-        // Add default option
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
         defaultOption.textContent = 'Select a variant';
@@ -101,45 +100,34 @@ function handleProductVariants(product) {
         defaultOption.selected = true;
         sizeSelect.appendChild(defaultOption);
         
-        // Sort variants by price
         const sortedVariants = [...product.variants].sort((a, b) => {
             const priceA = parseFloat(a.price) || 0;
             const priceB = parseFloat(b.price) || 0;
             return priceA - priceB;
         });
         
-        // Create options for each variant
         sortedVariants.forEach(variant => {
             const option = document.createElement('option');
             option.value = variant.variant_id;
-            
-            // Safely parse price
             const price = parseFloat(variant.price) || 0;
             option.textContent = `${variant.size} - ₱${formatPrice(variant.price)}`;
-            
-            // Store data for later use
             option.dataset.price = price;
             option.dataset.stock = variant.stock || 0;
             option.dataset.size = variant.size || 'N/A';
-            
-            // Handle out of stock variants
             const stock = parseInt(variant.stock) || 0;
             option.disabled = stock <= 0;
             if (stock <= 0) option.textContent += ' (Out of Stock)';
-            
             sizeSelect.appendChild(option);
         });
         
-        // Handle variant selection change
-        sizeSelect.addEventListener('change', function() {
+        sizeSelect.addEventListener('change', async function() {
             const selectedOption = this.options[this.selectedIndex];
             const selectedPrice = parseFloat(selectedOption.dataset.price) || 0;
             const selectedStock = parseInt(selectedOption.dataset.stock) || 0;
+            const variantId = selectedOption.value;
             
-            // Always use the formatPrice helper to avoid "Pnan"
             document.getElementById('product-price').textContent = `₱${formatPrice(selectedPrice)}`;
             
-            // Update stock info
             const stockInfo = document.getElementById('stock-info') || document.createElement('p');
             stockInfo.id = 'stock-info';
             stockInfo.textContent = `Stock: ${selectedStock}`;
@@ -147,44 +135,81 @@ function handleProductVariants(product) {
                 document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
             }
             
-            // Update quantity input max value
             const qtyInput = document.querySelector('.qty-input');
             qtyInput.setAttribute('max', selectedStock);
             if (parseInt(qtyInput.value) > selectedStock) qtyInput.value = selectedStock;
             
-            // Update button states
             updateButtonStates(selectedStock);
+            await fetchAndDisplayVariantRating(variantId);
         });
         
-        // Set initial price and stock from first available variant
         const firstInStock = sortedVariants.find(v => (parseInt(v.stock) || 0) > 0) || sortedVariants[0];
         if (firstInStock) {
-            // Use formatPrice helper consistently
             document.getElementById('product-price').textContent = `₱${formatPrice(firstInStock.price)}`;
-            
             const stockInfo = document.createElement('p');
             stockInfo.id = 'stock-info';
             stockInfo.textContent = `Stock: ${parseInt(firstInStock.stock) || 0}`;
             document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
-            
-            // Update button states
             updateButtonStates(parseInt(firstInStock.stock) || 0);
+            fetchAndDisplayVariantRating(firstInStock.variant_id);
         }
     } else {
-        // Handle products without variants
         sizeSelect.innerHTML = '<option value="">N/A</option>';
-        
-        // Use formatPrice helper consistently
         document.getElementById('product-price').textContent = `₱${formatPrice(product.price)}`;
-        
         const stockInfo = document.createElement('p');
         stockInfo.id = 'stock-info';
         stockInfo.textContent = `Stock: ${parseInt(product.stock) || 0}`;
         document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
-        
-        // Update button states
         updateButtonStates(parseInt(product.stock) || 0);
+        fetchAndDisplayVariantRating(null);
     }
+}
+
+async function fetchAndDisplayVariantRating(variantId) {
+    let ratingElement = document.getElementById('product-rating');
+    if (!ratingElement) {
+        ratingElement = document.createElement('div');
+        ratingElement.id = 'product-rating';
+        ratingElement.className = 'rating';
+        document.querySelector('.product-details').insertBefore(ratingElement, document.querySelector('.quantity'));
+    }
+
+    if (variantId) {
+        try {
+            const response = await fetch(`http://localhost/jmab/final-jmab/api/ratings/average/${variantId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                ratingElement.innerHTML = generateRatingStars(data.average_rating) + 
+                    `<span class="rating-value">(${data.average_rating} - ${data.rating_count} reviews)</span>`;
+            } else {
+                ratingElement.innerHTML = generateRatingStars(0) + `<span class="rating-value">(0 - 0 reviews)</span>`;
+            }
+        } catch (error) {
+            console.error('Error fetching variant rating:', error);
+            ratingElement.innerHTML = generateRatingStars(0) + `<span class="rating-value">(0 - 0 reviews)</span>`;
+        }
+    } else {
+        ratingElement.innerHTML = generateRatingStars(0) + `<span class="rating-value">(0 - 0 reviews)</span>`;
+    }
+}
+
+function generateRatingStars(rating) {
+    const maxStars = 5;
+    let stars = "";
+    const ratingValue = parseFloat(rating) || 0;
+    for (let i = 1; i <= maxStars; i++) {
+        stars += i <= ratingValue ? `<span class="star filled">★</span>` : `<span class="star">☆</span>`;
+    }
+    return stars;
+}
+
+function displayProductRating(product) {
+    fetchAndDisplayVariantRating(product.variants && product.variants.length > 0 ? product.variants[0].variant_id : null);
 }
 
 function updateButtonStates(stock) {
@@ -195,7 +220,6 @@ function updateButtonStates(stock) {
         addToCartButton.disabled = true;
         addToCartButton.textContent = 'NO STOCK';
         addToCartButton.classList.add('disabled-button');
-        
         buyNowButton.disabled = true;
         buyNowButton.textContent = 'NO STOCK';
         buyNowButton.classList.add('disabled-button');
@@ -203,7 +227,6 @@ function updateButtonStates(stock) {
         addToCartButton.disabled = false;
         addToCartButton.textContent = 'Add to Cart';
         addToCartButton.classList.remove('disabled-button');
-        
         buyNowButton.disabled = false;
         buyNowButton.textContent = 'Buy Now';
         buyNowButton.classList.remove('disabled-button');
