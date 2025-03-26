@@ -182,8 +182,8 @@ body {
 .confirm-btn {
     width: 100%;
     padding: 12px;
-    background-color: #02254b;
-    color: white;
+    background-color: #FFD700;
+    color: black;
     border: none;
     border-radius: 6px;
     font-size: 1.1rem;
@@ -194,7 +194,7 @@ body {
 }
 
 .confirm-btn:hover {
-    background-color: #0147A1;
+    background-color: #FFC107;
     transform: translateY(-1px);
 }
 
@@ -211,7 +211,6 @@ body {
     border-radius: 6px;
 }
 
-/* Notification Popup */
 .notification-popup {
     display: none;
     position: fixed;
@@ -254,4 +253,26 @@ body {
 
 .notification-btn:hover {
     background-color: #0147A1;
+}
+
+.address-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+}
+
+.add-address-btn {
+    background-color: #FFD700;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    cursor: pointer;
+    display: inline-block; 
+}
+
+.add-address-btn:hover {
+    background-color: #FFC107; 
 }

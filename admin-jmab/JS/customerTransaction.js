@@ -13,9 +13,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    fetchUsers(); // Fetch users when the page loads
+    fetchUsersWithTransactions(); // Fetch users with transactions when the page loads
 
-    function fetchUsers() {
+    function fetchUsersWithTransactions() {
+        // First fetch all users
         fetch("http://localhost/jmab/final-jmab/api/users", {
             headers: { 
                 'Content-Type': 'application/json',
@@ -23,59 +24,115 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         })
         .then(response => response.json())
-        .then(data => {
-            console.log("API response data:", data);
+        .then(usersData => {
+            console.log("API response data:", usersData);
     
-            if (data.success) {
-                const tableBody = document.querySelector('#customers-table tbody');
-                if (!tableBody) {
-                    console.error("Table body not found!");
-                    return;
-                }
+            if (usersData.success) {
+                // Then fetch all orders to check which users have transactions
+                fetch("http://localhost/jmab/final-jmab/api/orders", {
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`  
+                    },
+                })
+                .then(response => response.json())
+                .then(ordersData => {
+                    console.log("Orders data:", ordersData);
+                    
+                    if (ordersData.success) {
+                        const tableBody = document.querySelector('#customers-table tbody');
+                        if (!tableBody) {
+                            console.error("Table body not found!");
+                            return;
+                        }
     
-                tableBody.innerHTML = '';
-                let customerCount = 0;
+                        tableBody.innerHTML = '';
+                        let customerCount = 0;
+                        
+                        // Create a Set of user IDs who have orders
+                        const usersWithOrders = new Set();
+                        if (ordersData.orders && ordersData.orders.length > 0) {
+                            ordersData.orders.forEach(order => {
+                                usersWithOrders.add(order.user_id);
+                            });
+                        }
     
-                data.users.forEach(user => {
-                    if (user.roles === "customer") { 
-                        customerCount++;
+                        usersData.users.forEach(user => {
+                            // Only display if user is a customer AND has orders
+                            if (user.roles === "customer" && usersWithOrders.has(user.id)) { 
+                                customerCount++;
     
-                        // Store user_id in localStorage for later use
-                        localStorage.setItem(`user_${user.id}`, JSON.stringify(user));
+                                localStorage.setItem(`user_${user.id}`, JSON.stringify(user));
     
-                        const row = `
-                            <tr data-id="${user.id}">
-                                <td>${user.first_name}</td>
-                                <td>${user.last_name}</td>
-                                <td>${user.email}</td>
-                                <td><button class="view-btn" data-id="${user.id}">View</button></td>
-                            </tr>
-                        `;
-                        tableBody.innerHTML += row;
+                                const row = `
+                                    <tr data-id="${user.id}">
+                                        <td>${user.first_name}</td>
+                                        <td>${user.last_name}</td>
+                                        <td>${user.email}</td>
+                                        <td><button class="view-btn" data-id="${user.id}">View</button></td>
+                                    </tr>
+                                `;
+                                tableBody.innerHTML += row;
+                            }
+                        });
+    
+                        console.log(`Found ${customerCount} customers with transactions`);
+    
+                        if (customerCount === 0) {
+                            tableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="4" style="text-align: center; font-size: 18px; padding: 50px;">
+                                        No customers with transactions found
+                                    </td>
+                                </tr>
+                            `;
+                        }
+    
+                        // Attach event listeners
+                        document.querySelectorAll('.view-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                const userId = this.getAttribute('data-id');
+                                viewTransactions(userId);
+                            });
+                        });
+                    } else {
+                        console.error("Error fetching orders:", ordersData.errors);
+                        displayNoCustomersMessage();
                     }
-                });
-    
-                console.log(`Found ${customerCount} customers`);
-    
-                // Attach event listeners
-                document.querySelectorAll('.view-btn').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const userId = this.getAttribute('data-id');
-                        viewTransactions(userId);
-                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching orders:", error);
+                    displayNoCustomersMessage();
                 });
             } else {
-                console.error("Error fetching users:", data.errors);
+                console.error("Error fetching users:", usersData.errors);
+                displayNoCustomersMessage();
             }
         })
-        .catch(error => console.error("Error fetching users:", error));
+        .catch(error => {
+            console.error("Error fetching users:", error);
+            displayNoCustomersMessage();
+        });
     }
     
-    let currentUserId = null; // Store the current user ID globally
+    function displayNoCustomersMessage() {
+        const tableBody = document.querySelector('#customers-table tbody');
+        if (tableBody) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; font-size: 18px; padding: 50px;">
+                        No customers with transactions found
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    let currentUserId = null; 
 
     function viewTransactions(userId) {
         const authToken = localStorage.getItem("authToken");
-        currentUserId = userId; // Save the userId for the "Return" button
+        currentUserId = userId; 
         
         console.log("Fetching transactions for User ID:", userId);
         
@@ -90,7 +147,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             console.log("Raw API response for transactions:", data);
             
-            // Get user info from localStorage if available
             const userInfo = localStorage.getItem(`user_${userId}`);
             const user = userInfo ? JSON.parse(userInfo) : {first_name: "", last_name: ""};
             
@@ -112,7 +168,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 transactionsHTML += `<p style="text-align: center; font-size: 18px; margin-top: 50px;">NO TRANSACTIONS</p>`;
             }
             
-            // Add a "Close" button to close the popup
             transactionsHTML += `<button id="close-transactions-btn">Close</button>`;
             
             const viewContent = document.getElementById("transaction-view-content");
@@ -120,7 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 viewContent.innerHTML = transactionsHTML;
                 document.getElementById("transaction-view").style.display = "block";
                 
-                // Attach event listeners to view order details buttons
                 document.querySelectorAll('.view-order-details-btn').forEach(button => {
                     button.addEventListener('click', function () {
                         const orderId = this.getAttribute('data-order-id');
@@ -128,7 +182,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                 });
                 
-                // Attach event listener to the "Close" button
                 const closeBtn = document.getElementById("close-transactions-btn");
                 if (closeBtn) {
                     closeBtn.addEventListener("click", function() {
@@ -149,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
             orderDetails.forEach(detail => {
                 const price = detail.variant_price !== undefined 
                     ? parseFloat(detail.variant_price).toFixed(2) 
-                    : "N/A"; // Use variant_price instead of product_price
+                    : "N/A"; 
                 orderDetailsHTML += `
                     <div class="order-detail-item">
                         <p><strong>Product:</strong> ${detail.product_name}</p>

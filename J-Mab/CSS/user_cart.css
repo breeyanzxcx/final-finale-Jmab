@@ -724,7 +724,6 @@ main {
     color: #666;
   }
 
-/* Notifications and Loading States */
 .success-notification {
     position: fixed;
     top: 20px;

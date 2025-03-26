@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - J-MAB</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../CSS/checkout.css">
     <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
 </head>
@@ -25,13 +24,16 @@
                     <form id="checkout-form" class="shipping-form">
                         <div class="form-group">
                             <label for="full-name">Full Name</label>
-                            <input type="text" id="full-name" name="full-name" required>
+                            <input type="text" id="full-name" name="full-name" readonly required>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group address-group">
                             <label for="address-id">Shipping Address</label>
-                            <select id="address-id" name="address-id" required>
-                                <option value="">Select an address</option>
-                            </select>
+                            <div class="address-container">
+                                <select id="address-id" name="address-id" required>
+                                    <option value="">Select an address</option>
+                                </select>
+                                <button type="button" id="add-address-btn" class="add-address-btn">+</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="payment-method">Payment Method</label>

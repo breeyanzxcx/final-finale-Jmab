@@ -18,7 +18,7 @@
 
         :root {
             --primary: #02254B;
-            --accent: #15DBa0;
+            --accent: #FFD700;
             --bg-light: #F5F5F5;
             --bg-dark: #DCD7C9;
             --text-dark: #333;
@@ -491,7 +491,21 @@
         </div>
     </section>
 
-    <main>     
+    <main>
+        <div class="notification-container">
+            <div class="notification-icon" id="notificationIcon">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </div>
+            
+            <div class="notification-dropdown" id="notificationDropdown">
+                <h4>Notifications <span id="notificationConnectionStatus" class="status-disconnected">Disconnected</span></h4>
+                <ul id="notificationList">
+                    <li class="notification-empty">Loading notifications...</li>
+                </ul>
+            </div>
+        </div>
+
         <div class="container">
             <div class="user-info" id="user-info"></div>
             <div class="messaging-section">
@@ -501,6 +515,7 @@
                 <div class="conversation">
                     <div class="message-header" id="conversation-header">
                         Select a user to start messaging
+                        <span id="connectionStatus" class="status-disconnected">Disconnected</span>
                     </div>
                     <div class="messages-container" id="messages-container">
                         <div class="no-user-selected">
@@ -514,8 +529,9 @@
                 </div>
             </div>
         </div>
+        <div id="toast"></div>
     </main>
-    <script>
+   <!-- <script>
         document.getElementById('notificationIcon').addEventListener('click', function () {
             let dropdown = document.getElementById('notificationDropdown');
             dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
@@ -529,221 +545,129 @@
                 dropdown.style.display = 'none';
             }
         });
-    </script>
+    </script>-->
+    <script src="../J-Mab/JS/websocketManager.js"></script>
     <script>
-        // Configuration
-        const API_BASE_URL = "http://localhost/jmab/final-jmab/api";
-        const WS_URL = "http://192.168.100.74:8080";
-    
-        // Globals
-        let currentUser = null;
-        let selectedUserId = null;
-        let allUsers = [];
-        let authToken = null;
-        let webSocket = null;
-        let isConnected = false;
-        let isConnecting = false;
-        let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5;
-        let messagesList = [];
-        let lastMessageId = 0;
-        let pendingMessages = new Map();
         
-    
-        // API Service (unchanged)
-        const apiService = {
-            getUsers: async function() {
-                const response = await fetch(`${API_BASE_URL}/users`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (response.status === 401) throw new Error("Unauthorized");
-                return await response.json();
-            },
-            sendMessage: async function(messageRequest) {
-                const response = await fetch(`${API_BASE_URL}/messages`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(messageRequest)
-                });
-                if (response.status === 401) throw new Error("Unauthorized");
-                return await response.json();
-            },
-            getConversation: async function(senderId, receiverId) {
-                const response = await fetch(`${API_BASE_URL}/messages/conversation/${senderId}/${receiverId}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (response.status === 401) throw new Error("Unauthorized");
-                return await response.json();
-            },
-            getAllMessages: async function() {
-                const response = await fetch(`${API_BASE_URL}/messages`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (response.status === 401) throw new Error("Unauthorized");
-                return await response.json();
-            }
-        };
-    
-        // WebSocket Management (unchanged)
-        function connectWebSocket() {
-            if (isConnected || isConnecting || !authToken) return;
-            isConnecting = true;
-            webSocket = new WebSocket(WS_URL);
-    
-            webSocket.onopen = function() {
-                isConnected = true;
-                isConnecting = false;
-                reconnectAttempts = 0;
-                console.log(`WebSocket connected for admin ${currentUser.id}`);
-                webSocket.send(JSON.stringify({
-                    userId: currentUser.id,
-                    token: authToken
-                }));
-            };
-    
-            webSocket.onmessage = function(event) {
-                try {
-                    const data = JSON.parse(event.data);
-                    if (data.type === "auth") {
-                        if (!data.success) {
-                            console.error("WebSocket auth failed");
-                            closeWebSocket();
-                        }
-                        return;
-                    }
-                    console.log("WebSocket received:", data);
-                    
-                    // Case 1: This is our own message echoed back with tempId
-                    if (data.tempId && pendingMessages.has(data.tempId)) {
-                        // Just update our pending message with any server data, but don't display again
-                        const tempMessage = pendingMessages.get(data.tempId);
-                        if (tempMessage) {
-                            Object.assign(tempMessage, data);
-                        }
-                        return; // Skip displaying this message
-                    }
-                    
-                    // Case 2: This is a server-processed message with an ID
-                    if (data.id) {
-                        // Check if this might be a server confirmation of a pending message
-                        // by comparing sender_id, receiver_id, message content and approximate time
-                        for (let [tempId, pendingMsg] of pendingMessages.entries()) {
-                            if (pendingMsg.sender_id == data.sender_id && 
-                                pendingMsg.receiver_id == data.receiver_id && 
-                                pendingMsg.message == data.message) {
-                                
-                                // This appears to be our message that got confirmed by the server
-                                const tempElement = document.querySelector(`[data-message-id="${tempId}"]`);
-                                if (tempElement) {
-                                    // Update the existing element with the server ID
-                                    tempElement.dataset.messageId = data.id;
-                                    pendingMessages.delete(tempId);
-                                    return; // Skip displaying this message as we already have it
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Case 3: This is a genuinely new message from someone else
-                    if ((selectedUserId === 'all' || 
-                            (data.sender_id == selectedUserId && data.receiver_id == currentUser.id) || 
-                            (data.sender_id == currentUser.id && data.receiver_id == selectedUserId)) &&
-                            !document.querySelector(`[data-message-id="${data.id}"]`)) {
-                        appendMessage(data, selectedUserId === 'all');
-                    }
-                } catch (e) {
-                    console.error("Error parsing WebSocket message:", e);
-                }
-            };
-    
-            webSocket.onerror = function(error) {
-                console.error("WebSocket error:", error);
-                isConnected = false;
-                isConnecting = false;
-                scheduleReconnect();
-            };
-    
-            webSocket.onclose = function(event) {
-                console.log("WebSocket closed:", event.reason);
-                isConnected = false;
-                isConnecting = false;
-                if (event.code !== 1000) scheduleReconnect();
-            };
-        }
-    
-        function scheduleReconnect() {
-            if (reconnectAttempts >= maxReconnectAttempts) {
-                console.error("Max reconnect attempts reached");
-                return;
-            }
-            const delay = 5000 * (reconnectAttempts + 1);
-            reconnectAttempts++;
-            setTimeout(connectWebSocket, delay);
-        }
-    
-        function closeWebSocket() {
-            if (webSocket) {
-                webSocket.close(1000, "Normal closure");
-                webSocket = null;
-            }
-            isConnected = false;
-            isConnecting = false;
-            reconnectAttempts = 0;
-        }
-    
-        // Initialization
-        document.addEventListener('DOMContentLoaded', initialize);
-    
-        async function initialize() {
-            authToken = localStorage.getItem('authToken');
-            currentUser = JSON.parse(localStorage.getItem('user'));
-    
-            if (!authToken || !currentUser || currentUser.roles !== 'admin') {
+        document.addEventListener('DOMContentLoaded', function() {
+            //console.log(apiService);
+            const userId = parseInt(localStorage.getItem('userId')) || -1;
+            const authToken = localStorage.getItem('authToken');
+            const currentUser = JSON.parse(localStorage.getItem('user'));
+        
+            if (userId === -1 || !authToken || !currentUser || currentUser.roles !== 'admin') {
                 window.location.href = '../J-Mab/HTML/sign-in.php';
                 return;
             }
-    
-            document.getElementById('logout-btn').addEventListener('click', logout);
-            document.getElementById('send-btn').addEventListener('click', sendMessage);
-            document.getElementById('message-input').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendMessage();
+        
+            // Verify apiService is available
+            if (!window.apiService || typeof window.apiService.getUsers !== 'function') {
+                console.error('apiService or getUsers is not available');
+                showToast('Error: Messaging service unavailable');
+                return;
+            }
+        
+            // Initialize WebSockets
+            const messageWS = new WebSocketManager(WS_MESSAGE_URL, "message");
+            const notificationWS = new WebSocketManager(WS_NOTIFICATION_URL, "notification");
+        
+            // Connect WebSockets
+            messageWS.connect(userId, authToken, handleMessageReceived);
+            notificationWS.connect(userId, authToken, handleNotificationReceived);
+        
+            // Setup event listeners with null checks
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.addEventListener('click', (event) => logout(event));
+        
+            const sendBtn = document.getElementById('send-btn');
+            if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+        
+            const messageInput = document.getElementById('message-input');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendMessage();
+                });
+            }
+        
+            const notificationIcon = document.getElementById('notificationIcon');
+            if (notificationIcon) {
+                notificationIcon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const dropdown = document.getElementById('notificationDropdown');
+                    if (dropdown) {
+                        const isVisible = dropdown.style.display === 'block';
+                        dropdown.style.display = isVisible ? 'none' : 'block';
+                        if (!isVisible) {
+                            fetchNotifications();
+                            markAllAsRead();
+                        }
+                    }
+                });
+            }
+        
+            // Close notification dropdown when clicking outside
+            window.addEventListener('click', function(e) {
+                const notificationContainer = document.querySelector('.notification-container');
+                const dropdown = document.getElementById('notificationDropdown');
+                if (notificationContainer && dropdown && !notificationContainer.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
             });
-    
+        
+            // Handle visibility change
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+                    const currentAuthToken = localStorage.getItem('authToken');
+                    if (!currentAuthToken || !JSON.parse(localStorage.getItem('user'))) {
+                        handleUnauthorized();
+                    } else {
+                        messageWS.reconnectIfNeeded(userId, currentAuthToken, handleMessageReceived);
+                        notificationWS.reconnectIfNeeded(userId, currentAuthToken, handleNotificationReceived);
+                        if (selectedUserId && selectedUserId !== 'all') {
+                            fetchConversation(userId, selectedUserId);
+                        }
+                        fetchNotifications();
+                    }
+                }
+            });
+        
+            // Cleanup on unload
+            window.addEventListener('beforeunload', () => {
+                messageWS.close();
+                notificationWS.close();
+            });
+        
+            // Initial setup
             displayUserInfo();
-            await fetchUsers();
-            connectWebSocket();
-        }
-    
+            fetchUsers();
+            fetchNotifications();
+        });
+        
         function displayUserInfo() {
+            const currentUser = JSON.parse(localStorage.getItem('user'));
             document.getElementById('user-info').innerHTML = `
                 <h2>Welcome, ${currentUser.first_name} ${currentUser.last_name}</h2>
                 <p>Email: ${currentUser.email}</p>
                 <p>Role: ${currentUser.roles}</p>
             `;
         }
-    
+        
         async function fetchUsers() {
             try {
                 const data = await apiService.getUsers();
                 if (data.success) {
-                    allUsers = data.users.filter(u => u.id !== currentUser.id);
+                    allUsers = data.users.filter(u => u.id !== userId);
                     displayUsers(allUsers);
                 } else {
                     showToast("Failed to load users");
                 }
             } catch (error) {
                 console.error("Error fetching users:", error);
-                if (error.message === "Unauthorized") {
-                    handleUnauthorized();
-                } else {
-                    showToast("Error loading users");
-                }
+                if (error.message === "Unauthorized") handleUnauthorized();
+                else showToast("Error loading users");
             }
         }
-    
+        
         function displayUsers(users) {
             const usersList = document.getElementById('users-list');
             let html = '<div class="user-item active" data-id="all">All Messages</div>';
@@ -757,7 +681,7 @@
             });
             
             usersList.innerHTML = html;
-    
+        
             document.querySelectorAll('.user-item').forEach(item => {
                 item.addEventListener('click', function() {
                     document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
@@ -767,18 +691,18 @@
                     document.getElementById('message-input').disabled = selectedUserId === 'all';
                     
                     if (selectedUserId === 'all') {
-                        document.getElementById('conversation-header').textContent = 'All Messages';
+                        document.getElementById('conversation-header').childNodes[0].textContent = 'All Messages';
                         fetchAllMessages();
                     } else {
                         const user = allUsers.find(u => u.id == selectedUserId);
-                        document.getElementById('conversation-header').textContent = 
+                        document.getElementById('conversation-header').childNodes[0].textContent = 
                             user ? `${user.first_name} ${user.last_name}` : 'Conversation';
-                        fetchConversation(currentUser.id, selectedUserId);
+                        fetchConversation(userId, selectedUserId);
                     }
                 });
             });
         }
-    
+        
         async function fetchAllMessages() {
             try {
                 const data = await apiService.getAllMessages();
@@ -793,11 +717,10 @@
                 showToast("Error loading messages");
             }
         }
-    
+        
         async function fetchConversation(senderId, receiverId) {
             try {
                 const data = await apiService.getConversation(senderId, receiverId);
-                console.log("Conversation data:", data); // Debug log
                 if (data.success) {
                     messagesList = data.messages || [];
                     renderMessages(false);
@@ -809,38 +732,33 @@
                 showToast("Error loading conversation");
             }
         }
-    
+        
         function renderMessages(isAllMessages) {
             const container = document.getElementById('messages-container');
-            container.innerHTML = ''; // Clear existing content
+            container.innerHTML = '';
             
             if (!messagesList || messagesList.length === 0) {
                 container.innerHTML = '<div class="no-user-selected"><p>No messages found</p></div>';
                 return;
             }
-    
-            // Sort messages by timestamp
+        
             messagesList.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-            
-            // Render each message
             messagesList.forEach(message => {
                 const messageDiv = createMessageElement(message, isAllMessages);
                 container.appendChild(messageDiv);
             });
-            
-            // Scroll to bottom
             container.scrollTop = container.scrollHeight;
         }
-    
+        
         function createMessageElement(message, isAllMessages) {
             if (!message) return null;
             
-            const isSent = parseInt(message.sender_id) === currentUser.id;
+            const isSent = parseInt(message.sender_id) === userId;
             const timestamp = formatTimestamp(message.timestamp);
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
             messageDiv.dataset.messageId = message.id || message.tempId;
-
+        
             if (isAllMessages) {
                 const sender = allUsers.find(u => u.id == message.sender_id) || { first_name: 'User', last_name: '' };
                 const receiver = allUsers.find(u => u.id == message.receiver_id) || { first_name: 'User', last_name: '' };
@@ -857,103 +775,225 @@
                     <div class="message-info">${timestamp}</div>
                 `;
             }
-
             return messageDiv;
         }
-    
-        function appendMessage(message, isAllMessages, isNew = true) {
-            if (!message) return;
-
-            const container = document.getElementById('messages-container');
-            const messageId = message.id || message.tempId;
-            
-            // Check if this message already exists
-            const existingMessage = container.querySelector(`[data-message-id="${messageId}"]`);
-            if (existingMessage) return; // Skip if already exists
-            
-            if (isNew && message.id) {
-                messagesList.push(message);
+        
+        function handleMessageReceived(data) {
+            if (!data.id && !data.tempId) {
+                console.warn("[Message] Received invalid message data:", data);
+                return;
             }
-
-            const messageDiv = createMessageElement(message, isAllMessages);
-            if (messageDiv) {
-                container.appendChild(messageDiv);
-                container.scrollTop = container.scrollHeight;
+        
+            if (data.deviceId && data.deviceId !== messageWS.deviceId) {
+                if (!document.querySelector(`[data-message-id="${data.id}"]`)) {
+                    messagesList.push(data);
+                    renderMessages(selectedUserId === 'all');
+                }
+                return;
+            }
+        
+            if (data.tempId && messageWS.pendingMessages.has(data.tempId)) {
+                const tempMessage = messageWS.pendingMessages.get(data.tempId);
+                Object.assign(tempMessage, data);
+                const tempElement = document.querySelector(`[data-message-id="${data.tempId}"]`);
+                if (tempElement && data.id) {
+                    tempElement.dataset.messageId = data.id;
+                    messageWS.pendingMessages.delete(data.tempId);
+                }
+                renderMessages(selectedUserId === 'all');
+                return;
+            }
+        
+            if (data.id) {
+                for (let [tempId, pendingMsg] of messageWS.pendingMessages.entries()) {
+                    if (pendingMsg.sender_id == data.sender_id &&
+                        pendingMsg.receiver_id == data.receiver_id &&
+                        pendingMsg.message == data.message) {
+                        const tempElement = document.querySelector(`[data-message-id="${tempId}"]`);
+                        if (tempElement) {
+                            tempElement.dataset.messageId = data.id;
+                            messageWS.pendingMessages.delete(tempId);
+                            renderMessages(selectedUserId === 'all');
+                            return;
+                        }
+                    }
+                }
+            }
+        
+            if ((selectedUserId === 'all' || 
+                (data.sender_id == selectedUserId && data.receiver_id == userId) ||
+                (data.sender_id == userId && data.receiver_id == selectedUserId)) &&
+                !document.querySelector(`[data-message-id="${data.id}"]`)) {
+                appendMessage(data, selectedUserId === 'all');
             }
         }
-    
+        
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const messageText = input.value.trim();
+        
+            if (!messageText || !selectedUserId || selectedUserId === 'all') {
+                if (selectedUserId === 'all') showToast("Cannot send to all messages");
+                return;
+            }
+        
+            const tempId = addLocalMessage(messageText);
+            input.value = '';
+        
+            const messageRequest = {
+                sender_id: userId,
+                receiver_id: selectedUserId,
+                message: messageText,
+                tempId: tempId,
+                deviceId: messageWS.deviceId
+            };
+        
+            try {
+                const apiResponse = await apiService.sendMessage(messageRequest);
+                if (!apiResponse.success) {
+                    showToast("Failed to send message via API");
+                    fetchConversation(userId, selectedUserId);
+                } else {
+                    messageWS.send({
+                        type: "message",
+                        sender_id: userId,
+                        receiver_id: selectedUserId,
+                        message: messageText,
+                        id: apiResponse.message_id || tempId,
+                        timestamp: new Date().toISOString(),
+                        deviceId: messageWS.deviceId
+                    });
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+                showToast(error.message.includes("Unauthorized") ? 
+                    "Session expired. Please log in again." : `Network error: ${error.message}`);
+                fetchConversation(userId, selectedUserId);
+            }
+        }
+        
         function addLocalMessage(text) {
-            const tempId = `temp-${Date.now()}`; // Unique temporary ID
+            const tempId = `temp-${Date.now()}-${messageWS.deviceId}`;
             const tempMessage = {
                 tempId: tempId,
-                sender_id: currentUser.id,
+                sender_id: userId,
                 receiver_id: selectedUserId,
                 message: text,
                 timestamp: new Date().toISOString(),
                 status: "sent",
-                is_read: 0
+                is_read: 0,
+                deviceId: messageWS.deviceId
             };
-            
-            pendingMessages.set(tempId, tempMessage);
+        
+            messageWS.pendingMessages.set(tempId, tempMessage);
             appendMessage(tempMessage, selectedUserId === 'all');
             return tempId;
         }
-    
-        async function sendMessage() {
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-
-            if (!message || !selectedUserId || selectedUserId === 'all') {
-                if (selectedUserId === 'all') showToast("Cannot send to all messages");
-                return;
+        
+        function appendMessage(message, isAllMessages) {
+            if (!message) return;
+            const container = document.getElementById('messages-container');
+            const messageId = message.id || message.tempId;
+            
+            if (!document.querySelector(`[data-message-id="${messageId}"]`)) {
+                messagesList.push(message);
+                const messageDiv = createMessageElement(message, isAllMessages);
+                if (messageDiv) {
+                    container.appendChild(messageDiv);
+                    container.scrollTop = container.scrollHeight;
+                }
             }
-
-            const tempId = addLocalMessage(message);
-            input.value = '';
-
-            const messageRequest = {
-                sender_id: currentUser.id,
-                receiver_id: selectedUserId,
-                message: message,
-                tempId: tempId // Include tempId for WebSocket tracking
-            };
-
+        }
+        
+        function handleNotificationReceived(data) {
+            const existingIndex = notificationsList.findIndex(n => n.id === data.id);
+            if (existingIndex >= 0) {
+                notificationsList[existingIndex] = data;
+            } else {
+                notificationsList.unshift(data);
+            }
+            renderNotifications();
+            playNotificationSound();
+        }
+        
+        async function fetchNotifications() {
             try {
-                const timestamp = new Date().toISOString();
-                if (webSocket && isConnected) {
-                    webSocket.send(JSON.stringify({
-                        ...messageRequest,
-                        timestamp: timestamp,
-                        token: authToken
-                    }));
-                }
-
-                const response = await apiService.sendMessage(messageRequest);
-                if (!response.success) {
-                    showToast("Failed to send message: " + (response.errors?.join(', ') || "Unknown error"));
-                    fetchConversation(currentUser.id, selectedUserId);
-                }
+                const notifications = await apiService.fetchNotifications(userId);
+                notificationsList = notifications.sort((a, b) => 
+                    new Date(b.created_at) - new Date(a.created_at));
+                renderNotifications();
             } catch (error) {
-                console.error("Error sending message:", error);
-                fetchConversation(currentUser.id, selectedUserId);
-                showToast("Error sending message: " + error.message);
+                console.error('Error fetching notifications:', error);
             }
         }
-    
-        function formatTimestamp(timestamp) {
+        
+        async function markAllAsRead() {
             try {
-                return new Date(timestamp).toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-            } catch (e) {
-                return new Date().toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
+                const unreadNotifications = notificationsList.filter(n => n.is_read === 0);
+                for (const notification of unreadNotifications) {
+                    await apiService.markNotificationAsRead(notification.id);
+                    notification.is_read = 1;
+                }
+                renderNotifications();
+            } catch (error) {
+                console.error('Failed to mark notifications as read:', error);
             }
         }
-    
+        
+        function renderNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            const notificationBadge = document.getElementById('notificationBadge');
+        
+            if (!notificationList || !notificationBadge) return;
+        
+            notificationList.innerHTML = '';
+        
+            if (notificationsList.length === 0) {
+                notificationList.innerHTML = '<li class="notification-empty">No notifications</li>';
+            } else {
+                notificationsList.forEach(notification => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="${notification.is_read ? '' : 'unread-notification'}">
+                            <strong>${notification.title || 'Notification'}</strong>
+                            <p>${notification.message}</p>
+                            <small>${formatNotificationTimestamp(notification.created_at)}</small>
+                        </div>
+                    `;
+                    if (!notification.is_read) {
+                        li.style.cursor = 'pointer';
+                        li.addEventListener('click', async () => {
+                            await apiService.markNotificationAsRead(notification.id);
+                            notification.is_read = 1;
+                            renderNotifications();
+                        });
+                    }
+                    notificationList.appendChild(li);
+                });
+            }
+        
+            const unreadCount = notificationsList.filter(n => n.is_read === 0).length;
+            notificationBadge.textContent = unreadCount;
+            notificationBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+        }
+        
+        function formatTimestamp(timestamp) {
+            return new Date(timestamp).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+        
+        function formatNotificationTimestamp(timestamp) {
+            return new Date(timestamp).toLocaleString([], { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+        
         function showToast(message) {
             let toast = document.getElementById('toast');
             if (!toast) {
@@ -961,44 +1001,40 @@
                 toast.id = 'toast';
                 document.body.appendChild(toast);
             }
-            
             toast.textContent = message;
             toast.className = 'show';
-            setTimeout(() => {
-                toast.className = toast.className.replace('show', '');
-            }, 3000);
+            setTimeout(() => toast.className = toast.className.replace('show', ''), 3000);
         }
-    
+        
         function handleUnauthorized() {
-            closeWebSocket();
+            messageWS.close();
+            notificationWS.close();
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             showToast("Session expired. Please log in again.");
-            setTimeout(() => {
+            setTimeout(() => window.location.href = '../J-Mab/HTML/sign-in.php', 2000);
+        }
+        
+        function logout(event) {
+            event.preventDefault();
+            const confirmLogout = window.confirm("Are you sure you want to log out?");
+            if (confirmLogout) {
+                messageWS.close();
+                notificationWS.close();
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
                 window.location.href = '../J-Mab/HTML/sign-in.php';
-            }, 2000);
-        }
-    
-        function logout() {
-            closeWebSocket();
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
-            window.location.href = '../J-Mab/HTML/sign-in.php';
-        }
-    
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible') {
-                authToken = localStorage.getItem('authToken');
-                currentUser = JSON.parse(localStorage.getItem('user'));
-                if (!authToken || !currentUser || currentUser.roles !== 'admin') {
-                    handleUnauthorized();
-                } else if (!isConnected) {
-                    connectWebSocket();
-                }
             }
-        });
-    
-        window.addEventListener('beforeunload', closeWebSocket);
+        }
+        
+        function playNotificationSound() {
+            try {
+                const audio = new Audio('../sounds/notification.mp3');
+                audio.play();
+            } catch (error) {
+                console.error('Error playing notification sound:', error);
+            }
+        }
     </script>
 </body>
 </html>

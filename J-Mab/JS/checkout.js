@@ -15,6 +15,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("User ID:", userId);
     console.log("Auth Token:", authToken);
 
+    // Initialize WebSocket for notifications
+    const notificationWS = new WebSocketManager("ws://localhost:8081/final-jmab/api", "notification");
+    notificationWS.connect(userId, authToken, (data) => {
+        console.log("[Notification] Received on checkout page:", data);
+    });
+
     await fetchUserAndPopulateAddresses();
 
     if (productId) {
@@ -23,8 +29,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         await fetchSelectedCartItems();
     }
 
-    document.querySelector(".confirm-btn").addEventListener("click", checkout);
+    document.querySelector(".confirm-btn").addEventListener("click", () => checkout(notificationWS));
     checkPendingPayments(userId);
+
+    // Cleanup WebSocket on unload
+    window.addEventListener("beforeunload", () => {
+        notificationWS.close();
+    });
 });
 
 class PaymentDataManager {
@@ -52,13 +63,22 @@ async function fetchUserAndPopulateAddresses() {
     const userId = localStorage.getItem("userId");
     const authToken = localStorage.getItem("authToken");
     const addressSelect = document.getElementById("address-id");
+    const fullNameInput = document.getElementById("full-name");
+    const addAddressBtn = document.getElementById("add-address-btn"); 
     
-    console.log("Fetching user data for address population...");
-    
-    if (!addressSelect) {
-        console.error("Could not find address-id select element!");
+    console.log("Fetching user data for address population and full name...");
+    console.log("userId:", userId);
+    console.log("authToken:", authToken);
+
+    if (!addressSelect || !fullNameInput || !addAddressBtn) {
+        console.error("Could not find DOM elements - addressSelect:", addressSelect, "fullNameInput:", fullNameInput, "addAddressBtn:", addAddressBtn);
         return;
     }
+
+    addAddressBtn.addEventListener("click", () => {
+        console.log("Add address button clicked");
+        window.location.href = "../HTML/address.html"; // Redirect to address management page
+    });
 
     try {
         const response = await fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
@@ -74,6 +94,22 @@ async function fetchUserAndPopulateAddresses() {
         const data = await response.json();
         console.log("User data response:", data);
 
+        // Populate full name
+        if (data.success && data.user) {
+            const fullName = data.user.full_name || data.user.name || `${data.user.first_name || ''} ${data.user.last_name || ''}`.trim();
+            if (fullName) {
+                fullNameInput.value = fullName;
+                console.log(`Full name set to: "${fullName}"`);
+            } else {
+                console.warn("No full name found in user data:", data.user);
+                fullNameInput.value = "";
+            }
+        } else {
+            console.warn("Invalid response structure or no user data:", data);
+            fullNameInput.value = "";
+        }
+
+        // Populate addresses
         addressSelect.innerHTML = '<option value="">Select an address</option>';
         
         if (data.success && data.user && data.user.addresses && data.user.addresses.length > 0) {
@@ -94,6 +130,7 @@ async function fetchUserAndPopulateAddresses() {
     } catch (error) {
         console.error("Error fetching user data:", error);
         addressSelect.innerHTML = '<option value="">Failed to load addresses</option>';
+        fullNameInput.value = "";
     }
 }
 
@@ -227,7 +264,7 @@ function updateOrderSummaryFromCart(cartItems) {
     document.getElementById("total").textContent = `₱${(subtotal + 50).toFixed(2)}`;
 }
 
-async function checkout() {
+async function checkout(notificationWS) {
     const userId = localStorage.getItem("userId");
     const authToken = localStorage.getItem("authToken");
     
@@ -290,6 +327,19 @@ async function checkout() {
 
         if (response.ok && result.success) {
             localStorage.removeItem("selectedCartIds");
+
+            // Send notification to admins via WebSocket
+            const notificationData = {
+                type: "order_update",
+                title: "New Order Placed",
+                message: `Order #${result.order_id} has been created by ${shippingInfo.full_name}.`,
+                order_id: result.order_id,
+                user_id: userId, // Sender (customer)
+                created_at: new Date().toISOString(),
+                is_read: 0
+            };
+            notificationWS.send(notificationData);
+            console.log("Notification sent to admins:", notificationData);
 
             if (shippingInfo.payment_method === "gcash" && result.payment_link) {
                 PaymentDataManager.storePaymentData(

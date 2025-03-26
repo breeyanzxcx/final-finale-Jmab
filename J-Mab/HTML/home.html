@@ -6,9 +6,11 @@
   <title>Home</title>
   <link rel="stylesheet" href="../CSS/home.css">
   <link rel="stylesheet" href="../CSS/message.css">
+  <link rel="stylesheet" href="../CSS/notification.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
   <nav class="navbar">
@@ -33,10 +35,10 @@
       </a>
 
       <div class="notification-wrapper">
-        <a href="#" class="notification-icon" onclick="toggleNotificationDropdown(event)">
+        <a href="#" class="notification-icon" id="notificationIcon">
           <img src="../imahe/notifications.png" alt="Notification Icon">
-          <span class="notification-badge">0</span>
-        </a> 
+          <span class="notification-badge" id="notificationBadge">0</span>
+        </a>
         <div class="notification-dropdown" id="notificationDropdown">
           <h4>Notifications</h4>
           <ul id="notificationList">
@@ -59,24 +61,23 @@
   <div class="messenger-wrapper">
     <div class="messenger-box" id="messengerBox">
       <div class="messenger-header">
-        <select id="contactSelect">
-          <option value="support">Customer Support</option>
-          <option value="john">John Doe</option>
-          <option value="jane">Jane Smith</option>
-          <option value="mike">Mike Johnson</option>
-        </select>
+        Chat with <span id="connectionStatus" class="status-disconnected">Disconnected</span>
         <div class="messenger-actions">
           <span onclick="toggleMessenger(event)">×</span>
         </div>
       </div>
       <div class="messenger-body" id="messengerBody">
+        <div id="noMessageIcon" style="display: none;">
+          <i class="fas fa-comments"></i>
+        </div>
+        <div id="startConvoTV" style="display: none;">Start a conversation</div>
         <ul class="message-list" id="messageList">
           <!-- Messages will be populated by JS -->
         </ul>
       </div>
       <div class="message-input">
         <input type="text" id="messageInput" placeholder="Type a message...">
-        <button onclick="sendMessage()">Send</button>
+        <button id="btn_send">Send</button>
       </div>
     </div>
   </div>
@@ -131,70 +132,31 @@
     </div>
   </div>
 
+  <!-- Toast Notification -->
+  <div id="toast"></div>
+
   <script src="../JS/logout.js"></script>
-  <script src="../JS/notification.js"></script>
-  <script src="../JS/message.js"></script>
+  <script src="../JS/websocketManager.js"></script>
   <script>
     function toggleDropdown() {
       const dropdown = document.getElementById('profileDropdown');
       dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
     }
 
-    function toggleNotificationDropdown(event) {
-      event.preventDefault();
-      const dropdown = document.getElementById("notificationDropdown");
-      dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-      if (dropdown.style.display === "block") fetchNotifications();
-    }
-
-    async function fetchNotifications() {
-      const userId = localStorage.getItem("userId");
-      const authToken = localStorage.getItem("authToken");
-      if (!userId) {
-        console.error("User ID not found in localStorage.");
-        return;
-      }
-
-      try {
-        const response = await fetch(`http://localhost/jmab/final-jmab/api/notifications/user/${userId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${authToken}`
-          }
-        });
-
-        const data = await response.json();
-        const notificationList = document.getElementById("notificationList");
-        notificationList.innerHTML = "";
-
-        if (data.success && data.notifications.length > 0) {
-          data.notifications.forEach(notification => {
-            const li = document.createElement("li");
-            li.textContent = `${notification.title}: ${notification.message}`;
-            notificationList.appendChild(li);
-          });
-        } else {
-          notificationList.innerHTML = "<li>No new notifications.</li>";
-        }
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    }
-
     window.addEventListener('click', function (e) {
       const profileButton = document.querySelector('.profile-button');
-      const dropdown = document.getElementById('profileDropdown');
-      const notificationDropdown = document.getElementById("notificationDropdown");
+      const profileDropdown = document.getElementById('profileDropdown');
+      const notificationDropdown = document.getElementById('notificationDropdown');
       const messengerBox = document.getElementById('messengerBox');
       const messageIcon = document.querySelector('.action-icons a[href="#"] img[src="../imahe/message.png"]');
+      const notificationIcon = document.getElementById('notificationIcon');
 
-      if (!profileButton.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.style.display = 'none';
+      if (!profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
+        profileDropdown.style.display = 'none';
       }
 
-      if (!e.target.closest('.notification-icon') && !notificationDropdown.contains(e.target)) {
-        notificationDropdown.style.display = "none";
+      if (!notificationIcon.contains(e.target) && !notificationDropdown.contains(e.target)) {
+        notificationDropdown.style.display = 'none';
       }
 
       if (messengerBox.style.display === 'block' && 
