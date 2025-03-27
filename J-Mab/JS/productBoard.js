@@ -163,6 +163,7 @@ function handleProductVariants(product) {
         updateButtonStates(parseInt(product.stock) || 0);
         fetchAndDisplayVariantRating(null);
     }
+
 }
 
 async function fetchAndDisplayVariantRating(variantId) {

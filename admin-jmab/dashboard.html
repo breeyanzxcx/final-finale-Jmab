@@ -199,11 +199,34 @@
         font-weight: bold;
         border-radius: 10px;
         color: white;
-        justify-content: space-between;
+        justify-content: space-between; /* Changed from space-between to center */
         box-shadow: var(--shadow);
         transition: var(--transition);
+        text-align: center; /* Add text alignment */
     }
     
+    .sales-info, .customers-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        flex: 1; /* Take remaining space */
+    }
+
+    .icon {
+        font-size: 30px;
+        margin-right: 15px; /* Add space between icon and content */
+    }
+
+    .sales-counter, .customers-counter {
+        font-size: 28px;
+    }
+
+    .sales-text, .customers-text {
+        font-size: 16px;
+        font-weight: normal;
+    }
+
     .TotalSales {
         background: linear-gradient(45deg, #ff4d4d, #d32f2f);
     }
@@ -365,9 +388,30 @@
     border-bottom: 1px solid #eee;
     font-size: 14px;
     transition: background-color 0.2s;
-    word-wrap: break-word; /* Ensure text wraps */
-    overflow-wrap: break-word; /* Modern standard for word wrapping */
-    max-width: 100%; /* Limit width to container */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: flex; /* Flexbox for layout */
+    justify-content: space-between; /* Space between content and trash */
+    align-items: center; /* Limit width to container */
+}
+
+.notification-dropdown ul li .notification-content {
+    flex-grow: 1; /* Allow content to take available space */
+    max-width: calc(100% - 40px); /* Reserve space for trash icon */
+}
+
+.notification-dropdown ul li .trash-icon {
+    font-size: 16px;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 5px;
+    transition: var(--transition);
+}
+
+.notification-dropdown ul li .trash-icon:hover {
+    color: var(--danger-hover);
+    transform: scale(1.1);
 }
 
 .notification-dropdown ul li:hover {
@@ -598,8 +642,6 @@
         </div>
     </div>
 </div>
-
-
         <div class="notification-container">
             <div class="notification-icon" id="notificationIcon">
                 <i class="fas fa-bell"></i>
@@ -617,21 +659,21 @@
         <div id="dashboard-content" class="content-section">
             <h1>DASHBOARD</h1>
             <div class="boxes">
-                <div class="TotalSales">
-                    <i class="fa-solid fa-chart-line icon"></i>
-                    <div class="sales-info">
-                        <span class="sales-counter">0</span>
-                        <span class="sales-text">Sales</span>
-                    </div>
-                </div>
-                <div class="TotalCustomers">
-                    <i class="fa-solid fa-user icon"></i> 
-                    <div class="customers-info">
-                        <span class="customers-counter">0</span>
-                        <span class="customers-text">Customers</span>
-                    </div>
-                </div>
-            </div>
+    <div class="TotalSales">
+        <i class="fa-solid fa-chart-line icon"></i>
+        <div class="sales-info">
+            <span class="sales-counter">0</span>
+            <span class="sales-text">Sales</span>
+        </div>
+    </div>
+    <div class="TotalCustomers">
+        <i class="fa-solid fa-user icon"></i>
+        <div class="customers-info">
+            <span class="customers-counter">0</span>
+            <span class="customers-text">Customers</span>
+        </div>
+    </div>
+</div>
             
             <div class="orders-container">
                 <h2>Recent Orders</h2>
@@ -663,15 +705,20 @@
             </div>
         </div>
     </main>
+    
     <script src="JS/dashboard.js"></script>
     <script src="../J-Mab/JS/websocketManager.js"></script>
+
 <script>
+    let notificationList = [];
+
     document.addEventListener('DOMContentLoaded', function() {
         const userId = parseInt(localStorage.getItem('userId')) || -1;
         const authToken = localStorage.getItem('authToken');
 
         if (userId === -1 || !authToken) {
             console.error('User not authenticated');
+            window.location.href = '../J-Mab/HTML/sign-in.php';
             return;
         }
 
@@ -773,42 +820,74 @@
             }
         }
 
-        function renderNotifications() {
-            const notificationList = document.getElementById('notificationList');
-            const notificationBadge = document.getElementById('notificationBadge');
-
-            if (!notificationList || !notificationBadge) return;
-
-            notificationList.innerHTML = '';
-
-            if (notificationsList.length === 0) {
-                notificationList.innerHTML = '<li class="notification-empty">No notifications</li>';
-            } else {
-                notificationsList.forEach(notification => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <div class="${notification.is_read ? '' : 'unread-notification'}">
-                            <strong>${notification.title || 'Notification'}</strong>
-                            <p>${notification.message}</p>
-                            <small>${formatNotificationTimestamp(notification.created_at)}</small>
-                        </div>
-                    `;
-                    if (!notification.is_read) {
-                        li.style.cursor = 'pointer';
-                        li.addEventListener('click', async () => {
-                            await apiService.markNotificationAsRead(notification.id);
-                            notification.is_read = 1;
-                            renderNotifications();
-                        });
+        async function deleteNotification(notificationId) {
+            try {
+                const response = await fetch(`http://localhost/jmab/final-jmab/api/notifications/${notificationId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        "Authorization": `Bearer ${authToken}`
                     }
-                    notificationList.appendChild(li);
+                });
+                const data = await response.json();
+                if (data.success) {
+                    notificationsList = notificationsList.filter(n => n.id !== notificationId);
+                    renderNotifications();
+                    console.log(`Notification ${notificationId} deleted successfully`);
+                } else {
+                    console.error('Failed to delete notification:', data.message);
+                }
+            } catch (error) {
+                console.error('Error deleting notification:', error);
+            }
+        }
+
+       function renderNotifications() {
+    const notificationList = document.getElementById('notificationList');
+    const notificationBadge = document.getElementById('notificationBadge');
+
+    if (!notificationList || !notificationBadge) return;
+
+    notificationList.innerHTML = '';
+
+    if (notificationsList.length === 0) {
+        notificationList.innerHTML = '<li class="notification-empty">No notifications</li>';
+    } else {
+        notificationsList.forEach(notification => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="notification-content ${notification.is_read ? '' : 'unread-notification'}">
+                    <strong>${notification.title || 'Notification'}</strong>
+                    <p>${notification.message}</p>
+                    <small>${formatNotificationTimestamp(notification.created_at)}</small>
+                </div>
+                <div class="trash-icon" data-notification-id="${notification.id}">
+                    <i class="fas fa-trash"></i>
+                </div>
+            `;
+            
+            if (!notification.is_read) {
+                li.querySelector('.notification-content').style.cursor = 'pointer';
+                li.querySelector('.notification-content').addEventListener('click', async () => {
+                    await apiService.markNotificationAsRead(notification.id);
+                    notification.is_read = 1;
+                    renderNotifications();
                 });
             }
 
-            const unreadCount = notificationsList.filter(n => n.is_read === 0).length;
-            notificationBadge.textContent = unreadCount;
-            notificationBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
-        }
+            // Add event listener to trash icon
+            li.querySelector('.trash-icon').addEventListener('click', (e) => {
+                const notificationId = e.currentTarget.getAttribute('data-notification-id');
+                deleteNotification(parseInt(notificationId));
+            });
+
+            notificationList.appendChild(li);
+        });
+    }
+
+    const unreadCount = notificationsList.filter(n => n.is_read === 0).length;
+    notificationBadge.textContent = unreadCount;
+    notificationBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+}
 
         function formatNotificationTimestamp(timestamp) {
             return new Date(timestamp).toLocaleString([], { 

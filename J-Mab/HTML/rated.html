@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To Rate</title>
+  <title>RATED</title>
   <link rel="stylesheet" href="../CSS/purchases.css">
   <link rel="stylesheet" href="../CSS/message.css">
   <link rel="icon" type="image/x-icon" href="../imahe/jmab no bg.png">
@@ -26,7 +26,7 @@
 
     <div class="action-icons">
       <a href="../HTML/userCart.html">
-          <img src="../imahe/cart.png" alt="Cart Icon">
+        <img src="../imahe/cart.png" alt="Cart Icon">
       </a>
 
       <a href="#" onclick="toggleMessenger(event)">
@@ -45,9 +45,9 @@
           </ul>
         </div>
       </div>
-      
+
       <div class="profile-button" onclick="toggleDropdown()">
-          <img src="../imahe/prof.png" alt="Profile Icon">
+        <img src="../imahe/prof.png" alt="Profile Icon">
       </div>
       <div class="profile-dropdown" id="profileDropdown">
         <a href="../HTML/profile.html">My Profile</a>
@@ -55,32 +55,33 @@
       </div>
     </div>
   </nav>
-    <!-- Messenger Popup -->
-    <div class="messenger-wrapper">
-      <div class="messenger-box" id="messengerBox">
-        <div class="messenger-header">
-          <select id="contactSelect">
-            <option value="support">Customer Support</option>
-            <option value="john">John Doe</option>
-            <option value="jane">Jane Smith</option>
-            <option value="mike">Mike Johnson</option>
-          </select>
-          <div class="messenger-actions">
-            <span onclick="toggleMessenger(event)">×</span>
-          </div>
-        </div>
-        <div class="messenger-body" id="messengerBody">
-          <ul class="message-list" id="messageList">
-            <!-- Messages will be populated by JS -->
-          </ul>
-        </div>
-        <div class="message-input">
-          <input type="text" id="messageInput" placeholder="Type a message...">
-          <button onclick="sendMessage()">Send</button>
+
+  <!-- Messenger Popup -->
+  <div class="messenger-wrapper">
+    <div class="messenger-box" id="messengerBox">
+      <div class="messenger-header">
+        <select id="contactSelect">
+          <option value="support">Customer Support</option>
+          <option value="john">John Doe</option>
+          <option value="jane">Jane Smith</option>
+          <option value="mike">Mike Johnson</option>
+        </select>
+        <div class="messenger-actions">
+          <span onclick="toggleMessenger(event)">×</span>
         </div>
       </div>
+      <div class="messenger-body" id="messengerBody">
+        <ul class="message-list" id="messageList">
+          <!-- Messages will be populated by JS -->
+        </ul>
+      </div>
+      <div class="message-input">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
     </div>
-  
+  </div>
+
   <div class="container">
     <div class="sidebar">
       <h3>MY ACCOUNT</h3>
@@ -103,24 +104,26 @@
       <a href="../HTML/toReceive.html">
         <img src="../imahe/truck(blue).png" alt="Receive Icon" class="sidebar-icon"> TO RECEIVE
       </a>
-      <a href="../HTML/toRate.html" class="active">
+      <a href="../HTML/toRate.html">
         <img src="../imahe/star(blue).png" alt="Rate Icon" class="sidebar-icon"> TO RATE
       </a>
       <a href="../HTML/cancelled.html">
         <img src="../imahe/canceled(blue).png" alt="Cancel Icon" class="sidebar-icon"> CANCELLED
       </a>
+      <a href="../HTML/rated.html" class="active">
+        <img src="../imahe/star(blue).png" alt="Rate Icon" class="sidebar-icon"> RATED
+      </a>
     </div>
-
     <div class="main-content">
       <div class="tabs">
         <a href="../HTML/purchases.html" class="tab">ALL ITEMS</a>
         <a href="../HTML/toPay.html" class="tab">TO PAY</a>
         <a href="../HTML/toShip.html" class="tab">TO SHIP</a>
         <a href="../HTML/toReceive.html" class="tab">TO RECEIVE</a>
-        <a href="../HTML/toRate.html" class="tab active">TO RATE</a>
+        <a href="../HTML/toRate.html" class="tab">TO RATE</a>
         <a href="../HTML/cancelled.html" class="tab">CANCELLED</a>
+        <a href="../HTML/rated.html" class="tab active">RATED</a>
       </div>
-      
       <div class="content-area">
         <!-- Placeholder for content -->
         <p>No items to display.</p>
@@ -131,34 +134,17 @@
   <!-- Custom Logout Pop-Up -->
   <div id="logoutPopup" class="popup">
     <div class="popup-content">
-        <h3>Logout Confirmation</h3>
-        <p>Are you sure you want to log out?</p>
-        <div class="popup-buttons">
-            <button id="confirmLogout" class="popup-btn confirm">Yes</button>
-            <button id="cancelLogout" class="popup-btn cancel">No</button>
-        </div>
-    </div>
-</div>
-
-<div id="ratingModal" class="popup">
-  <div class="popup-content">
-      <span class="close">&times;</span>
-      <h3>Rate Product</h3>
-      <p>Please rate your experience:</p>
-      <div class="star-rating">
-          <span class="star" data-value="1">★</span>
-          <span class="star" data-value="2">★</span>
-          <span class="star" data-value="3">★</span>
-          <span class="star" data-value="4">★</span>
-          <span class="star" data-value="5">★</span>
+      <h3>Logout Confirmation</h3>
+      <p>Are you sure you want to log out?</p>
+      <div class="popup-buttons">
+        <button id="confirmLogout" class="popup-btn confirm">Yes</button>
+        <button id="cancelLogout" class="popup-btn cancel">No</button>
       </div>
-      <button id="submitRating" class="popup-btn confirm">Submit Rating</button>
+    </div>
   </div>
-</div>
 
   <script src="../JS/orderDisplay.js"></script>
   <script src="../JS/logout.js"></script>
-  <script src="../JS/rating.js"></script>
   <script src="../JS/message.js"></script>
   <script src="../JS/websocketManager.js"></script>
   <script>

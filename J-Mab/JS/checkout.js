@@ -15,28 +15,52 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("User ID:", userId);
     console.log("Auth Token:", authToken);
 
-    // Initialize WebSocket for notifications
-    const notificationWS = new WebSocketManager("ws://localhost:8081/final-jmab/api", "notification");
-    notificationWS.connect(userId, authToken, (data) => {
-        console.log("[Notification] Received on checkout page:", data);
-    });
-
     await fetchUserAndPopulateAddresses();
 
+    let checkoutItems = []; // Store items for notification
     if (productId) {
-        await fetchBuyNowItem(productId, quantity);
+        checkoutItems = await fetchBuyNowItem(productId, quantity);
     } else {
-        await fetchSelectedCartItems();
+        checkoutItems = await fetchSelectedCartItems();
     }
 
-    document.querySelector(".confirm-btn").addEventListener("click", () => checkout(notificationWS));
+    document.querySelector(".confirm-btn").addEventListener("click", () => checkout(checkoutItems));
     checkPendingPayments(userId);
-
-    // Cleanup WebSocket on unload
-    window.addEventListener("beforeunload", () => {
-        notificationWS.close();
-    });
 });
+
+async function sendAdminNotification(userId, fullName, checkoutItems) {
+    const authToken = localStorage.getItem("authToken");
+    
+    try {
+        // Construct the product list for the notification
+        const itemsList = checkoutItems.map(item => 
+            `${item.product_name || item.name || "Unknown Product"}`
+        ).join(", ");
+
+        const notificationData = {
+            user_id: 1, // Admin user ID (adjust as needed)
+            title: "New Order!",
+            message: `Order placed by User ID ${userId} and Username ${fullName} Products: ${itemsList}`
+        };
+
+        const response = await fetch("http://localhost/jmab/final-jmab/api/notifications", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json", 
+                "Authorization": `Bearer ${authToken}` 
+            },
+            body: JSON.stringify(notificationData)
+        });
+
+        const result = await response.json();
+        console.log("Admin Notification Result:", result);
+
+        return result.success;
+    } catch (error) {
+        console.error("Error sending admin notification:", error);
+        return false;
+    }
+}
 
 class PaymentDataManager {
     static storePaymentData(orderId, paymentMethod, paymentLink) {
@@ -77,7 +101,7 @@ async function fetchUserAndPopulateAddresses() {
 
     addAddressBtn.addEventListener("click", () => {
         console.log("Add address button clicked");
-        window.location.href = "../HTML/address.html"; // Redirect to address management page
+        window.location.href = "../HTML/address.html";
     });
 
     try {
@@ -94,7 +118,6 @@ async function fetchUserAndPopulateAddresses() {
         const data = await response.json();
         console.log("User data response:", data);
 
-        // Populate full name
         if (data.success && data.user) {
             const fullName = data.user.full_name || data.user.name || `${data.user.first_name || ''} ${data.user.last_name || ''}`.trim();
             if (fullName) {
@@ -109,7 +132,6 @@ async function fetchUserAndPopulateAddresses() {
             fullNameInput.value = "";
         }
 
-        // Populate addresses
         addressSelect.innerHTML = '<option value="">Select an address</option>';
         
         if (data.success && data.user && data.user.addresses && data.user.addresses.length > 0) {
@@ -146,16 +168,25 @@ async function fetchBuyNowItem(productId, quantity) {
                 const price = product.variants && product.variants.length > 0 
                     ? parseFloat(product.variants[0].price) || 0 
                     : parseFloat(product.price) || 0;
-                const normalizedProduct = { ...product, price, quantity };
+                const normalizedProduct = { 
+                    ...product, 
+                    price, 
+                    quantity,
+                    product_name: product.product_name || product.name || "Unknown Product",
+                    variant_size: product.variants && product.variants.length > 0 ? product.variants[0].size : "N/A"
+                };
                 displaySelectedItems([normalizedProduct]);
                 updateOrderSummary(price, quantity);
+                return [normalizedProduct]; // Return item for notification
             } else {
                 document.getElementById("selected-items-container").innerHTML = "<p>Product not found.</p>";
+                return [];
             }
         }
     } catch (error) {
         console.error("Error fetching product:", error);
         document.getElementById("selected-items-container").innerHTML = "<p>Failed to load product.</p>";
+        return [];
     }
 }
 
@@ -181,21 +212,27 @@ async function fetchSelectedCartItems() {
                 selectedCartIds.includes(item.cart_id.toString())
             ).map(item => ({
                 ...item,
-                price: parseFloat(item.variant_price) || 0
+                price: parseFloat(item.variant_price) || 0,
+                product_name: item.product_name || "Unknown Product",
+                variant_size: item.variant_size || "N/A"
             }));
             
             if (selectedItems.length > 0) {
                 displaySelectedItems(selectedItems);
                 updateOrderSummaryFromCart(selectedItems);
+                return selectedItems; // Return items for notification
             } else {
                 document.getElementById("selected-items-container").innerHTML = "<p>No items selected.</p>";
+                return [];
             }
         } else {
             document.getElementById("selected-items-container").innerHTML = "<p>Your cart is empty.</p>";
+            return [];
         }
     } catch (error) {
         console.error("Error fetching cart items:", error);
         document.getElementById("selected-items-container").innerHTML = "<p>Failed to load cart items.</p>";
+        return [];
     }
 }
 
@@ -264,7 +301,7 @@ function updateOrderSummaryFromCart(cartItems) {
     document.getElementById("total").textContent = `₱${(subtotal + 50).toFixed(2)}`;
 }
 
-async function checkout(notificationWS) {
+async function checkout(checkoutItems) {
     const userId = localStorage.getItem("userId");
     const authToken = localStorage.getItem("authToken");
     
@@ -326,20 +363,10 @@ async function checkout(notificationWS) {
         console.log("Order result:", result);
 
         if (response.ok && result.success) {
-            localStorage.removeItem("selectedCartIds");
+            // Send admin notification with product details
+            await sendAdminNotification(userId, shippingInfo.full_name, checkoutItems);
 
-            // Send notification to admins via WebSocket
-            const notificationData = {
-                type: "order_update",
-                title: "New Order Placed",
-                message: `Order #${result.order_id} has been created by ${shippingInfo.full_name}.`,
-                order_id: result.order_id,
-                user_id: userId, // Sender (customer)
-                created_at: new Date().toISOString(),
-                is_read: 0
-            };
-            notificationWS.send(notificationData);
-            console.log("Notification sent to admins:", notificationData);
+            localStorage.removeItem("selectedCartIds");
 
             if (shippingInfo.payment_method === "gcash" && result.payment_link) {
                 PaymentDataManager.storePaymentData(

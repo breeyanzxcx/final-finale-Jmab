@@ -61,9 +61,7 @@
       <img src="../imahe/j-mab.png" alt="J-MAB Logo">
       <span>J-MAB</span>
     </div> 
-    <div class="help-link">
-      <a href="#">Need Help?</a>
-    </div>
+
   </nav>
   <div class="container">
     <div class="left-section">
