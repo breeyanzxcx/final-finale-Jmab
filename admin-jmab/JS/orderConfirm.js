@@ -1,15 +1,17 @@
-// Global confirmation modal variables
+// Global variables
 let currentOrderId = null;
 let currentNewStatus = null;
 let currentUserId = null;
 let currentReferenceNumber = null;
 let currentProductDetails = null;
+let groupedOrders = {}; // Made global to access in updateOrderStatus
 
 function showConfirmationModal(message, orderId, newStatus, userId, referenceNumber, productDetails) {
     const confirmationModal = document.getElementById("confirmationModal");
     const confirmationMessage = document.getElementById("confirmationMessage");
 
     if (confirmationModal && confirmationMessage) {
+        console.log("Showing confirmation modal with:", { message, orderId, newStatus, userId, referenceNumber, productDetails });
         confirmationMessage.textContent = message;
         currentOrderId = orderId;
         currentNewStatus = newStatus;
@@ -36,34 +38,45 @@ const confirmYes = document.getElementById("confirmYes");
 const confirmNo = document.getElementById("confirmNo");
 
 if (confirmYes) {
-    confirmYes.addEventListener("click", function () {
-        hideConfirmationModal();
+    confirmYes.addEventListener("click", function (e) {
+        e.preventDefault();
+        console.log("Confirm Yes clicked with:", { currentOrderId, currentNewStatus, currentUserId, currentReferenceNumber, currentProductDetails });
         if (currentOrderId && currentNewStatus && currentUserId) {
-            // If status is cancelled or failed delivery, show reasons modal first
+            hideConfirmationModal();
             if (currentNewStatus === "cancelled" || currentNewStatus === "failed delivery") {
                 showReasonsModal(
-                    currentOrderId, 
-                    currentNewStatus, 
-                    currentUserId, 
-                    currentReferenceNumber, 
+                    currentOrderId,
+                    currentNewStatus,
+                    currentUserId,
+                    currentReferenceNumber,
                     currentProductDetails
                 );
             } else {
-                // For other statuses, proceed directly with update
                 updateOrderStatus(
-                    currentOrderId, 
-                    currentNewStatus, 
-                    currentUserId, 
-                    currentReferenceNumber, 
+                    currentOrderId,
+                    currentNewStatus,
+                    currentUserId,
+                    currentReferenceNumber,
                     currentProductDetails
                 );
             }
+            // Reset variables after action is initiated
+            currentOrderId = null;
+            currentNewStatus = null;
+            currentUserId = null;
+            currentReferenceNumber = null;
+            currentProductDetails = null;
+        } else {
+            console.warn("Confirmation attempted without valid order data.");
+            alert("Error: Order data is missing. Please try again.");
         }
     });
 }
 
 if (confirmNo) {
-    confirmNo.addEventListener("click", function () {
+    confirmNo.addEventListener("click", function (e) {
+        e.preventDefault();
+        console.log("Confirm No clicked");
         hideConfirmationModal();
     });
 }
@@ -78,10 +91,8 @@ function showReasonsModal(orderId, newStatus, userId, referenceNumber, productDe
         return;
     }
 
-    // Clear previous reasons
     reasonsForm.innerHTML = "";
 
-    // Define reasons based on the status
     let reasons = [];
     if (newStatus === "failed delivery") {
         reasons = [
@@ -89,8 +100,7 @@ function showReasonsModal(orderId, newStatus, userId, referenceNumber, productDe
             "Customer not available",
             "Incomplete/incorrect address",
             "Access issues (gated community, etc.)",
-            "Delivery attempted outside business hours",
-            "Other delivery complications"
+            "Delivery attempted outside business hours"
         ];
     } else if (newStatus === "cancelled") {
         reasons = [
@@ -100,84 +110,59 @@ function showReasonsModal(orderId, newStatus, userId, referenceNumber, productDe
             "Incorrect product ordered",
             "Duplicate order",
             "Changed mind",
-            "Found better alternative",
-            "Other cancellation reasons"
+            "Found better alternative"
         ];
     }
 
-    // Create radio buttons for reasons
     reasons.forEach((reason, index) => {
         const reasonDiv = document.createElement("div");
         reasonDiv.className = "reason-option";
-        
+
         const radioInput = document.createElement("input");
         radioInput.type = "radio";
         radioInput.id = `reason-${index}`;
         radioInput.name = "cancelOrFailReason";
         radioInput.value = reason;
-        
+
         const label = document.createElement("label");
         label.htmlFor = `reason-${index}`;
         label.textContent = reason;
-        
+
         reasonDiv.appendChild(radioInput);
         reasonDiv.appendChild(label);
         reasonsForm.appendChild(reasonDiv);
+
+        radioInput.addEventListener("change", function() {
+            reasonsSubmit.disabled = false;
+        });
     });
 
-    // Add a textarea for additional comments
-    const additionalCommentsDiv = document.createElement("div");
-    additionalCommentsDiv.className = "additional-comments";
-    
-    const additionalCommentsLabel = document.createElement("label");
-    additionalCommentsLabel.htmlFor = "additionalComments";
-    additionalCommentsLabel.textContent = "Additional Comments (Optional):";
-    
-    const additionalCommentsTextarea = document.createElement("textarea");
-    additionalCommentsTextarea.id = "additionalComments";
-    additionalCommentsTextarea.name = "additionalComments";
-    additionalCommentsTextarea.placeholder = "Provide more details if needed...";
-    
-    additionalCommentsDiv.appendChild(additionalCommentsLabel);
-    additionalCommentsDiv.appendChild(additionalCommentsTextarea);
-    reasonsForm.appendChild(additionalCommentsDiv);
-
-    // Show the modal
     reasonsModal.style.display = "flex";
+    reasonsSubmit.disabled = true;
 
-    // Submit button event listener
     reasonsSubmit.onclick = function() {
         const selectedReason = document.querySelector('input[name="cancelOrFailReason"]:checked');
-        const additionalComments = document.getElementById("additionalComments").value.trim();
 
         if (!selectedReason) {
             alert("Please select a reason.");
             return;
         }
 
-        const fullReason = additionalComments 
-            ? `${selectedReason.value} - ${additionalComments}` 
-            : selectedReason.value;
-
-        // Hide the modal
+        const fullReason = selectedReason.value;
         reasonsModal.style.display = "none";
 
-        // Proceed with order status update
-        updateOrderStatus(
-            orderId, 
-            newStatus, 
-            userId, 
-            referenceNumber, 
-            productDetails, 
-            fullReason
-        );
+        updateOrderStatus(orderId, newStatus, userId, referenceNumber, productDetails, fullReason);
     };
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    const confirmationModal = document.getElementById("confirmationModal");
+    const reasonsModal = document.getElementById("reasonsModal");
+    if (confirmationModal) confirmationModal.style.display = "none";
+    if (reasonsModal) reasonsModal.style.display = "none";
+
     fetchOrders();
 
-    // Logout functionality
     document.getElementById("logout").addEventListener("click", function (e) {
         e.preventDefault();
         if (confirm("Are you sure you want to log out?")) {
@@ -185,17 +170,15 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Name/Model sync logic
     const nameInput = document.getElementById("name");
     const modelInput = document.getElementById("model");
 
     if (nameInput && modelInput) {
         nameInput.addEventListener("input", function () {
-            modelInput.value = nameInput.value; // Sync the model with name
+            modelInput.value = nameInput.value;
         });
     }
 
-    // Form submission handling
     const createProductForm = document.getElementById("createProductForm");
     if (createProductForm) {
         createProductForm.addEventListener("submit", function (e) {
@@ -279,8 +262,8 @@ function displayOrders(orders) {
     }
 
     ordersTableBody.innerHTML = "";
+    groupedOrders = {}; // Reset and repopulate
 
-    const groupedOrders = {};
     orders.forEach((order) => {
         if (!groupedOrders[order.reference_number]) {
             console.log("Processing order:", order);
@@ -309,24 +292,12 @@ function displayOrders(orders) {
 
         let statusClass;
         switch (order.status.toLowerCase()) {
-            case "pending":
-                statusClass = "status-pending";
-                break;
-            case "cancelled":
-                statusClass = "status-cancelled";
-                break;
-            case "out for delivery":
-                statusClass = "status-out-for-delivery";
-                break;
-            case "delivered":
-                statusClass = "status-delivered";
-                break;
-            case "failed delivery":
-                statusClass = "status-failed";
-                break;
-            default:
-                statusClass = "status-default";
-                break;
+            case "pending": statusClass = "status-pending"; break;
+            case "cancelled": statusClass = "status-cancelled"; break;
+            case "out for delivery": statusClass = "status-out-for-delivery"; break;
+            case "delivered": statusClass = "status-delivered"; break;
+            case "failed delivery": statusClass = "status-failed"; break;
+            default: statusClass = "status-default"; break;
         }
 
         let formattedProductDetails = "N/A";
@@ -379,25 +350,26 @@ function parseProductDetailsString(detailsString) {
 
 function getStatusActions(status, orderId, userId, referenceNumber, productDetails) {
     let actions = "";
+    const escapedProductDetails = productDetails.replace(/'/g, "\\'");
 
     if (status === "pending") {
         actions = `
-            <button class="accept-btn" onclick="showConfirmationModal('Are you sure you want to accept this order?', ${orderId}, 'processing', ${userId}, '${referenceNumber}', '${productDetails}')">Accept</button>
-            <button class="decline-btn" onclick="showConfirmationModal('Are you sure you want to cancel this order?', ${orderId}, 'cancelled', ${userId}, '${referenceNumber}', '${productDetails}')">Decline</button>
+            <button class="accept-btn" onclick="console.log('Accept clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to accept this order?', ${orderId}, 'processing', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Accept</button>
+            <button class="decline-btn" onclick="console.log('Decline clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to cancel this order?', ${orderId}, 'cancelled', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Decline</button>
         `;
     } else if (status === "processing") {
         actions = `
-            <button class="out-for-delivery-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Out for Delivery?', ${orderId}, 'out for delivery', ${userId}, '${referenceNumber}', '${productDetails}')">Out for Delivery</button>
+            <button class="out-for-delivery-btn" onclick="console.log('Out for Delivery clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to mark this order as Out for Delivery?', ${orderId}, 'out for delivery', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Out for Delivery</button>
         `;
     } else if (status === "out for delivery") {
         actions = `
-            <button class="delivered-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Delivered?', ${orderId}, 'delivered', ${userId}, '${referenceNumber}', '${productDetails}')">Delivered</button>
-            <button class="didnt-receive-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Failed Delivery?', ${orderId}, 'failed delivery', ${userId}, '${referenceNumber}', '${productDetails}')">Didn\'t Receive</button>
+            <button class="delivered-btn" onclick="console.log('Delivered clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to mark this order as Delivered?', ${orderId}, 'delivered', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Delivered</button>
+            <button class="didnt-receive-btn" onclick="console.log('Didn\\'t Receive clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to mark this order as Failed Delivery?', ${orderId}, 'failed delivery', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Didn\'t Receive</button>
         `;
     } else if (status === "failed delivery") {
         actions = `
-            <button class="retry-delivery-btn" onclick="showConfirmationModal('Are you sure you want to mark this order as Out for Delivery?', ${orderId}, 'out for delivery', ${userId}, '${referenceNumber}', '${productDetails}')">Out for Delivery Again</button>
-            <button class="cancel-btn" onclick="showConfirmationModal('Are you sure you want to cancel this order?', ${orderId}, 'cancelled', ${userId}, '${referenceNumber}', '${productDetails}')">Cancel</button>
+            <button class="retry-delivery-btn" onclick="console.log('Retry Delivery clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to mark this order as Out for Delivery?', ${orderId}, 'out for delivery', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Out for Delivery Again</button>
+            <button class="cancel-btn" onclick="console.log('Cancel clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to cancel this order?', ${orderId}, 'cancelled', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Cancel</button>
         `;
     } else if (status === "cancelled" || status === "delivered") {
         actions = `<span>No actions</span>`;
@@ -407,9 +379,7 @@ function getStatusActions(status, orderId, userId, referenceNumber, productDetai
 }
 
 function formatPrice(price) {
-    // Convert to number if it's a string
     const num = typeof price === 'string' ? parseFloat(price) : price;
-    // Format with commas and 2 decimal places
     return num.toLocaleString('en-PH', {
         style: 'decimal',
         minimumFractionDigits: 2,
@@ -417,18 +387,13 @@ function formatPrice(price) {
     });
 }
 
-async function updateOrderStatus(
-    orderId, 
-    newStatus, 
-    userId, 
-    referenceNumber, 
-    productDetails, 
-    reason = null
-) {
+async function updateOrderStatus(orderId, newStatus, userId, referenceNumber, productDetails, reason = null) {
     const authToken = localStorage.getItem("authToken");
 
+    console.log("Updating order status:", { orderId, newStatus, userId, referenceNumber, productDetails, reason });
+
     try {
-        // Step 1: Update the order status
+        // Update order status
         const updateResponse = await fetch(`http://localhost/jmab/final-jmab/api/orders/${orderId}`, {
             method: "PUT",
             headers: {
@@ -437,41 +402,29 @@ async function updateOrderStatus(
             },
             body: JSON.stringify({ 
                 status: newStatus,
-                reason: reason  // Include the reason in the update
+                reason: reason
             }),
         });
 
         const updateData = await updateResponse.json();
+        console.log("Update response:", updateData);
 
         if (updateData.success) {
-            // Step 2: Determine the notification title based on the new status
             let notificationTitle;
             switch (newStatus.toLowerCase()) {
-                case "processing":
-                    notificationTitle = "Order Accepted";
-                    break;
-                case "out for delivery":
-                    notificationTitle = "Order Out for Delivery";
-                    break;
-                case "delivered":
-                    notificationTitle = "Order Delivered";
-                    break;
-                case "failed delivery":
-                    notificationTitle = "Order Delivery Failed";
-                    break;
-                case "cancelled":
-                    notificationTitle = "Order Cancelled";
-                    break;
-                default:
-                    notificationTitle = "Order Status Update";
-                    break;
+                case "processing": notificationTitle = "Order Accepted"; break;
+                case "out for delivery": notificationTitle = "Order Out for Delivery"; break;
+                case "delivered": notificationTitle = "Order Delivered"; break;
+                case "failed delivery": notificationTitle = "Order Delivery Failed"; break;
+                case "cancelled": notificationTitle = "Order Cancelled"; break;
+                default: notificationTitle = "Order Status Update"; break;
             }
 
-            // Step 3: Send notification to the customer
+            // Send notification
             const notificationData = {
                 user_id: userId,
                 title: notificationTitle,
-                message: `Your order (Ref: ${referenceNumber}) has been ${newStatus}. ${reason ? `Reason: ${reason}` : ''} Product: ${productDetails || "N/A"}`,
+                message: `Your order (Ref: ${referenceNumber}) has been ${newStatus}.${reason ? ` Reason: ${reason}` : ''}`
             };
 
             const notificationResponse = await fetch("http://localhost/jmab/final-jmab/api/notifications", {
@@ -484,6 +437,7 @@ async function updateOrderStatus(
             });
 
             const notificationResult = await notificationResponse.json();
+            console.log("Notification response:", notificationResult);
 
             if (notificationResult.success) {
                 console.log(`Notification sent to user ${userId} for order ${orderId}: ${notificationTitle}`);
@@ -491,15 +445,51 @@ async function updateOrderStatus(
                 console.error("Failed to send notification:", notificationResult.message);
             }
 
-            // Step 4: Update UI and notify admin
+            // Generate receipt if status is "delivered"
+            if (newStatus.toLowerCase() === "delivered") {
+                const order = groupedOrders[referenceNumber];
+                if (!order) {
+                    console.error("Order not found in groupedOrders:", referenceNumber);
+                    alert("Order updated, but receipt could not be generated due to missing order data.");
+                } else {
+                    const receiptData = {
+                        order_id: orderId,
+                        user_id: userId,
+                        order_reference: referenceNumber,
+                        total_amount: order.total_price,
+                        payment_method: order.payment_method,
+                        payment_status: "completed" // Changed to "completed" to reflect payment finalization
+                    };
+
+                    const receiptResponse = await fetch("http://localhost/jmab/final-jmab/api/receipts/order", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${authToken}`,
+                        },
+                        body: JSON.stringify(receiptData),
+                    });
+
+                    const receiptResult = await receiptResponse.json();
+                    console.log("Receipt response:", receiptResult);
+
+                    if (receiptResult.success) {
+                        console.log(`Receipt created for order ${orderId}`);
+                    } else {
+                        console.error("Failed to create receipt:", receiptResult.message);
+                        alert(`Order updated, but failed to create receipt: ${receiptResult.message}`);
+                    }
+                }
+            }
+
             alert(`Order ${orderId} updated to ${newStatus}`);
             fetchOrders();
             localStorage.setItem("orderUpdated", "true");
         } else {
-            alert(`Failed to update order: ${updateData.errors.join(", ")}`);
+            alert(`Failed to update order: ${updateData.errors ? updateData.errors.join(", ") : updateData.message}`);
         }
     } catch (error) {
-        console.error("Error updating order or sending notification:", error);
-        alert("An error occurred while updating the order or sending the notification.");
+        console.error("Error updating order, sending notification, or creating receipt:", error);
+        alert("An error occurred while processing the order.");
     }
 }

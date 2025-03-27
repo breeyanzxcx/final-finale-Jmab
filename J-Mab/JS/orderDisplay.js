@@ -1,9 +1,11 @@
-document.addEventListener("DOMContentLoaded", function () {
-    fetchUserOrders();
-    fetchUserRatings();
+document.addEventListener("DOMContentLoaded", async function () {
+    await fetchUserRatings(); // Load ratings first
+    await fetchUserOrders();  // Then load orders
 });
 
 let ratedVariants = new Set();
+let userOrders = [];
+let userRatings = [];
 
 async function fetchUserRatings() {
     const authToken = localStorage.getItem("authToken");
@@ -11,7 +13,7 @@ async function fetchUserRatings() {
     if (!authToken || !userId) return;
 
     try {
-        const response = await fetch(`http://localhost/jmab/final-jmab/api/ratings/user/${userId}`, {
+        const response = await fetch(`http://localhost/jmab/final-jmab/api/ratings/userRated/${userId}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -20,15 +22,22 @@ async function fetchUserRatings() {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            console.error(`Ratings fetch failed. Status: ${response.status}, StatusText: ${response.statusText}`);
+            return;
         }
 
         const data = await response.json();
         console.log("User Ratings Response:", data);
-        if (data.success && Array.isArray(data.ratings)) {
-            data.ratings.forEach(rating => {
-                ratedVariants.add(String(rating.variant_id));
-                localStorage.setItem(`rated_order_${rating.order_id}`, 'true');
+        
+        if (data.success && Array.isArray(data.items)) {
+            userRatings = data.items;
+            data.items.forEach(rating => {
+                if (rating.rating_status === "Rated") {
+                    ratedVariants.add(String(rating.variant_id));
+                    localStorage.setItem(`rated_order_${rating.order_id}`, 'true');
+                } else {
+                    localStorage.removeItem(`rated_order_${rating.order_id}`); // Ensure unrated orders are cleared
+                }
             });
         }
     } catch (error) {
@@ -63,8 +72,9 @@ async function fetchUserOrders() {
         }
 
         const data = await response.json();
-        console.log("API Response:", data);
+        console.log("API Response (Orders):", data);
         if (data.success) {
+            userOrders = data.orders;
             displayUserOrders(data.orders);
         } else {
             console.error("Failed to fetch orders:", data.message);
@@ -97,16 +107,22 @@ function displayUserOrders(orders) {
             filteredOrders = orders.filter(order => order.status.toLowerCase() === 'out for delivery');
             break;
         case 'toRate.html':
-            filteredOrders = orders.filter(order => 
-                order.status.toLowerCase() === 'delivered' && 
-                !localStorage.getItem(`rated_order_${order.order_id}`)
-            );
+            filteredOrders = orders.filter(order => {
+                const ratingInfo = userRatings.find(r => r.order_id === order.order_id && String(r.variant_id) === String(order.variant_id));
+                const isRated = ratingInfo ? ratingInfo.rating_status === "Rated" : false;
+                console.log(`Order ${order.order_id} - Status: ${order.status}, Rated: ${isRated}, Rating Info:`, ratingInfo);
+                return order.status.toLowerCase() === 'delivered' && !isRated;
+            });
             break;
         case 'cancelled.html':
             filteredOrders = orders.filter(order => order.status.toLowerCase() === 'cancelled' || order.status.toLowerCase() === 'failed delivery');
             break;
         case 'purchases.html':
-            filteredOrders = orders;
+            filteredOrders = orders.filter(order => {
+                const ratingInfo = userRatings.find(r => r.order_id === order.order_id && String(r.variant_id) === String(order.variant_id));
+                const isRated = ratingInfo ? ratingInfo.rating_status === "Rated" : false;
+                return order.status.toLowerCase() !== 'delivered' || isRated;
+            });
             break;
     }
 
@@ -153,9 +169,6 @@ function createOrderCard(reference, orders) {
         return sum + (isNaN(price) ? 0 : price * (isNaN(quantity) ? 1 : quantity));
     }, 0);
 
-    console.log('Total Items:', totalItems);
-    console.log('Total Price:', totalPrice);
-    
     const statusClass = firstOrder.status.toLowerCase().replace(/ /g, '-');
     orderCard.classList.add(statusClass);
     
@@ -176,6 +189,22 @@ function createOrderCard(reference, orders) {
         const price = parseFloat(order.variant_price || order.product_price || 0);
         const productItem = document.createElement('div');
         productItem.className = 'product-item';
+        
+        const ratingInfo = userRatings.find(r => 
+            String(r.variant_id) === String(order.variant_id) && 
+            r.order_id === order.order_id
+        );
+        console.log('Checking rating for:', {
+            variantId: order.variant_id,
+            orderId: order.order_id,
+            ratingInfo: ratingInfo
+        });
+
+        let ratingStars = '';
+        if (window.location.pathname.split('/').pop() === 'purchases.html' && ratingInfo && ratingInfo.rating_status === "Rated") {
+            ratingStars = `<div class="user-rating">${generateStars(ratingInfo.rating)}</div>`;
+        }
+        
         productItem.innerHTML = `
             <div class="product-image">
                 <img src="${order.product_image || '../imahe/default-product.png'}" alt="${order.product_name}">
@@ -184,6 +213,7 @@ function createOrderCard(reference, orders) {
                 <h4>${order.product_name}</h4>
                 <p>${order.product_brand}</p>
                 <p>₱${price.toFixed(2)} x ${order.quantity || 1}</p>
+                ${ratingStars}
             </div>
         `;
         orderContent.appendChild(productItem);
@@ -205,7 +235,7 @@ function createOrderCard(reference, orders) {
             <span>Total: ₱${totalPrice.toFixed(2)}</span>
         </div>
         <div class="order-actions">
-            ${getOrderActions(firstOrder.status, firstOrder.order_id, firstOrder.payment_method, firstOrder.variant_id || firstOrder.product_id)}
+            ${getOrderActions(firstOrder.status, firstOrder.order_id, firstOrder.payment_method, firstOrder.variant_id || firstOrder.product_id, reference)}
         </div>
     `;
     
@@ -214,6 +244,15 @@ function createOrderCard(reference, orders) {
     orderCard.appendChild(orderFooter);
     
     return orderCard;
+}
+
+function generateStars(rating) {
+    const maxStars = 5;
+    let stars = '';
+    for (let i = 1; i <= maxStars; i++) {
+        stars += `<span class="star ${i <= rating ? 'selected' : ''}">★</span>`;
+    }
+    return stars;
 }
 
 function formatDate(dateString) {
@@ -225,10 +264,14 @@ function formatDate(dateString) {
     });
 }
 
-function getOrderActions(status, orderId, paymentMethod, id) {
-    console.log('getOrderActions:', { status, orderId, paymentMethod, id });
-
+function getOrderActions(status, orderId, paymentMethod, id, referenceNumber) {
+    console.log('getOrderActions:', { status, orderId, paymentMethod, id, referenceNumber });
     let actions = '';
+    const userId = localStorage.getItem("userId");
+    const ratingInfo = userRatings.find(r => r.order_id === orderId && String(r.variant_id) === String(id));
+    const isRated = ratingInfo ? ratingInfo.rating_status === "Rated" : false;
+    console.log(`Order ${orderId} - isRated: ${isRated}, Rating Info:`, ratingInfo);
+
     switch (status.toLowerCase()) {
         case 'pending':
             if (paymentMethod.toLowerCase() === 'cod') {
@@ -244,10 +287,9 @@ function getOrderActions(status, orderId, paymentMethod, id) {
             actions = `<button class="action-btn receive-btn" data-order-id="${orderId}">Confirm Receipt</button>`;
             break;
         case 'delivered':
-            const isRated = ratedVariants.has(String(id)) || 
-                            localStorage.getItem(`rated_order_${orderId}`) === 'true';
-            if (!isRated) {
-                actions = `<button class="action-btn rate-btn" data-order-id="${orderId}" data-variant-id="${id}">Rate Product</button>`;
+            actions = `<button class="action-btn view-receipt-btn" data-reference="${referenceNumber}">View Receipt</button>`;
+            if (!isRated && id && id !== 'undefined') {
+                actions += `<button class="action-btn rate-btn" data-order-id="${orderId}" data-user-id="${userId}" data-variant-id="${id}">Rate Product</button>`;
             }
             break;
         case 'failed delivery':
@@ -284,13 +326,27 @@ function addButtonEventListeners() {
     document.querySelectorAll('.rate-btn').forEach(button => {
         button.addEventListener('click', function() {
             const orderId = this.getAttribute('data-order-id');
+            const userId = this.getAttribute('data-user-id');
             const variantId = this.getAttribute('data-variant-id');
-            // Simple confirmation instead of modal
-            if (confirm('Would you like to mark this product as rated?')) {
-                localStorage.setItem(`rated_order_${orderId}`, 'true');
+            console.log('Rate button clicked:', { orderId, userId, variantId });
+            openRatingModal(orderId, userId, variantId, async () => {
+                button.textContent = 'Product Rated';
+                button.disabled = true;
                 ratedVariants.add(String(variantId));
-                fetchUserOrders();
-            }
+                localStorage.setItem(`rated_order_${orderId}`, 'true');
+                await fetchUserRatings(); // Refresh ratings
+                await fetchUserOrders();  // Refresh orders
+                if (window.location.pathname.split('/').pop() === 'toRate.html') {
+                    window.location.href = '../HTML/purchases.html'; // Redirect to purchases.html
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.view-receipt-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const referenceNumber = this.getAttribute('data-reference');
+            fetchAndDisplayReceipt(referenceNumber);
         });
     });
     
@@ -322,7 +378,9 @@ async function updateOrderStatus(orderId, newStatus) {
         const data = await response.json();
         if (data.success) {
             alert(`Order status updated successfully!`);
-            fetchUserOrders();
+            await fetchUserRatings(); // Sync ratings
+            await fetchUserOrders();  // Sync orders
+            window.location.href = '../HTML/toRate.html'; // Redirect to toRate.html
         } else {
             alert(`Failed to update order: ${data.message}`);
         }
@@ -332,136 +390,190 @@ async function updateOrderStatus(orderId, newStatus) {
     }
 }
 
-async function getUserId() {
+async function fetchAndDisplayReceipt(referenceNumber) {
     const authToken = localStorage.getItem("authToken");
-    if (!authToken) return null;
-    
+    if (!authToken) {
+        alert("Please log in to view your receipt.");
+        return;
+    }
+
     try {
-        const response = await fetch("http://localhost/jmab/final-jmab/api/user", {
+        const response = await fetch(`http://localhost/jmab/final-jmab/api/receipts`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${authToken}`
             }
         });
-        
-        if (!response.ok) return null;
-        
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
-        if (data.success && data.user && data.user.id) {
-            localStorage.setItem("userId", data.user.id);
-            return data.user.id;
+        console.log("Receipts Response:", data);
+
+        const receipt = data.find(r => r.order_reference === referenceNumber);
+        if (!receipt) {
+            alert("Receipt not found for this order.");
+            return;
         }
-        return null;
+
+        const orderGroup = userOrders.filter(o => o.reference_number === referenceNumber);
+        displayReceiptModal(receipt, orderGroup);
     } catch (error) {
-        console.error("Error fetching user profile:", error);
-        return null;
+        console.error("Error fetching receipt:", error);
+        alert("An error occurred while fetching the receipt.");
     }
 }
 
-window.addEventListener('storage', function(event) {
-    if (event.key === 'orderUpdated' && event.newValue === 'true') {
-        fetchUserOrders();
-        localStorage.removeItem('orderUpdated');
-    }
-});
+function displayReceiptModal(receipt, orderGroup) {
+    const itemsWithDetails = receipt.items.map((item, index) => {
+        const order = orderGroup[index] || orderGroup[0];
+        const productName = order?.product_name || "Unknown Product";
+        const variant = order?.variant_price ? `Variant (Price: ₱${parseFloat(order.variant_price).toFixed(2)})` : "";
+        return { ...item, productName, variant };
+    });
 
-if (!localStorage.getItem("userId")) {
-    getUserId();
+    const modal = document.createElement('div');
+    modal.className = 'receipt-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>RECEIPT</h2>
+            <p class="order-ref">${receipt.order_reference}</p>
+            <div class="section">
+                <h3>Bill to:</h3>
+                <p>${receipt.bill_to.name}</p>
+                <p>${receipt.bill_to.address}</p>
+            </div>
+            <div class="section">
+                <h3>Ship to:</h3>
+                <p>${receipt.ship_to.name}</p>
+                <p>${receipt.ship_to.address}</p>
+            </div>
+            <div class="section">
+                <h3>Payment Details:</h3>
+                <p>Payment Method: ${receipt.payment_method.toUpperCase()}</p>
+            </div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>ITEM</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsWithDetails.map(item => `
+                        <tr>
+                            <td>${item.productName}${item.variant ? ` - ${item.variant}` : ''}</td>
+                            <td>${item.quantity}</td>
+                            <td>₱${parseFloat(item.unit_price).toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <p class="total">TOTAL: ₱${parseFloat(receipt.total_amount).toFixed(2)}</p>
+            <div class="modal-actions">
+                <button id="close-receipt-modal">Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('#close-receipt-modal').addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
 }
 
-function handleProductVariants(product) {
-    const sizeSelect = document.getElementById('size');
-    
-    function formatPrice(priceValue) {
-        const price = parseFloat(priceValue);
-        return isNaN(price) ? '0.00' : price.toFixed(2);
+function openRatingModal(orderId, userId, variantId, callback) {
+    console.log('Opening rating modal with:', { orderId, userId, variantId });
+    if (!variantId || variantId === 'undefined') {
+        alert("Error: Cannot rate this product due to missing variant ID.");
+        return;
     }
-    
-    if (product.variants && product.variants.length > 0) {
-        sizeSelect.innerHTML = '';
-        
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'Select a variant';
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        sizeSelect.appendChild(defaultOption);
-        
-        const sortedVariants = [...product.variants].sort((a, b) => {
-            const priceA = parseFloat(a.price) || 0;
-            const priceB = parseFloat(b.price) || 0;
-            return priceA - priceB;
-        });
-        
-        sortedVariants.forEach(variant => {
-            const option = document.createElement('option');
-            option.value = variant.variant_id;
-            const price = parseFloat(variant.price) || 0;
-            option.textContent = `${variant.size} - ₱${formatPrice(variant.price)}`;
-            option.dataset.price = price;
-            option.dataset.stock = variant.stock || 0;
-            option.dataset.size = variant.size || 'N/A';
-            const stock = parseInt(variant.stock) || 0;
-            option.disabled = stock <= 0;
-            if (stock <= 0) option.textContent += ' (Out of Stock)';
-            sizeSelect.appendChild(option);
-        });
-        
-        sizeSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const selectedPrice = parseFloat(selectedOption.dataset.price) || 0;
-            const selectedStock = parseInt(selectedOption.dataset.stock) || 0;
-            document.getElementById('product-price').textContent = `₱${formatPrice(selectedPrice)}`;
-            const stockInfo = document.getElementById('stock-info') || document.createElement('p');
-            stockInfo.id = 'stock-info';
-            stockInfo.textContent = `Stock: ${selectedStock}`;
-            if (!stockInfo.parentElement) {
-                document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
+
+    const modal = document.createElement('div');
+    modal.className = 'rating-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2>Rate Product</h2>
+            <p>Please rate this product (1-5 stars):</p>
+            <div class="star-rating">
+                <span class="star" data-value="1">★</span>
+                <span class="star" data-value="2">★</span>
+                <span class="star" data-value="3">★</span>
+                <span class="star" data-value="4">★</span>
+                <span class="star" data-value="5">★</span>
+            </div>
+            <div class="modal-actions">
+                <button id="submit-rating" disabled>Submit Rating</button>
+                <button id="close-rating-modal">Cancel</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    let selectedRating = 0;
+    const stars = modal.querySelectorAll('.star');
+    const submitButton = modal.querySelector('#submit-rating');
+    const closeButton = modal.querySelector('#close-rating-modal');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.getAttribute('data-value'));
+            stars.forEach(s => s.classList.remove('selected'));
+            for (let i = 0; i < selectedRating; i++) {
+                stars[i].classList.add('selected');
             }
-            const qtyInput = document.querySelector('.qty-input');
-            qtyInput.setAttribute('max', selectedStock);
-            if (parseInt(qtyInput.value) > selectedStock) qtyInput.value = selectedStock;
-            const addToCartButton = document.querySelector('.add-to-cart');
-            const buyNowButton = document.querySelector('.buy-now');
-            if (selectedStock <= 0) {
-                addToCartButton.disabled = true;
-                addToCartButton.textContent = 'OUT OF STOCK';
-                buyNowButton.disabled = true;
-                buyNowButton.textContent = 'OUT OF STOCK';
+            submitButton.disabled = false;
+        });
+    });
+
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
+
+    submitButton.addEventListener('click', async () => {
+        if (selectedRating === 0) {
+            alert("Please select a rating.");
+            return;
+        }
+
+        const authToken = localStorage.getItem("authToken");
+        console.log('Submitting rating with:', { variantId, userId, rating: selectedRating });
+
+        try {
+            const response = await fetch(`http://localhost/jmab/final-jmab/api/ratings`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    variant_id: variantId,
+                    user_id: userId,
+                    rating: selectedRating
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                alert("Rating submitted successfully!");
+                document.body.removeChild(modal);
+                if (callback) callback();
             } else {
-                addToCartButton.disabled = false;
-                addToCartButton.textContent = 'Add to Cart';
-                buyNowButton.disabled = false;
-                buyNowButton.textContent = 'Buy Now';
+                alert(`Failed to submit rating: ${data.errors.join(', ')}`);
             }
-        });
-        
-        const firstInStock = sortedVariants.find(v => (parseInt(v.stock) || 0) > 0) || sortedVariants[0];
-        if (firstInStock) {
-            document.getElementById('product-price').textContent = `₱${formatPrice(firstInStock.price)}`;
-            const stockInfo = document.createElement('p');
-            stockInfo.id = 'stock-info';
-            stockInfo.textContent = `Stock: ${parseInt(firstInStock.stock) || 0}`;
-            document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
+        } catch (error) {
+            console.error("Error submitting rating:", error);
+            alert("An error occurred while submitting the rating.");
         }
-    } else {
-        sizeSelect.innerHTML = '<option value="">N/A</option>';
-        document.getElementById('product-price').textContent = `₱${formatPrice(product.price)}`;
-        const stockInfo = document.createElement('p');
-        stockInfo.id = 'stock-info';
-        stockInfo.textContent = `Stock: ${parseInt(product.stock) || 0}`;
-        document.querySelector('.product-details').insertBefore(stockInfo, document.querySelector('.quantity'));
-        const addToCartButton = document.querySelector('.add-to-cart');
-        const buyNowButton = document.querySelector('.buy-now');
-        const stock = parseInt(product.stock) || 0;
-        if (stock <= 0) {
-            addToCartButton.disabled = true;
-            addToCartButton.textContent = 'OUT OF STOCK';
-            buyNowButton.disabled = true;
-            buyNowButton.textContent = 'OUT OF STOCK';
-        }
-    }
+    });
 }
 
 function openCancelOrderModal(orderId) {
@@ -472,16 +584,14 @@ function openCancelOrderModal(orderId) {
             <h2>Cancel Order</h2>
             <p>Please select a reason for cancellation:</p>
             <select id="cancellation-reason" class="form-control">
-                <option value="">Select a reason</option>
+                <option value="" disabled selected>Select a reason</option>
                 <option value="changed_mind">I changed my mind</option>
                 <option value="found_cheaper">Found a cheaper alternative</option>
                 <option value="delivery_too_long">Delivery is taking too long</option>
                 <option value="incorrect_item">Incorrect item in cart</option>
                 <option value="pricing_error">Pricing error</option>
                 <option value="duplicate_order">Duplicate order</option>
-                <option value="other">Other reason</option>
             </select>
-            <textarea id="cancellation-comments" placeholder="Additional comments (optional)" rows="3" style="display:none;"></textarea>
             <div class="modal-actions">
                 <button id="submit-cancel" disabled>Confirm Cancellation</button>
                 <button id="close-cancel-modal">Cancel</button>
@@ -491,13 +601,14 @@ function openCancelOrderModal(orderId) {
     document.body.appendChild(modal);
 
     const reasonSelect = modal.querySelector('#cancellation-reason');
-    const commentsTextarea = modal.querySelector('#cancellation-comments');
     const submitButton = modal.querySelector('#submit-cancel');
     const closeButton = modal.querySelector('#close-cancel-modal');
 
     reasonSelect.addEventListener('change', function() {
-        commentsTextarea.style.display = this.value === 'other' ? 'block' : 'none';
         submitButton.disabled = !this.value;
+        if (this.value) {
+            reasonSelect.querySelector('option[value=""]').disabled = true;
+        }
     });
 
     function closeModal() {
@@ -508,7 +619,11 @@ function openCancelOrderModal(orderId) {
 
     submitButton.addEventListener('click', async function() {
         const reason = reasonSelect.value;
-        const comments = commentsTextarea.value;
+
+        if (!reason) {
+            alert("Please select a cancellation reason.");
+            return;
+        }
 
         try {
             const response = await fetch(`http://localhost/jmab/final-jmab/api/orders/${orderId}`, {
@@ -519,8 +634,7 @@ function openCancelOrderModal(orderId) {
                 },
                 body: JSON.stringify({ 
                     status: 'cancelled',
-                    cancellation_reason: reason,
-                    cancellation_comments: comments
+                    cancellation_reason: reason
                 })
             });
 
@@ -530,7 +644,7 @@ function openCancelOrderModal(orderId) {
 
             const data = await response.json();
             if (data.success) {
-                const notificationSent = await sendAdminNotification(orderId, reason, comments);
+                const notificationSent = await sendAdminNotification(orderId, reason);
                 alert('Order cancelled successfully' + 
                       (notificationSent ? ' and admin notified.' : '.'));
                 closeModal();
@@ -545,8 +659,266 @@ function openCancelOrderModal(orderId) {
     });
 }
 
-const cancelOrderStyles = `
+async function sendAdminNotification(orderId, cancellationReason) {
+    const authToken = localStorage.getItem("authToken");
+    const userId = localStorage.getItem("userId");
+
+    if (!authToken || !userId) return false;
+
+    const payload = {
+        recipient_type: "admin",
+        user_id: 1, 
+        title: "Order Cancelled",
+        message: `Order #${orderId} has been cancelled by a customer. Reason: ${getLocalizedCancellationReason(cancellationReason)}`,
+        type: "order_cancellation",
+        additional_data: {
+            order_id: parseInt(orderId),
+            customer_user_id: parseInt(userId),
+            cancellation_reason: cancellationReason
+        }
+    };
+
+    try {
+        const response = await fetch("http://localhost/jmab/final-jmab/api/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        return data.success;
+    } catch (error) {
+        console.error("Error sending admin notification:", error);
+        return false;
+    }
+}
+
+function getLocalizedCancellationReason(reason) {
+    const reasons = {
+        'changed_mind': 'Changed mind',
+        'found_cheaper': 'Found cheaper alternative',
+        'incorrect_item': 'Incorrect item',
+        'pricing_error': 'Pricing error',
+        'duplicate_order': 'Duplicate order'
+    };
+    return reasons[reason] || reason;
+}
+
+const styles = `
 <style>
+.action-btn {
+    padding: 8px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.view-receipt-btn, .rate-btn {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #0069d9;
+}
+
+.view-receipt-btn:hover, .rate-btn:hover {
+    background-color: #0069d9;
+    transform: scale(1.05);
+}
+
+.rate-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.receipt-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.receipt-modal .modal-content {
+    background: #ffffff;
+    padding: 35px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.receipt-modal h2 {
+    margin: 0 0 15px;
+    font-size: 26px;
+    color: #333;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.receipt-modal .order-ref {
+    font-size: 18px;
+    color: #444;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.receipt-modal .section {
+    margin-bottom: 20px;
+}
+
+.receipt-modal h3 {
+    margin: 0 0 10px;
+    font-size: 20px;
+    color: #555;
+}
+
+.receipt-modal p {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #444;
+    line-height: 1.6;
+}
+
+.receipt-modal .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.receipt-modal .items-table th,
+.receipt-modal .items-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.receipt-modal .items-table th {
+    background: #f1f1f1;
+    font-size: 16px;
+    color: #333;
+    text-transform: uppercase;
+}
+
+.receipt-modal .items-table td {
+    font-size: 15px;
+    color: #444;
+}
+
+.receipt-modal .total {
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+    text-align: right;
+    margin-top: 15px;
+}
+
+.receipt-modal .modal-actions {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.receipt-modal button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.rating-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.rating-modal .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rating-modal h2 {
+    margin: 0 0 15px;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+}
+
+.rating-modal p {
+    margin: 0 0 15px;
+    font-size: 16px;
+    color: #444;
+}
+
+.rating-modal .star-rating {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.rating-modal .star {
+    font-size: 30px;
+    color: #ddd;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.rating-modal .star.selected {
+    color: #f5c518;
+}
+
+.rating-modal .modal-actions {
+    display: flex;
+    justify-content: space-between;
+}
+
+.rating-modal button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.rating-modal #submit-rating {
+    background-color: #28a745;
+    color: white;
+}
+
+.rating-modal #submit-rating:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.rating-modal #close-rating-modal {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+}
+
 .cancel-order-modal {
     position: fixed;
     top: 0;
@@ -569,8 +941,7 @@ const cancelOrderStyles = `
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.cancel-order-modal select,
-.cancel-order-modal textarea {
+.cancel-order-modal select {
     width: 100%;
     margin: 10px 0;
     padding: 10px;
@@ -605,57 +976,21 @@ const cancelOrderStyles = `
     background-color: #f8f9fa;
     border: 1px solid #ddd;
 }
+
+.user-rating {
+    margin-top: 5px;
+}
+
+.user-rating .star {
+    font-size: 16px;
+    color: #ddd;
+    margin: 0 2px;
+}
+
+.user-rating .star.selected {
+    color: #f5c518;
+}
 </style>
 `;
 
-document.head.insertAdjacentHTML('beforeend', cancelOrderStyles);
-
-async function sendAdminNotification(orderId, cancellationReason, comments) {
-    const authToken = localStorage.getItem("authToken");
-    const userId = localStorage.getItem("userId");
-
-    try {
-        const response = await fetch("http://localhost/jmab/final-jmab/api/notifications", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${authToken}`
-            },
-            body: JSON.stringify({
-                recipient_type: "admin",
-                title: "Order Cancelled",
-                message: `Order #${orderId} has been cancelled by a customer.`,
-                type: "order_cancellation",
-                additional_data: {
-                    order_id: orderId,
-                    user_id: userId,
-                    cancellation_reason: cancellationReason,
-                    cancellation_comments: comments || "No additional comments"
-                }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.success;
-    } catch (error) {
-        console.error("Error sending admin notification:", error);
-        return false;
-    }
-}
-
-function getLocalizedCancellationReason(reason) {
-    const reasons = {
-        'changed_mind': 'Changed mind',
-        'found_cheaper': 'Found cheaper alternative',
-        'delivery_too_long': 'Delivery taking too long',
-        'incorrect_item': 'Incorrect item',
-        'pricing_error': 'Pricing error',
-        'duplicate_order': 'Duplicate order',
-        'other': 'Other reason'
-    };
-    return reasons[reason] || reason;
-}
+document.head.insertAdjacentHTML('beforeend', styles);
