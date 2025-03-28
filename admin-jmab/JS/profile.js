@@ -1,45 +1,116 @@
-// Logout functionality
 document.addEventListener("DOMContentLoaded", function () {
     const logoutBtn = document.getElementById('logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (confirm("Are you sure you want to log out?")) {
-                window.location.href = '../J-Mab/HTML/sign-in.php';
-            }
+    const profileImageUpload = document.getElementById('profileImageUpload');
+
+    // Custom Modal Functions
+    function showCustomModal(title, message, onConfirm) {
+        const modal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalClose = document.querySelector('.modal-close');
+
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+
+        const newConfirmBtn = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+        document.getElementById('modalConfirm').addEventListener('click', function() {
+            onConfirm();
+            hideCustomModal();
+        });
+
+        modalCancel.addEventListener('click', hideCustomModal);
+        modalClose.addEventListener('click', hideCustomModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) hideCustomModal();
         });
     }
 
-    // Fetch and load admin profile data on page load
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.id) {
-        fetchAdminProfile(user.id);
-    } else {
-        console.error('No user data found in localStorage');
+    function hideCustomModal() {
+        const modal = document.getElementById('customModal');
+        modal.style.display = 'none';
     }
 
-    document.getElementById('profileImageUpload').addEventListener('change', handleImageUpload);
+    // Authentication check
+    const authToken = localStorage.getItem('authToken');
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!authToken || !user || !user.id) {
+        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
+        return;
+    }
+
+    // Logout functionality with custom modal
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            showCustomModal('Logout Confirmation', 'Are you sure you want to log out?', 
+                function() {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('userId');
+                    window.location.href = '../J-Mab/HTML/sign-in.php';
+                }
+            );
+        });
+    }
+
+    // Fetch and load admin profile data
+    fetchAdminProfile(user.id);
+
+    // Handle profile image upload
+    if (profileImageUpload) {
+        profileImageUpload.addEventListener('change', handleImageUpload);
+    }
 });
 
 // Fetch admin profile data from the API
 function fetchAdminProfile(userId) {
     const token = localStorage.getItem('authToken');
+    if (!token) {
+        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
+        return;
+    }
+
     fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             localStorage.setItem('user', JSON.stringify(data.user));
             loadAdminProfileData();
         } else {
             console.error('Failed to fetch admin profile:', data.message);
+            showCustomModal('Error', 'Failed to fetch profile data: ' + (data.message || 'Unknown error'), 
+                function() {}
+            );
         }
     })
-    .catch(error => console.error('Error fetching admin profile:', error));
+    .catch(error => {
+        console.error('Error fetching admin profile:', error);
+        showCustomModal('Error', 'An error occurred while fetching your profile: ' + error.message, 
+            function() {}
+        );
+    });
 }
 
 // Load admin profile data into the UI
@@ -48,7 +119,6 @@ function loadAdminProfileData() {
     if (user) {
         document.getElementById('adminName').textContent = `${user.first_name} ${user.last_name}`;
         
-        // Update personal information
         document.getElementById('firstNameValue').textContent = user.first_name || '';
         document.getElementById('lastNameValue').textContent = user.last_name || '';
         document.getElementById('emailValue').textContent = user.email || '';
@@ -56,7 +126,7 @@ function loadAdminProfileData() {
         document.getElementById('birthdayValue').textContent = user.birthday || 'Not Set';
         
         document.getElementById('usernameValue').textContent = user.email || '';
-        document.getElementById('passwordValue').textContent = '••••••••'; // Static masked value
+        document.getElementById('passwordValue').textContent = '••••••••';
         
         if (user.profile_picture) {
             document.getElementById('profileImage').src = user.profile_picture;
@@ -71,12 +141,12 @@ function handleImageUpload(event) {
 
     const validTypes = ['image/jpeg', 'image/png'];
     if (!validTypes.includes(file.type)) {
-        alert('Please select a .JPG or .PNG file');
+        showCustomModal('Invalid File', 'Please select a .JPG or .PNG file.', function() {});
         return;
     }
 
     if (file.size > 1048576) {
-        alert('File size must not exceed 1MB');
+        showCustomModal('File Too Large', 'File size must not exceed 1MB.', function() {});
         return;
     }
 
@@ -97,6 +167,15 @@ function updateProfileImage(base64Image) {
         profile_picture: base64Image
     };
 
+    if (!token) {
+        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
+        return;
+    }
+
     fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
         method: 'PUT',
         headers: {
@@ -116,16 +195,20 @@ function updateProfileImage(base64Image) {
                 document.getElementById('successMessage').style.display = 'none';
             }, 2000);
         } else {
-            alert('Failed to update profile picture: ' + (data.errors?.join(', ') || 'Unknown error'));
+            showCustomModal('Update Failed', 'Failed to update profile picture: ' + (data.errors?.join(', ') || 'Unknown error'), 
+                function() {}
+            );
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while uploading the image.');
+        showCustomModal('Error', 'An error occurred while uploading the image: ' + error.message, 
+            function() {}
+        );
     });
 }
 
 // Placeholder for change password popup
 function openChangePasswordPopup() {
-    alert('WALANG FUNCTION ITO.');
+    showCustomModal('Function Not Implemented', 'This feature is not yet available.', function() {});
 }

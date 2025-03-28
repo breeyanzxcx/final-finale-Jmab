@@ -433,7 +433,7 @@
             border-radius: 8px;
             padding: 0;
             z-index: 1200;
-            overflow-x: hidden; /* Prevent horizontal overflow */
+            overflow-x: hidden;
         }
         
         .notification-dropdown h4 {
@@ -459,9 +459,9 @@
             border-bottom: 1px solid #eee;
             font-size: 14px;
             transition: background-color 0.2s;
-            word-wrap: break-word; /* Ensure text wraps */
-            overflow-wrap: break-word; /* Modern standard for word wrapping */
-            max-width: 100%; /* Limit width to container */
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
         
         .notification-dropdown ul li:hover {
@@ -475,7 +475,7 @@
         .notification-dropdown ul li div {
             position: relative;
             padding-left: 5px;
-            max-width: 100%; /* Ensure div stays within bounds */
+            max-width: 100%;
         }
         
         .notification-dropdown ul li div.unread-notification {
@@ -487,17 +487,17 @@
             display: block;
             margin-bottom: 5px;
             color: #02254B;
-            word-wrap: break-word; /* Wrap long titles */
+            word-wrap: break-word;
         }
         
         .notification-dropdown ul li p {
             margin: 0 0 5px 0;
             color: #666;
-            word-wrap: break-word; /* Wrap long messages */
+            word-wrap: break-word;
             overflow-wrap: break-word;
             max-width: 100%;
-            overflow: hidden; /* Prevent overflow */
-            text-overflow: ellipsis; /* Optional: add ellipsis for very long text */
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .notification-dropdown ul li small {
@@ -505,7 +505,7 @@
             color: #999;
             font-size: 11px;
             text-align: right;
-            white-space: nowrap; /* Keep timestamp on one line */
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -551,7 +551,7 @@
             right: 0;
             width: 300px;
             max-height: 215px; 
-            overflow-y: auto; /* Enable vertical scrolling */
+            overflow-y: auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
@@ -577,67 +577,105 @@
             color: var(--primary);
         }
 
-        
-.help-bubble {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1500;
-}
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
 
-.help-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    background-color: var(--accent);
-    color: var(--text-light);
-    font-size: 30px;
-    font-weight: bold;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-}
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
 
-.help-icon:hover {
-    transform: scale(1.1);
-    background-color: #12c591;
-}
+        .modal-header {
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: var(--text-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.contact-popup {
-    display: none;
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    width: 300px;
-    max-height: 215px; 
-    overflow-y: auto; /* Enable vertical scrolling */
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    color: var(--text-dark);
-    border: 1px solid var(--bg-dark);
-}
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
 
-.contact-popup h3 {
-    margin: 0 0 15px 0;
-    color: var(--primary);
-    font-size: 18px;
-    text-align: center;
-}
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+            transition: var(--transition);
+        }
 
-.contact-info p {
-    margin: 5px 0;
-    font-size: 14px;
-    line-height: 1.4;
-}
+        .modal-close:hover {
+            color: var(--accent);
+        }
 
-.contact-info p strong {
-    color: var(--primary);
-}
+        .modal-body {
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: var(--bg-light);
+        }
+
+        .modal-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .cancel-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .confirm-btn {
+            background-color: var(--primary-btn);
+            color: white;
+        }
+
+        .confirm-btn:hover {
+            background-color: var(--primary-btn-hover);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -662,41 +700,39 @@
     </section>
 
     <main>
-          <!-- Help Bubble -->
-<div class="help-bubble" id="helpBubble">
-    <span class="help-icon">?</span>
-    <div class="contact-popup" id="contactPopup">
-        <h3>Developer Contacts</h3>
-        <div class="contact-info">
-            <p><strong>Aaron Abad</strong></p>
-            <p>Email: Aaron.abad@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Benedict Nacor</strong></p>
-            <p>Email: Benedict.nacor@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Marvin Recepcion</strong></p>
-            <p>Email: Marvin.recepcion@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Brian Rosario</strong></p>
-            <p>Email: Brian.rosario@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Christian Tenorio</strong></p>
-            <p>Email: Christian.tenorio@gmail.com</p>
-            <p>Phone: 09123456789</p>
+        <div class="help-bubble" id="helpBubble">
+            <span class="help-icon">?</span>
+            <div class="contact-popup" id="contactPopup">
+                <h3>Developer Contacts</h3>
+                <div class="contact-info">
+                    <p><strong>Aaron Abad</strong></p>
+                    <p>Email: Aaron.abad@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Benedict Nacor</strong></p>
+                    <p>Email: Benedict.nacor@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Marvin Recepcion</strong></p>
+                    <p>Email: Marvin.recepcion@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Brian Rosario</strong></p>
+                    <p>Email: Brian.rosario@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Christian Tenorio</strong></p>
+                    <p>Email: Christian.tenorio@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
         <div class="notification-container">
             <div class="notification-icon" id="notificationIcon">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge" id="notificationBadge">0</span>
             </div>
-            
             <div class="notification-dropdown" id="notificationDropdown">
                 <h4>Notifications <span id="notificationConnectionStatus" class="status-disconnected">Disconnected</span></h4>
                 <ul id="notificationList">
@@ -709,7 +745,6 @@
             <table id="customers-table">
                 <thead>
                     <tr>
-                        <!--<th>ID</th>-->
                         <th>First Name</th>
                         <th>Last Name</th>
                         <th>Email</th>
@@ -717,18 +752,30 @@
                     </tr>
                 </thead>
                 <tbody id="usersTable">
-                    <!--DITO MALALAGAY YUNG MGA USER-->
+                    <!-- Users will be populated here -->
                 </tbody>
-
-                <div id="order-details" style="display:none; padding: 10px; background: #fff; border-radius: 5px;">
-                    <h3>Order Details</h3>
-                    <div id="order-details-content"></div>
-                </div>
             </table>
         </div>
 
         <div id="transaction-view">
             <div id="transaction-view-content"></div>
+        </div>
+
+        <!-- Custom Modal Popup -->
+        <div id="customModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle"></h3>
+                    <span class="modal-close">×</span>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button id="modalCancel" class="modal-btn cancel-btn">Cancel</button>
+                    <button id="modalConfirm" class="modal-btn confirm-btn">Confirm</button>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -744,31 +791,25 @@
                 return;
             }
     
-            // Initialize WebSocket for notifications
             const notificationWS = new WebSocketManager(WS_NOTIFICATION_URL, "notification");
-            
-            // Connect to WebSocket
             notificationWS.connect(userId, authToken, function(data) {
                 if (data.type === 'notification') {
                     handleNotificationReceived(data);
                 }
             });
     
-            // Notification dropdown toggle
             const notificationIcon = document.getElementById('notificationIcon');
             const notificationDropdown = document.getElementById('notificationDropdown');
             notificationIcon.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const isVisible = notificationDropdown.style.display === 'block';
                 notificationDropdown.style.display = isVisible ? 'none' : 'block';
-                
                 if (!isVisible) {
                     fetchNotifications();
                     markAllAsRead();
                 }
             });
     
-            // Help bubble toggle
             const helpBubble = document.getElementById('helpBubble');
             const contactPopup = document.getElementById('contactPopup');
             helpBubble.addEventListener('click', function(e) {
@@ -779,7 +820,6 @@
                 }
             });
     
-            // Close dropdowns/popups when clicking outside
             window.addEventListener('click', function(e) {
                 const notificationContainer = document.querySelector('.notification-container');
                 if (!notificationContainer.contains(e.target)) {
@@ -790,7 +830,6 @@
                 }
             });
     
-            // Handle visibility change
             document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'visible') {
                     notificationWS.reconnectIfNeeded(userId, authToken, handleNotificationReceived);
@@ -798,15 +837,12 @@
                 }
             });
     
-            // Cleanup on page unload
             window.addEventListener('beforeunload', () => {
                 notificationWS.close();
             });
     
-            // Initial fetch
             fetchNotifications();
     
-            // Notification handling functions
             function handleNotificationReceived(data) {
                 const existingIndex = notificationsList.findIndex(n => n.id === data.id);
                 if (existingIndex >= 0) {

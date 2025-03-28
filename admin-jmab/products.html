@@ -7,1061 +7,1101 @@
     <link rel="icon" type="image/x-icon" href="../images/J-mab Logo.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-* {
-    text-decoration: none;
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-:root {
-    --primary: #02254B;
-    --accent: #FFD700;
-    --bg-light: #F5F5F5;
-    --bg-dark: #DCD7C9;
-    --text-dark: #333;
-    --text-light: #fff;
-    --danger: #dc3545;
-    --danger-hover: #c82333;
-    --primary-btn: #007bff;
-    --primary-btn-hover: #0056b3;
-    --transition: all 0.3s ease;
-    --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    --sidebar-width: 240px;
-}
-
-h1 {
-    margin-bottom: 25px;
-    font-size: 32px;
-    color: var(--primary);
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-h1:after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    height: 4px;
-    width: 60px;
-    background-color: var(--accent);
-    border-radius: 2px;
-}
-
-body {
-    display: flex;
-    background-color: #DCD7C9;
-    font-family: 'Arial', sans-serif;
-}
-    
-#sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: var(--sidebar-width);
-    height: 100%;
-    background: var(--primary);
-    transition: var(--transition);
-    color: var(--text-light); 
-    box-shadow: var(--shadow);
-    z-index: 1000;
-    padding: 0 15px;
-}
-
-#sidebar .logo-container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; 
-    padding: 20px;
-    gap: 5px; 
-}
-
-#sidebar .logo-container img {
-    width: 60px; 
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-#sidebar .admin-text {
-    font-weight: 600;
-    font-size: 30px;
-    color: var(--accent);
-    letter-spacing: 0.5px;
-    white-space: nowrap; 
-}
-
-#sidebar hr {
-    border: none;
-    height: 2px;
-    background: var(--accent);
-    margin: 15px 0;
-    opacity: 0.5;
-    margin-bottom: 50px;
-}
-
-#sidebar .side-menu {
-    list-style: none;
-    padding: 0;
-    margin-top: 20px;
-}
-
-#sidebar .side-menu li {
-    position: relative;
-    margin: 8px 0;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-#sidebar .side-menu li a {
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-    padding: 14px 20px;
-    color: var(--text-light);
-    transition: var(--transition);
-    border-radius: 10px;
-    font-weight: 500;
-}
-
-#sidebar .side-menu li a i {
-    margin-right: 15px;
-    width: 25px;
-    text-align: center;
-    transition: transform 0.3s ease;
-    font-size: 18px;
-}
-
-#sidebar .side-menu li a:hover,
-#sidebar .side-menu li a.active {
-    background-color: rgba(21, 219, 160, 0.2);
-    color: var(--accent);
-    transform: translateX(5px);
-}
-
-#sidebar .side-menu li a:hover i,
-#sidebar .side-menu li a.active i {
-    transform: scale(1.1);
-    color: var(--accent);
-}
-
-#sidebar .logout-container {
-    position: absolute;
-    bottom: 30px;
-    width: calc(100% - 30px);
-}
-
-#sidebar .logout-container a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(255,0,0,0.1);
-    color: #ff4d4d;
-    padding: 14px;
-    border-radius: 10px;
-    transition: var(--transition);
-    font-weight: 500;
-}
-
-#sidebar .logout-container a i {
-    margin-right: 10px;
-}
-
-#sidebar .logout-container a:hover {
-    background-color: rgba(255,0,0,0.2);
-    transform: translateY(-3px);
-}
-
-main {
-    margin-left: var(--sidebar-width);
-    padding: 30px;
-    min-height: 100vh;
-    background-color: var(--bg-light);
-    color: black;
-    width: calc(100% - var(--sidebar-width));
-    box-sizing: border-box;
-}
-
-.flex-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-h3 {
-    font-size: 32px;
-    color: var(--primary);
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-h3:after{
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    height: 4px;
-    width: 60px;
-    background-color: var(--accent);
-    border-radius: 2px;
-}
-
-.item-container {
-    position: relative; 
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 400px;
-    background-color: white;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
-    box-sizing: border-box;
-}
-
-.out-of-stock {
-    opacity: 0.7; 
-}
-
-.out-of-stock-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 0, 0, 0.8); 
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-    z-index: 1; 
-    pointer-events: none; 
-}
-
-.item-container img {
-    max-width: 100%;
-    height: 200px;
-    object-fit: contain;
-    border-radius: 8px;
-    position: relative; 
-}
-
-.item-container p {
-    padding: 10px;
-    max-width: 100%;
-    white-space: normal;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.item-container h4{
-    text-align: center;
-    font-size: 20px;
-}
-
-.tire-section,
-.Battery-section,
-.Oil-section,
-.Lubricant-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
-    padding: 10px;
-    transition: all 0.2s ease-in-out;
-}
-
-label {
-    display: block;
-    margin: 8px 0;
-}
-
-input, textarea, select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-textarea {
-    height: 100px;
-}
-
-.dynamic-fields {
-    margin-top: 10px;
-}
-
-.form-buttons {
-    display: flex;
-    justify-content: space-between;
-}
-
-button {
-    padding: 10px 20px;
-    background-color: var(--primary-btn);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: var(--primary-btn-hover);
-}
-
-.products-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.product-item {
-    width: 200px;
-    padding: 10px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    color: black;
-}
-
-.product-item img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.tire-section,
-.Battery-section,
-.Oil-section,
-.Lubricant-section{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-    gap: 15px;
-    padding: 10px;
-    transition: all 0.2s ease-in-out;
-}
-
-
-
-
-  #addProductButton {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 16px;
-    transition: var(--transition);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  #addProductButton:hover {
-    background-color: #01579B;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  #productFormContainer {
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-    display: none;
-  }
-  
-  form div {
-    margin-bottom: 15px;
-  }
-  
-  label {
-    display: inline-block;
-    width: 100px;
-    text-align: right;
-    margin-right: 10px;
-  }
-  
-  input[type="text"], input[type="number"], input[type="url"], textarea, select {
-    width: 250px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  input[type="submit"], #cancelButton {
-    background-color: #009688;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 10px;
-    width: auto;
-  }
-  
-  #cancelButton {
-    background-color: #808080;
-    width: auto;
-  }
-
-  #sidebar .side-menu li a:hover, #sidebar .side-menu li a.active {
-    background-color: rgba(21, 219, 160, 0.2);
-    transition: background 0.3s ease, color 0.3s ease;
-    width: 95%;
-}
-
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 15px 25px;
-    background-color: #ffffff; 
-    border-radius: 12px; 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-    border: 1px solid #e0e0e0; 
-}
-
-#addProductButton {
-    background-color: #02254B; 
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-#addProductButton:hover {
-    background-color: #01579B; 
-    transform: translateY(-2px); 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-}
-
-#addProductButton:active {
-    transform: translateY(0); 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-}
-
-.category-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.category-buttons button {
-    padding: 10px 20px;
-    background-color: #02254B; 
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.category-buttons button:hover {
-    background-color: #01579B; 
-    transform: translateY(-2px); 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-}
-
-.category-buttons button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-}
-
-.search-container {
-    display: flex;
-    align-items: center;
-    width: 300px;
-    position: relative;
-    background-color: #f5f5f5;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    border: 1px solid #e0e0e0;
-}
-
-.search-container:hover {
-    background-color: #e0e0e0; 
-    border-color: #ccc; 
-}
-
-.search-container input {
-    margin-top: 7px;
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-size: 16px;
-    outline: none;
-    color: #333; 
-}
-
-.search-container input::placeholder {
-    color: #888; 
-}
-
-.search-container i {
-    position: absolute;
-    right: 12px;
-    font-size: 18px;
-    color: #888; 
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.search-container i:hover {
-    color: #02254B; 
-}
-
-.product-actions{
-   display: flex; 
-   margin-top: 10px;
-   gap: 10px;
-}
-
-.edit-product-btn{
-    background-color: #4CAF50; 
-    color: white; 
-    padding: 5px 10px; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer;
-    width: 50%;
-}
-
-.delete-product-btn{
-    background-color: #f44336; 
-    color: white; 
-    padding: 5px 10px; 
-    border: none; 
-    border-radius: 4px; 
-    cursor: pointer;
-    width: 50%;
-}
-
-/* Product Form Enhancements */
-#productFormContainer {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    margin-bottom: 40px;
-    max-width: 90%;
-    margin: 0 auto 40px;
-    transition: all 0.3s ease;
-}
-
-#createProductForm {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-#createProductForm div {
-    margin-bottom: 15px;
-}
-
-#createProductForm label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: var(--primary);
-    text-align: left;
-    width: auto;
-}
-
-#createProductForm input[type="text"],
-#createProductForm input[type="number"],
-#createProductForm input[type="url"],
-#createProductForm textarea,
-#createProductForm select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-#createProductForm input:focus,
-#createProductForm textarea:focus,
-#createProductForm select:focus {
-    border-color: var(--accent);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(21, 219, 160, 0.2);
-}
-
-#createProductForm input::placeholder,
-#createProductForm textarea::placeholder {
-    color: #aaa;
-}
-
-#createProductForm textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-#createProductForm select {
-    cursor: pointer;
-    background-color: white;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-    padding-right: 40px;
-    appearance: none;
-}
-
-#variantsContainer {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 10px;
-    border: 1px solid #eee;
-}
-
-#variantsContainer:empty {
-    display: none;
-}
-
-#addVariantButton {
-    background-color: #e8f5e9;
-    color: #4caf50;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: none;
-    margin-top: 10px;
-    width: auto;
-}
-
-#addVariantButton:hover {
-    background-color: #c8e6c9;
-    transform: translateY(-2px);
-}
-
-#addVariantButton:before {
-    content: "+";
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 5px;
-}
-
-#createProductForm input[type="submit"],
-#cancelButton {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#createProductForm input[type="submit"] {
-    background-color: var(--primary);
-    color: white;
-    margin-right: 10px;
-}
-
-#createProductForm input[type="submit"]:hover {
-    background-color: #01579B;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-#cancelButton {
-    background-color: #f5f5f5;
-    color: #666;
-}
-
-#cancelButton:hover {
-    background-color: #e0e0e0;
-}
-
-/* Responsive adjustments */
-@media (min-width: 768px) {
-    #createProductForm {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-    
-    #createProductForm div:nth-child(3),  /* Description field */
-    #createProductForm div:nth-child(7),  /* Image URL field */
-    #variantsContainer,
-    #addVariantButton,
-    #createProductForm div:last-child {   /* Form buttons */
-        grid-column: span 2;
-    }
-}
-
-/* Animation for form appearance */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-#productFormContainer[style*="display: block"] {
-    animation: fadeIn 0.3s ease forwards;
-}
-
-/* Toggle visibility of additional fields */
-#sizeField, 
-#voltageField {
-    transition: all 0.3s ease;
-    overflow: hidden;
-    opacity: 1;
-}
-
-#sizeField[style*="display: none"], 
-#voltageField[style*="display: none"] {
-    opacity: 0;
-    max-height: 0;
-    margin: 0;
-    padding: 0;
-}
-
-#variant-selector-container {
-    margin-bottom: 15px;
-}
-
-#variant-selector-container label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-#variant-select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    font-size: 1em;
-}
-
-.variant-row {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-}
-
-.form-group {
-    margin-bottom: 10px;
-}
-
-.form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.remove-variant-btn {
-    background-color: #ff4444;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.remove-variant-btn:hover {
-    background-color: #cc0000;
-}
-
-.notification-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    cursor: pointer;
-    z-index: 1100;
-}
-
-.notification-icon {
-    position: relative;
-    font-size: 24px;
-    color: #02254B;
-    padding: 8px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.notification-icon:hover {
-    background-color: rgba(255, 255, 255, 1);
-    transform: scale(1.05);
-}
-
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ff4d4d;
-    color: white;
-    font-size: 12px;
-    border-radius: 50%;
-    padding: 3px 6px;
-    min-width: 16px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    animation: pulse 1.5s infinite;
-}
-
-.notification-dropdown {
-    display: none;
-    position: absolute;
-    top: 45px;
-    right: 0;
-    width: 300px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: white;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 0;
-    z-index: 1200;
-    overflow-x: hidden; /* Prevent horizontal overflow */
-}
-
-.notification-dropdown h4 {
-    margin: 0;
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    font-size: 16px;
-    color: #02254B;
-    background-color: #f8f9fa;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.notification-dropdown ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.notification-dropdown ul li {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-    transition: background-color 0.2s;
-    word-wrap: break-word; /* Ensure text wraps */
-    overflow-wrap: break-word; /* Modern standard for word wrapping */
-    max-width: 100%; /* Limit width to container */
-}
-
-.notification-dropdown ul li:hover {
-    background-color: #f5f5f5;
-}
-
-.notification-dropdown ul li:last-child {
-    border-bottom: none;
-}
-
-.notification-dropdown ul li div {
-    position: relative;
-    padding-left: 5px;
-    max-width: 100%; /* Ensure div stays within bounds */
-}
-
-.notification-dropdown ul li div.unread-notification {
-    border-left: 3px solid #15DBa0;
-    background-color: rgba(21, 219, 160, 0.05);
-}
-
-.notification-dropdown ul li strong {
-    display: block;
-    margin-bottom: 5px;
-    color: #02254B;
-    word-wrap: break-word; /* Wrap long titles */
-}
-
-.notification-dropdown ul li p {
-    margin: 0 0 5px 0;
-    color: #666;
-    word-wrap: break-word; /* Wrap long messages */
-    overflow-wrap: break-word;
-    max-width: 100%;
-    overflow: hidden; /* Prevent overflow */
-    text-overflow: ellipsis; /* Optional: add ellipsis for very long text */
-}
-
-.notification-dropdown ul li small {
-    display: block;
-    color: #999;
-    font-size: 11px;
-    text-align: right;
-    white-space: nowrap; /* Keep timestamp on one line */
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.notification-empty {
-    padding: 20px;
-    text-align: center;
-    color: #666;
-}
-
-.help-bubble {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1500;
-}
-
-.help-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    background-color: var(--accent);
-    color: var(--text-light);
-    font-size: 30px;
-    font-weight: bold;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-}
-
-.help-icon:hover {
-    transform: scale(1.1);
-    background-color: #12c591;
-}
-
-.contact-popup {
-    display: none;
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    width: 300px;
-    max-height: 215px; 
-    overflow-y: auto; /* Enable vertical scrolling */
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    color: var(--text-dark);
-    border: 1px solid var(--bg-dark);
-}
-
-.contact-popup h3 {
-    margin: 0 0 15px 0;
-    color: var(--primary);
-    font-size: 18px;
-    text-align: center;
-}
-
-.contact-info p {
-    margin: 5px 0;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.contact-info p strong {
-    color: var(--primary);
-}
-
-.help-bubble {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1500;
-}
-
-.help-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    background-color: var(--accent);
-    color: var(--text-light);
-    font-size: 30px;
-    font-weight: bold;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
-}
-
-.help-icon:hover {
-    transform: scale(1.1);
-    background-color: #12c591;
-}
-
-.contact-popup {
-    display: none;
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    width: 300px;
-    max-height: 215px; 
-    overflow-y: auto; /* Enable vertical scrolling */
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    color: var(--text-dark);
-    border: 1px solid var(--bg-dark);
-}
-
-.contact-popup h3 {
-    margin: 0 0 15px 0;
-    color: var(--primary);
-    font-size: 18px;
-    text-align: center;
-}
-
-.contact-info p {
-    margin: 5px 0;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.contact-info p strong {
-    color: var(--primary);
-}
-</style>
+    <style>
+        * {
+            text-decoration: none;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #02254B;
+            --accent: #FFD700;
+            --bg-light: #F5F5F5;
+            --bg-dark: #DCD7C9;
+            --text-dark: #333;
+            --text-light: #fff;
+            --danger: #dc3545;
+            --danger-hover: #c82333;
+            --primary-btn: #007bff;
+            --primary-btn-hover: #0056b3;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 240px;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-size: 32px;
+            color: var(--primary);
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 4px;
+            width: 60px;
+            background-color: var(--accent);
+            border-radius: 2px;
+        }
+
+        body {
+            display: flex;
+            background-color: #DCD7C9;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background: var(--primary);
+            transition: var(--transition);
+            color: var(--text-light); 
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 0 15px;
+        }
+
+        #sidebar .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; 
+            padding: 20px;
+            gap: 5px; 
+        }
+
+        #sidebar .logo-container img {
+            width: 60px; 
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        #sidebar .admin-text {
+            font-weight: 600;
+            font-size: 30px;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+            white-space: nowrap; 
+        }
+
+        #sidebar hr {
+            border: none;
+            height: 2px;
+            background: var(--accent);
+            margin: 15px 0;
+            opacity: 0.5;
+            margin-bottom: 50px;
+        }
+
+        #sidebar .side-menu {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        #sidebar .side-menu li {
+            position: relative;
+            margin: 8px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #sidebar .side-menu li a {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            padding: 14px 20px;
+            color: var(--text-light);
+            transition: var(--transition);
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        #sidebar .side-menu li a i {
+            margin-right: 15px;
+            width: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+
+        #sidebar .side-menu li a:hover,
+        #sidebar .side-menu li a.active {
+            background-color: rgba(21, 219, 160, 0.2);
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+
+        #sidebar .side-menu li a:hover i,
+        #sidebar .side-menu li a.active i {
+            transform: scale(1.1);
+            color: var(--accent);
+        }
+
+        #sidebar .logout-container {
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 30px);
+        }
+
+        #sidebar .logout-container a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255,0,0,0.1);
+            color: #ff4d4d;
+            padding: 14px;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        #sidebar .logout-container a i {
+            margin-right: 10px;
+        }
+
+        #sidebar .logout-container a:hover {
+            background-color: rgba(255,0,0,0.2);
+            transform: translateY(-3px);
+        }
+
+        main {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            min-height: 100vh;
+            background-color: var(--bg-light);
+            color: black;
+            width: calc(100% - var(--sidebar-width));
+            box-sizing: border-box;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        h4 {
+            font-size: 32px;
+            color: var(--primary);
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h4:after{
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 4px;
+            width: 60px;
+            background-color: var(--accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 32px;
+            color: white;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h3:after{
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 4px;
+            width: 60px;
+            background-color: var(--accent);
+            border-radius: 2px;
+        }
+
+        .item-container {
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+            min-height: 400px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            box-sizing: border-box;
+        }
+
+        .out-of-stock {
+            opacity: 0.7; 
+        }
+
+        .out-of-stock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 0, 0, 0.8); 
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            z-index: 1; 
+            pointer-events: none; 
+        }
+
+        .item-container img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            position: relative; 
+        }
+
+        .item-container p {
+            padding: 10px;
+            max-width: 100%;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .item-container h4{
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .tire-section,
+        .Battery-section,
+        .Oil-section,
+        .Lubricant-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 10px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        label {
+            display: block;
+            margin: 8px 0;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        .dynamic-fields {
+            margin-top: 10px;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-btn);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--primary-btn-hover);
+        }
+
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .product-item {
+            width: 200px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            color: black;
+        }
+
+        .product-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        #addProductButton {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #addProductButton:hover {
+            background-color: #01579B;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #productFormContainer {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        form div {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: inline-block;
+            width: 100px;
+            text-align: right;
+            margin-right: 10px;
+        }
+        
+        input[type="text"], input[type="number"], input[type="url"], textarea, select {
+            width: 250px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        input[type="submit"], #cancelButton {
+            background-color: #009688;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            width: auto;
+        }
+        
+        #cancelButton {
+            background-color: #808080;
+            width: auto;
+        }
+
+        #sidebar .side-menu li a:hover, #sidebar .side-menu li a.active {
+            background-color: rgba(21, 219, 160, 0.2);
+            transition: background 0.3s ease, color 0.3s ease;
+            width: 95%;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 25px;
+            background-color: #ffffff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+            border: 1px solid #e0e0e0; 
+        }
+
+        #addProductButton {
+            background-color: #02254B; 
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #addProductButton:hover {
+            background-color: #01579B; 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        }
+
+        #addProductButton:active {
+            transform: translateY(0); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+        }
+
+        .category-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .category-buttons button {
+            padding: 10px 20px;
+            background-color: #02254B; 
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-buttons button:hover {
+            background-color: #01579B; 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        }
+
+        .category-buttons button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            width: 300px;
+            position: relative;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .search-container:hover {
+            background-color: #e0e0e0; 
+            border-color: #ccc; 
+        }
+
+        .search-container input {
+            margin-top: 7px;
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            outline: none;
+            color: #333; 
+        }
+
+        .search-container input::placeholder {
+            color: #888; 
+        }
+
+        .search-container i {
+            position: absolute;
+            right: 12px;
+            font-size: 18px;
+            color: #888; 
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .search-container i:hover {
+            color: #02254B; 
+        }
+
+        .product-actions{
+            display: flex; 
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .edit-product-btn{
+            background-color: #4CAF50; 
+            color: white; 
+            padding: 5px 10px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer;
+            width: 50%;
+        }
+
+        .delete-product-btn{
+            background-color: #f44336; 
+            color: white; 
+            padding: 5px 10px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer;
+            width: 50%;
+        }
+
+        #productFormContainer {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            max-width: 90%;
+            margin: 0 auto 40px;
+            transition: all 0.3s ease;
+        }
+
+        #createProductForm {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #createProductForm div {
+            margin-bottom: 15px;
+        }
+
+        #createProductForm label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary);
+            text-align: left;
+            width: auto;
+        }
+
+        #createProductForm input[type="text"],
+        #createProductForm input[type="number"],
+        #createProductForm input[type="url"],
+        #createProductForm textarea,
+        #createProductForm select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        #createProductForm input:focus,
+        #createProductForm textarea:focus,
+        #createProductForm select:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(21, 219, 160, 0.2);
+        }
+
+        #createProductForm input::placeholder,
+        #createProductForm textarea::placeholder {
+            color: #aaa;
+        }
+
+        #createProductForm textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        #createProductForm select {
+            cursor: pointer;
+            background-color: white;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+            appearance: none;
+        }
+
+        #variantsContainer {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid #eee;
+        }
+
+        #variantsContainer:empty {
+            display: none;
+        }
+
+        #addVariantButton {
+            background-color: #e8f5e9;
+            color: #4caf50;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            margin-top: 10px;
+            width: auto;
+        }
+
+        #addVariantButton:hover {
+            background-color: #c8e6c9;
+            transform: translateY(-2px);
+        }
+
+        #addVariantButton:before {
+            content: "+";
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        #createProductForm input[type="submit"],
+        #cancelButton {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #createProductForm input[type="submit"] {
+            background-color: var(--primary);
+            color: white;
+            margin-right: 10px;
+        }
+
+        #createProductForm input[type="submit"]:hover {
+            background-color: #01579B;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #cancelButton {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        #cancelButton:hover {
+            background-color: #e0e0e0;
+        }
+
+        @media (min-width: 768px) {
+            #createProductForm {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            #createProductForm div:nth-child(3), 
+            #createProductForm div:nth-child(7), 
+            #variantsContainer,
+            #addVariantButton,
+            #createProductForm div:last-child {
+                grid-column: span 2;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #productFormContainer[style*="display: block"] {
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        #sizeField, 
+        #voltageField {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            opacity: 1;
+        }
+
+        #sizeField[style*="display: none"], 
+        #voltageField[style*="display: none"] {
+            opacity: 0;
+            max-height: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        #variant-selector-container {
+            margin-bottom: 15px;
+        }
+
+        #variant-selector-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        #variant-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 1em;
+        }
+
+        .variant-row {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .remove-variant-btn {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .remove-variant-btn:hover {
+            background-color: #cc0000;
+        }
+
+        .notification-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            z-index: 1100;
+        }
+
+        .notification-icon {
+            position: relative;
+            font-size: 24px;
+            color: #02254B;
+            padding: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .notification-icon:hover {
+            background-color: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4d4d;
+            color: white;
+            font-size: 12px;
+            border-radius: 50%;
+            padding: 3px 6px;
+            min-width: 16px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 0;
+            z-index: 1200;
+            overflow-x: hidden;
+        }
+
+        .notification-dropdown h4 {
+            margin: 0;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+            color: #02254B;
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .notification-dropdown ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .notification-dropdown ul li {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .notification-dropdown ul li:hover {
+            background-color: #f5f5f5;
+        }
+
+        .notification-dropdown ul li:last-child {
+            border-bottom: none;
+        }
+
+        .notification-dropdown ul li div {
+            position: relative;
+            padding-left: 5px;
+            max-width: 100%;
+        }
+
+        .notification-dropdown ul li div.unread-notification {
+            border-left: 3px solid #15DBa0;
+            background-color: rgba(21, 219, 160, 0.05);
+        }
+
+        .notification-dropdown ul li strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #02254B;
+            word-wrap: break-word;
+        }
+
+        .notification-dropdown ul li p {
+            margin: 0 0 5px 0;
+            color: #666;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notification-dropdown ul li small {
+            display: block;
+            color: #999;
+            font-size: 11px;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notification-empty {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+        }
+
+        .help-bubble {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1500;
+        }
+
+        .help-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background-color: var(--accent);
+            color: var(--text-light);
+            font-size: 30px;
+            font-weight: bold;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .help-icon:hover {
+            transform: scale(1.1);
+            background-color: #12c591;
+        }
+
+        .contact-popup {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            width: 300px;
+            max-height: 215px; 
+            overflow-y: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            color: var(--text-dark);
+            border: 1px solid var(--bg-dark);
+        }
+
+        .contact-popup h3 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .contact-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .contact-info p strong {
+            color: var(--primary);
+        }
+
+        /* Custom Modal Styles */
+        #customModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: var(--text-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+        }
+
+        .modal-body {
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: var(--bg-light);
+        }
+
+        .modal-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .modal-cancel-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .modal-cancel-btn:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .modal-confirm-btn {
+            background-color: var(--primary-btn);
+            color: white;
+        }
+
+        .modal-confirm-btn:hover {
+            background-color: var(--primary-btn-hover);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -1086,35 +1126,33 @@ button:hover {
     </section>
 
     <main>
-        
-        <!-- Help Bubble -->
-<div class="help-bubble" id="helpBubble">
-    <span class="help-icon">?</span>
-    <div class="contact-popup" id="contactPopup">
-        <h3>Developer Contacts</h3>
-        <div class="contact-info">
-            <p><strong>Aaron Abad</strong></p>
-            <p>Email: Aaron.abad@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Benedict Nacor</strong></p>
-            <p>Email: Benedict.nacor@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Marvin Recepcion</strong></p>
-            <p>Email: Marvin.recepcion@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Brian Rosario</strong></p>
-            <p>Email: Brian.rosario@gmail.com</p>
-            <p>Phone: 09123456789</p>
-            <br>
-            <p><strong>Christian Tenorio</strong></p>
-            <p>Email: Christian.tenorio@gmail.com</p>
-            <p>Phone: 09123456789</p>
+        <div class="help-bubble" id="helpBubble">
+            <span class="help-icon">?</span>
+            <div class="contact-popup" id="contactPopup">
+                <h3>Developer Contacts</h3>
+                <div class="contact-info">
+                    <p><strong>Aaron Abad</strong></p>
+                    <p>Email: Aaron.abad@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Benedict Nacor</strong></p>
+                    <p>Email: Benedict.nacor@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Marvin Recepcion</strong></p>
+                    <p>Email: Marvin.recepcion@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Brian Rosario</strong></p>
+                    <p>Email: Brian.rosario@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Christian Tenorio</strong></p>
+                    <p>Email: Christian.tenorio@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
         <div class="notification-container">
             <div class="notification-icon" id="notificationIcon">
@@ -1149,11 +1187,9 @@ button:hover {
         <div id="productFormContainer" style="display: none;">
             <h3>Product Details</h3>
             <form id="createProductForm">
-                <!-- Main Product Fields -->
                 <div>
                     <label for="name">Name:</label>
                     <input type="text" id="name" name="name" required>
-                    <!-- Hidden model field -->
                     <input type="hidden" id="model" name="model">
                 </div>
                 <div>
@@ -1178,215 +1214,207 @@ button:hover {
                     <label for="brand">Brand:</label>
                     <input type="text" id="brand" name="brand" required>
                 </div>
-        
-                <!-- Variants Section -->
-                <div id="variantsContainer">
-                    <!-- Variants will be dynamically added here -->
-                </div>
-        
-                <!-- Add Variant Button -->
+                <div id="variantsContainer"></div>
                 <button type="button" id="addVariantButton">Add Variant</button>
-        
-                <!-- Form Buttons -->
                 <input type="submit" value="Create Product">
                 <input type="button" value="Cancel" id="cancelButton">
             </form>
         </div>
 
         <div class="flex-container">
-            <div class="tire-title"><h3>Tire section</h3></div>
-            <div class="tire-section">
-                <!-- Tire products will be dynamically added here -->
-            </div>
+            <div class="tire-title"><h4>Tire section</h4></div>
+            <div class="tire-section"></div>
         </div>
 
         <div class="flex-container">
-            <div class="Battery-title"><h3>Battery section</h3></div>
-            <div class="Battery-section">
-                <!-- Battery products will be dynamically added here -->
-            </div>
+            <div class="Battery-title"><h4>Battery section</h4></div>
+            <div class="Battery-section"></div>
         </div>
 
         <div class="flex-container">
-            <div class="Lubricant-title"><h3>Lubricant section</h3></div>
-            <div class="Lubricant-section">
-                <!-- Lubricant products will be dynamically added here -->
-            </div>
+            <div class="Lubricant-title"><h4>Lubricant section</h4></div>
+            <div class="Lubricant-section"></div>
         </div>
 
         <div class="flex-container">
-            <div class="Oil-title"><h3>Oil section</h3></div>
-            <div class="Oil-section">
-                <!-- Oil products will be dynamically added here -->
+            <div class="Oil-title"><h4>Oil section</h4></div>
+            <div class="Oil-section"></div>
+        </div>
+
+        <!-- Custom Modal -->
+        <div id="customModal" class="modal">
+            <div class="custom-modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle"></h3>
+                    <span class="modal-close">×</span>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button id="modalCancel" class="modal-btn modal-cancel-btn">Cancel</button>
+                    <button id="modalConfirm" class="modal-btn modal-confirm-btn">Confirm</button>
+                </div>
             </div>
         </div>
     </main>
-<script src="JS/products.js"></script>
-<script src="../J-Mab/JS/websocketManager.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const userId = parseInt(localStorage.getItem('userId')) || -1;
-        const authToken = localStorage.getItem('authToken');
+    <script src="JS/products.js"></script>
+    <script src="../J-Mab/JS/websocketManager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = parseInt(localStorage.getItem('userId')) || -1;
+            const authToken = localStorage.getItem('authToken');
 
-        if (userId === -1 || !authToken) {
-            console.error('User not authenticated');
-            return;
-        }
-
-        // Initialize WebSocket for notifications
-        const notificationWS = new WebSocketManager(WS_NOTIFICATION_URL, "notification");
-        
-        // Connect to WebSocket
-        notificationWS.connect(userId, authToken, function(data) {
-            if (data.type === 'notification') {
-                handleNotificationReceived(data);
+            if (userId === -1 || !authToken) {
+                console.error('User not authenticated');
+                return;
             }
-        });
 
-        // Notification dropdown toggle
-        const notificationIcon = document.getElementById('notificationIcon');
-        const notificationDropdown = document.getElementById('notificationDropdown');
-        notificationIcon.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const isVisible = notificationDropdown.style.display === 'block';
-            notificationDropdown.style.display = isVisible ? 'none' : 'block';
+            const notificationWS = new WebSocketManager(WS_NOTIFICATION_URL, "notification");
             
-            if (!isVisible) {
-                fetchNotifications();
-                markAllAsRead();
-            }
-        });
+            notificationWS.connect(userId, authToken, function(data) {
+                if (data.type === 'notification') {
+                    handleNotificationReceived(data);
+                }
+            });
 
-        // Help bubble toggle
-        const helpBubble = document.getElementById('helpBubble');
-        const contactPopup = document.getElementById('contactPopup');
-        helpBubble.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (e.target !== contactPopup && !contactPopup.contains(e.target)) {
-                contactPopup.style.display = 
-                    contactPopup.style.display === 'block' ? 'none' : 'block';
-            }
-        });
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            notificationIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isVisible = notificationDropdown.style.display === 'block';
+                notificationDropdown.style.display = isVisible ? 'none' : 'block';
+                
+                if (!isVisible) {
+                    fetchNotifications();
+                    markAllAsRead();
+                }
+            });
 
-        // Close dropdowns/popups when clicking outside
-        window.addEventListener('click', function(e) {
-            const notificationContainer = document.querySelector('.notification-container');
-            if (!notificationContainer.contains(e.target)) {
-                notificationDropdown.style.display = 'none';
-            }
-            if (!helpBubble.contains(e.target)) {
-                contactPopup.style.display = 'none';
-            }
-        });
+            const helpBubble = document.getElementById('helpBubble');
+            const contactPopup = document.getElementById('contactPopup');
+            helpBubble.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (e.target !== contactPopup && !contactPopup.contains(e.target)) {
+                    contactPopup.style.display = 
+                        contactPopup.style.display === 'block' ? 'none' : 'block';
+                }
+            });
 
-        // Handle visibility change
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible') {
-                notificationWS.reconnectIfNeeded(userId, authToken, handleNotificationReceived);
-                fetchNotifications();
-            }
-        });
+            window.addEventListener('click', function(e) {
+                const notificationContainer = document.querySelector('.notification-container');
+                if (!notificationContainer.contains(e.target)) {
+                    notificationDropdown.style.display = 'none';
+                }
+                if (!helpBubble.contains(e.target)) {
+                    contactPopup.style.display = 'none';
+                }
+            });
 
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', () => {
-            notificationWS.close();
-        });
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+                    notificationWS.reconnectIfNeeded(userId, authToken, handleNotificationReceived);
+                    fetchNotifications();
+                }
+            });
 
-        // Initial fetch
-        fetchNotifications();
+            window.addEventListener('beforeunload', () => {
+                notificationWS.close();
+            });
 
-        // Existing notification functions (unchanged)
-        function handleNotificationReceived(data) {
-            const existingIndex = notificationsList.findIndex(n => n.id === data.id);
-            if (existingIndex >= 0) {
-                notificationsList[existingIndex] = data;
-            } else {
-                notificationsList.unshift(data);
-            }
-            renderNotifications();
-            playNotificationSound();
-        }
+            fetchNotifications();
 
-        async function fetchNotifications() {
-            try {
-                const notifications = await apiService.fetchNotifications(userId);
-                notificationsList = notifications.sort((a, b) => 
-                    new Date(b.created_at) - new Date(a.created_at));
-                renderNotifications();
-            } catch (error) {
-                console.error('Error fetching notifications:', error);
-            }
-        }
-
-        async function markAllAsRead() {
-            try {
-                const unreadNotifications = notificationsList.filter(n => n.is_read === 0);
-                for (const notification of unreadNotifications) {
-                    await apiService.markNotificationAsRead(notification.id);
-                    notification.is_read = 1;
+            function handleNotificationReceived(data) {
+                const existingIndex = notificationsList.findIndex(n => n.id === data.id);
+                if (existingIndex >= 0) {
+                    notificationsList[existingIndex] = data;
+                } else {
+                    notificationsList.unshift(data);
                 }
                 renderNotifications();
-            } catch (error) {
-                console.error('Failed to mark notifications as read:', error);
+                playNotificationSound();
             }
-        }
 
-        function renderNotifications() {
-            const notificationList = document.getElementById('notificationList');
-            const notificationBadge = document.getElementById('notificationBadge');
+            async function fetchNotifications() {
+                try {
+                    const notifications = await apiService.fetchNotifications(userId);
+                    notificationsList = notifications.sort((a, b) => 
+                        new Date(b.created_at) - new Date(a.created_at));
+                    renderNotifications();
+                } catch (error) {
+                    console.error('Error fetching notifications:', error);
+                }
+            }
 
-            if (!notificationList || !notificationBadge) return;
-
-            notificationList.innerHTML = '';
-
-            if (notificationsList.length === 0) {
-                notificationList.innerHTML = '<li class="notification-empty">No notifications</li>';
-            } else {
-                notificationsList.forEach(notification => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <div class="${notification.is_read ? '' : 'unread-notification'}">
-                            <strong>${notification.title || 'Notification'}</strong>
-                            <p>${notification.message}</p>
-                            <small>${formatNotificationTimestamp(notification.created_at)}</small>
-                        </div>
-                    `;
-                    if (!notification.is_read) {
-                        li.style.cursor = 'pointer';
-                        li.addEventListener('click', async () => {
-                            await apiService.markNotificationAsRead(notification.id);
-                            notification.is_read = 1;
-                            renderNotifications();
-                        });
+            async function markAllAsRead() {
+                try {
+                    const unreadNotifications = notificationsList.filter(n => n.is_read === 0);
+                    for (const notification of unreadNotifications) {
+                        await apiService.markNotificationAsRead(notification.id);
+                        notification.is_read = 1;
                     }
-                    notificationList.appendChild(li);
+                    renderNotifications();
+                } catch (error) {
+                    console.error('Failed to mark notifications as read:', error);
+                }
+            }
+
+            function renderNotifications() {
+                const notificationList = document.getElementById('notificationList');
+                const notificationBadge = document.getElementById('notificationBadge');
+
+                if (!notificationList || !notificationBadge) return;
+
+                notificationList.innerHTML = '';
+
+                if (notificationsList.length === 0) {
+                    notificationList.innerHTML = '<li class="notification-empty">No notifications</li>';
+                } else {
+                    notificationsList.forEach(notification => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <div class="${notification.is_read ? '' : 'unread-notification'}">
+                                <strong>${notification.title || 'Notification'}</strong>
+                                <p>${notification.message}</p>
+                                <small>${formatNotificationTimestamp(notification.created_at)}</small>
+                            </div>
+                        `;
+                        if (!notification.is_read) {
+                            li.style.cursor = 'pointer';
+                            li.addEventListener('click', async () => {
+                                await apiService.markNotificationAsRead(notification.id);
+                                notification.is_read = 1;
+                                renderNotifications();
+                            });
+                        }
+                        notificationList.appendChild(li);
+                    });
+                }
+
+                const unreadCount = notificationsList.filter(n => n.is_read === 0).length;
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+            }
+
+            function formatNotificationTimestamp(timestamp) {
+                return new Date(timestamp).toLocaleString([], { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
                 });
             }
 
-            const unreadCount = notificationsList.filter(n => n.is_read === 0).length;
-            notificationBadge.textContent = unreadCount;
-            notificationBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
-        }
-
-        function formatNotificationTimestamp(timestamp) {
-            return new Date(timestamp).toLocaleString([], { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-        }
-
-        function playNotificationSound() {
-            try {
-                const audio = new Audio('../sounds/notification.mp3');
-                audio.play();
-            } catch (error) {
-                console.error('Error playing notification sound:', error);
+            function playNotificationSound() {
+                try {
+                    const audio = new Audio('../sounds/notification.mp3');
+                    audio.play();
+                } catch (error) {
+                    console.error('Error playing notification sound:', error);
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>

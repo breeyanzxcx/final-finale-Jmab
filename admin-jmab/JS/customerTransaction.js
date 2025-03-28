@@ -1,22 +1,65 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Get the token from localStorage
     const token = localStorage.getItem('authToken');
     
-    // Logout confirmation
+    // Logout confirmation with custom modal
     const logoutBtn = document.getElementById('logout');
+    const modal = document.getElementById('customModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalClose = document.querySelector('.modal-close');
+
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
+        logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (confirm("Are you sure you want to log out?")) {
-                window.location.href = '../J-Mab/HTML/sign-in.php';
-            }
+            showModal('Logout Confirmation', 'Are you sure you want to log out?', 
+                function() {
+                    window.location.href = '../J-Mab/HTML/sign-in.php';
+                }
+            );
         });
     }
 
-    fetchUsersWithTransactions(); // Fetch users with transactions when the page loads
+    // Modal close handlers
+    modalCancel.addEventListener('click', hideModal);
+    modalClose.addEventListener('click', hideModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) hideModal();
+    });
+
+    // Modal functions
+    function showModal(title, message, onConfirm) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+
+        // Remove any existing confirm listener and add new one
+        const newConfirmBtn = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+        document.getElementById('modalConfirm').addEventListener('click', function() {
+            onConfirm();
+            hideModal();
+        });
+    }
+
+    function hideModal() {
+        modal.style.display = 'none';
+    }
+
+    // Check for authentication before fetching users
+    if (!token) {
+        showModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
+        return;
+    }
+
+    fetchUsersWithTransactions();
 
     function fetchUsersWithTransactions() {
-        // First fetch all users
         fetch("http://localhost/jmab/final-jmab/api/users", {
             headers: { 
                 'Content-Type': 'application/json',
@@ -28,7 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("API response data:", usersData);
     
             if (usersData.success) {
-                // Then fetch all orders to check which users have transactions
                 fetch("http://localhost/jmab/final-jmab/api/orders", {
                     headers: { 
                         'Content-Type': 'application/json',
@@ -49,7 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         tableBody.innerHTML = '';
                         let customerCount = 0;
                         
-                        // Create a Set of user IDs who have orders
                         const usersWithOrders = new Set();
                         if (ordersData.orders && ordersData.orders.length > 0) {
                             ordersData.orders.forEach(order => {
@@ -58,7 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
     
                         usersData.users.forEach(user => {
-                            // Only display if user is a customer AND has orders
                             if (user.roles === "customer" && usersWithOrders.has(user.id)) { 
                                 customerCount++;
     
@@ -88,7 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             `;
                         }
     
-                        // Attach event listeners
                         document.querySelectorAll('.view-btn').forEach(button => {
                             button.addEventListener('click', function () {
                                 const userId = this.getAttribute('data-id');
@@ -128,11 +167,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    let currentUserId = null; 
+    let currentUserId = null;
 
     function viewTransactions(userId) {
         const authToken = localStorage.getItem("authToken");
-        currentUserId = userId; 
+        currentUserId = userId;
         
         console.log("Fetching transactions for User ID:", userId);
         
@@ -218,19 +257,17 @@ document.addEventListener("DOMContentLoaded", function () {
             orderDetailsHTML += `<p style="text-align: center; font-size: 18px; margin-top: 50px;">NO ORDER DETAILS</p>`;
         }
         
-        // Add the "Return to Transactions" button
         orderDetailsHTML += `<button id="return-to-transactions-btn">Return to Transactions</button>`;
     
         const viewContent = document.getElementById("transaction-view-content");
         if (viewContent) {
             viewContent.innerHTML = orderDetailsHTML;
     
-            // Attach event listener to the "Return to Transactions" button
             const returnBtn = document.getElementById("return-to-transactions-btn");
             if (returnBtn) {
                 returnBtn.addEventListener("click", function () {
                     if (currentUserId) {
-                        viewTransactions(currentUserId); // Return to recent transactions
+                        viewTransactions(currentUserId);
                     }
                 });
             }

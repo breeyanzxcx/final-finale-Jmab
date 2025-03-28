@@ -44,6 +44,19 @@ a {
   transition: transform 0.3s ease;
 }
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navbar .logo-link:hover .logo-container {
+  transform: scale(1.05);
+}
+
+.navbar .logo-link::after {
+  content: none;
+}
+
 .navbar .logo-container:hover {
   transform: scale(1.05);
 }
@@ -364,8 +377,8 @@ main {
 
 .add-to-cart {
   padding: 15px 35px;
-  background-color: #fff;
-  color: #02254b;
+  background-color: #02254b;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 700;
   text-transform: uppercase;
@@ -378,7 +391,7 @@ main {
 }
 
 .add-to-cart:hover {
-  background-color: #02254b;
+  background-color: #0147A1;
   color: #ffffff;
   transform: translateY(-3px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -608,18 +621,26 @@ main {
 }
 
 .compare-btn {
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 10px;
-  font-weight: bold;
+    padding: 15px 35px;
+    background-color: #202020;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: 2px solid #2e2e2e;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    font-family: 'Poppins', sans-serif;
 }
 
 .compare-btn:hover {
-  background-color: #555;
+    background-color: #3d3d3d;
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
 }
 
 #compare-modal {

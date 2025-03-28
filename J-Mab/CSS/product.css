@@ -45,6 +45,19 @@ a {
 
 }
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navbar .logo-link:hover .logo-container {
+  transform: scale(1.05);
+}
+
+.navbar .logo-link::after {
+  content: none;
+}
+
 .navbar .logo-container:hover {
   transform: scale(1.05);
 }

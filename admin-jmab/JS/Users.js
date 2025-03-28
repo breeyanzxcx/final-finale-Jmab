@@ -1,14 +1,64 @@
 document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem('authToken');
 
-    // Logout confirmation
+    // Custom Modal Functions
+    function showCustomModal(title, message, onConfirm, showCancel = true) {
+        const modal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalClose = document.querySelector('.modal-close');
+
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+        modalCancel.style.display = showCancel ? 'block' : 'none';
+
+        const newConfirmBtn = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+        document.getElementById('modalConfirm').addEventListener('click', function() {
+            onConfirm();
+            hideCustomModal();
+        });
+
+        if (showCancel) {
+            modalCancel.addEventListener('click', hideCustomModal);
+        }
+        modalClose.addEventListener('click', hideCustomModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) hideCustomModal();
+        });
+    }
+
+    function hideCustomModal() {
+        const modal = document.getElementById('customModal');
+        modal.style.display = 'none';
+    }
+
+    // Authentication check
+    if (!token) {
+        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }, false
+        );
+        return;
+    }
+
+    // Logout functionality with custom modal
     const logoutBtn = document.getElementById('logout');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            if (confirm("Are you sure you want to log out?")) {
-                window.location.href = '../J-Mab/HTML/sign-in.php';
-            }
+            showCustomModal('Logout Confirmation', 'Are you sure you want to log out?', 
+                function() {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('userId');
+                    window.location.href = '../J-Mab/HTML/sign-in.php';
+                }
+            );
         });
     }
 
@@ -16,7 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".password-container i").forEach(icon => {
         icon.addEventListener("click", function () {
             const passwordInput = this.previousElementSibling; 
-
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
                 this.classList.remove("fa-eye");
@@ -32,18 +81,18 @@ document.addEventListener("DOMContentLoaded", function () {
     // Add User functionality
     function addUser(firstName, lastName, email, password, role) {
         if (!firstName || !lastName || !email || !password || !role) {
-            alert("Please fill in all fields.");
+            showCustomModal('Input Error', 'Please fill in all fields.', function() {}, false);
             return;
         }
 
         if (password.length < 8) {
-            alert("Password must be at least 8 characters long.");
+            showCustomModal('Invalid Password', 'Password must be at least 8 characters long.', function() {}, false);
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            alert("Please enter a valid email address.");
+            showCustomModal('Invalid Email', 'Please enter a valid email address.', function() {}, false);
             return;
         }
 
@@ -66,16 +115,17 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("User added successfully!");
-                fetchUsers();
-                document.getElementById('add-user-form').reset();
+                showCustomModal('Success', 'User added successfully!', function() {
+                    fetchUsers();
+                    document.getElementById('add-user-form').reset();
+                }, false);
             } else {
-                alert((data.errors ? data.errors.join(', ') : 'Unknown error'));
+                showCustomModal('Error', data.errors ? data.errors.join(', ') : 'Unknown error', function() {}, false);
             }
         })
         .catch(error => {
             console.error("Error adding user:", error);
-            alert("An error occurred while adding the user.");
+            showCustomModal('Error', 'An error occurred while adding the user.', function() {}, false);
         });
     }
 
@@ -103,7 +153,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 'Authorization': `Bearer ${token}`
             },
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 const adminsTableBody = document.querySelector('#adminsTable');
@@ -140,37 +195,42 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                 });
             } else {
-                console.error("Error fetching users:", data.errors);
-            }
-        })
-        .catch(error => console.error("Error fetching users:", error));
-    }
-
-    function deleteUser(userId) {
-        if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-            return;
-        }
-    
-        fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
-            method: 'DELETE',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("User deleted successfully!");
-                fetchUsers();
-            } else {
-                alert("Error deleting user: " + (data.errors ? data.errors.join(', ') : 'Unknown error'));
+                showCustomModal('Error', 'Error fetching users: ' + (data.errors ? data.errors.join(', ') : 'Unknown error'), function() {}, false);
             }
         })
         .catch(error => {
-            console.error("Error deleting user:", error);
-            alert("An error occurred while deleting the user.");
+            console.error("Error fetching users:", error);
+            showCustomModal('Error', 'An error occurred while fetching users: ' + error.message, function() {}, false);
         });
+    }
+
+    // Delete User functionality
+    function deleteUser(userId) {
+        showCustomModal('Delete Confirmation', 'Are you sure you want to delete this user? This action cannot be undone.', 
+            function() {
+                fetch(`http://localhost/jmab/final-jmab/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showCustomModal('Success', 'User deleted successfully!', function() {
+                            fetchUsers();
+                        }, false);
+                    } else {
+                        showCustomModal('Error', 'Error deleting user: ' + (data.errors ? data.errors.join(', ') : 'Unknown error'), function() {}, false);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting user:", error);
+                    showCustomModal('Error', 'An error occurred while deleting the user: ' + error.message, function() {}, false);
+                });
+            }
+        );
     }
 
     // Initial load of users

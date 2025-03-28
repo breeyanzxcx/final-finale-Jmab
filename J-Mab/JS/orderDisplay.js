@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", async function () {
     await fetchUserRatings(); // Load ratings first
     await fetchUserOrders();  // Then load orders
+    initializeCustomPopup();  // Initialize custom popup
 });
 
 let ratedVariants = new Set();
@@ -299,6 +300,74 @@ function getOrderActions(status, orderId, paymentMethod, id, referenceNumber) {
     return actions;
 }
 
+function initializeCustomPopup() {
+    // Custom Alert Popup
+    const alertPopup = document.createElement('div');
+    alertPopup.id = 'customAlertPopup';
+    alertPopup.className = 'popup';
+    alertPopup.innerHTML = `
+        <div class="popup-content">
+            <h3>Notification</h3>
+            <p id="customAlertMessage"></p>
+            <div class="popup-buttons">
+                <button id="customAlertOk" class="popup-btn confirm">OK</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(alertPopup);
+
+    const alertOkButton = document.getElementById('customAlertOk');
+    alertOkButton.addEventListener('click', () => {
+        alertPopup.style.display = 'none';
+    });
+
+    // Override default alert
+    window.alert = function(message) {
+        const alertMessage = document.getElementById('customAlertMessage');
+        alertMessage.textContent = message;
+        alertPopup.style.display = 'flex';
+    };
+
+    // Custom Confirm Popup
+    const confirmPopup = document.createElement('div');
+    confirmPopup.id = 'customConfirmPopup';
+    confirmPopup.className = 'popup';
+    confirmPopup.innerHTML = `
+        <div class="popup-content">
+            <h3>Confirmation</h3>
+            <p id="customConfirmMessage"></p>
+            <div class="popup-buttons">
+                <button id="customConfirmYes" class="popup-btn confirm">Yes</button>
+                <button id="customConfirmNo" class="popup-btn cancel">No</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(confirmPopup);
+
+    // Handle confirm responses
+    window.customConfirm = function(message, callback) {
+        const confirmMessage = document.getElementById('customConfirmMessage');
+        confirmMessage.textContent = message;
+        confirmPopup.style.display = 'flex';
+
+        const yesButton = document.getElementById('customConfirmYes');
+        const noButton = document.getElementById('customConfirmNo');
+
+        const handleResponse = (response) => {
+            confirmPopup.style.display = 'none';
+            callback(response);
+            yesButton.removeEventListener('click', yesHandler);
+            noButton.removeEventListener('click', noHandler);
+        };
+
+        const yesHandler = () => handleResponse(true);
+        const noHandler = () => handleResponse(false);
+
+        yesButton.addEventListener('click', yesHandler);
+        noButton.addEventListener('click', noHandler);
+    };
+}
+
 function addButtonEventListeners() {
     document.querySelectorAll('.pay-btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -317,9 +386,11 @@ function addButtonEventListeners() {
     document.querySelectorAll('.receive-btn').forEach(button => {
         button.addEventListener('click', function() {
             const orderId = this.getAttribute('data-order-id');
-            if (confirm('Have you received this order?')) {
-                updateOrderStatus(orderId, 'delivered');
-            }
+            customConfirm('Have you received this order?', (confirmed) => {
+                if (confirmed) {
+                    updateOrderStatus(orderId, 'delivered');
+                }
+            });
         });
     });
     
@@ -989,6 +1060,80 @@ const styles = `
 
 .user-rating .star.selected {
     color: #f5c518;
+}
+
+/* Custom Popup Styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    width: 350px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.popup-content h3 {
+    color: #02254b;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.popup-content p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.popup-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.popup-btn.confirm {
+    background-color: #02254b;
+    color: #FFFFFF;
+}
+
+.popup-btn.confirm:hover {
+    background-color: #0147A1;
+}
+
+.popup-btn.cancel {
+    background-color: #FF0000;
+    color: #FFFFFF;
+}
+
+.popup-btn.cancel:hover {
+    background-color: #CC0000;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 </style>
 `;

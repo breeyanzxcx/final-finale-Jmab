@@ -1,23 +1,61 @@
 document.addEventListener("DOMContentLoaded", function () {
-    fetchOrders(); // Fetch orders and update both sales and customer counters
+    fetchOrders();
 
-    // Logout confirmation
+    // Logout confirmation with custom modal
     const logoutBtn = document.getElementById('logout');
+    const modal = document.getElementById('customModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalClose = document.querySelector('.modal-close');
+
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (confirm("Are you sure you want to log out?")) {
-                window.location.href = '../J-Mab/HTML/sign-in.php';
-            }
+            showModal('Logout Confirmation', 'Are you sure you want to log out?', 
+                function() {
+                    window.location.href = '../J-Mab/HTML/sign-in.php';
+                }
+            );
         });
+    }
+
+    // Modal close handlers
+    modalCancel.addEventListener('click', hideModal);
+    modalClose.addEventListener('click', hideModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) hideModal();
+    });
+
+    // Modal functions
+    function showModal(title, message, onConfirm) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+
+        // Remove any existing confirm listener and add new one
+        const newConfirmBtn = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+        document.getElementById('modalConfirm').addEventListener('click', function() {
+            onConfirm();
+            hideModal();
+        });
+    }
+
+    function hideModal() {
+        modal.style.display = 'none';
     }
 });
 
 async function fetchOrders() {
     const authToken = localStorage.getItem("authToken");
     if (!authToken) {
-        alert("Unauthorized access. Please log in.");
-        window.location.href = "../HTML/sign-in.php";
+        showModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = "../HTML/sign-in.php";
+            }
+        );
         return;
     }
 
@@ -35,11 +73,11 @@ async function fetchOrders() {
         }
 
         const data = await response.json();
-        console.log("API Response:", data); // Log the API response
+        console.log("API Response:", data);
         if (data.success) {
             displayOrders(data.orders);
-            updateSalesCounter(data.orders); // Calculate and update the sales counter
-            updateCustomerCounter(data.orders); // Calculate and update the customer counter
+            updateSalesCounter(data.orders);
+            updateCustomerCounter(data.orders);
         } else {
             console.error("Failed to fetch orders:", data.message);
         }
@@ -53,13 +91,12 @@ function updateSalesCounter(orders) {
 
     orders.forEach(order => {
         if (order.total_quantity) {
-            console.log("Order Quantity:", order.total_quantity); // Log each order's total quantity
+            console.log("Order Quantity:", order.total_quantity);
             totalSales += parseInt(order.total_quantity, 10);
         }
     });
 
-    console.log("Total Sales:", totalSales); // Log the total sales
-
+    console.log("Total Sales:", totalSales);
     const salesCounter = document.querySelector(".sales-counter");
     if (salesCounter) {
         salesCounter.textContent = totalSales;
@@ -67,20 +104,18 @@ function updateSalesCounter(orders) {
 }
 
 function updateCustomerCounter(orders) {
-    const uniqueCustomers = new Set(); // Use a Set to store unique customer IDs
+    const uniqueCustomers = new Set();
 
-    // Add each customer's user_id to the Set
     orders.forEach(order => {
         if (order.user_id) {
-            console.log("Customer ID:", order.user_id); // Log each customer's ID
+            console.log("Customer ID:", order.user_id);
             uniqueCustomers.add(order.user_id);
         }
     });
 
-    const totalCustomers = uniqueCustomers.size; // Get the number of unique customers
-    console.log("Total Customers:", totalCustomers); // Log the total customers
+    const totalCustomers = uniqueCustomers.size;
+    console.log("Total Customers:", totalCustomers);
 
-    // Update the customer counter in the UI
     const customersCounter = document.querySelector(".customers-counter");
     if (customersCounter) {
         customersCounter.textContent = totalCustomers;
@@ -89,12 +124,9 @@ function updateCustomerCounter(orders) {
 
 function displayOrders(orders) {
     const ordersTableBody = document.querySelector(".orders-container tbody");
-    ordersTableBody.innerHTML = ""; // Clear previous data
+    ordersTableBody.innerHTML = "";
 
-    // Show most recent orders first
     const sortedOrders = orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
-    // Display only the recent orders
     const recentOrders = sortedOrders.slice(0, 10);
 
     recentOrders.forEach(order => {
@@ -108,12 +140,10 @@ function displayOrders(orders) {
             <td>${formattedDate || "N/A"}</td>
             <td><p class="status ${statusClass}">${order.status}</p></td>
         `;
-
         ordersTableBody.appendChild(row);
     });
 }
 
-// Function to format date into MM/DD/YYYY HH:MM AM/PM
 function formatDate(dateString) {
     if (!dateString) return "N/A";
 
@@ -126,6 +156,5 @@ function formatDate(dateString) {
         minute: "2-digit", 
         hour12: true 
     };
-
     return date.toLocaleString("en-US", options);
 }

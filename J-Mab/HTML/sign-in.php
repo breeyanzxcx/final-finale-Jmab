@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
-    #forgot-password-link{
+    #forgot-password-link {
       color: black;
     }
     .modal { 
@@ -39,19 +39,17 @@
     .modal-content button { 
       padding: 10px; 
       width: 100%; 
-      background-color: #007bff; 
+      background-color: #02254B; /* Updated to match brand color */
       color: white; 
       border: none; 
       border-radius: 4px; 
       cursor: pointer; 
     }
     .modal-content button:hover { 
-      background-color: #0056b3; 
+      background-color: #034078; /* Hover state matching popup */
     }
-
-    #forgot-email{
+    #forgot-email {
       width: 90%;
-   
     }
   </style>
 </head>
@@ -61,7 +59,6 @@
       <img src="../imahe/j-mab.png" alt="J-MAB Logo">
       <span>J-MAB</span>
     </div> 
-
   </nav>
   <div class="container">
     <div class="left-section">
@@ -130,23 +127,64 @@
     </div>
   </div>
 
+  <!-- Custom Popup -->
+  <div id="custom-popup" class="popup-overlay">
+    <div class="popup-content">
+      <p id="popup-message"></p>
+      <div class="popup-buttons">
+        <button class="popup-ok" onclick="closePopup(true)">OK</button>
+        <button class="popup-cancel" onclick="closePopup(false)">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // Popup handling functions
+    function showPopup(message, callback) {
+      const popup = document.getElementById('custom-popup');
+      const messageElement = document.getElementById('popup-message');
+      messageElement.textContent = message;
+      popup.style.display = 'block';
+      
+      setTimeout(() => {
+        popup.classList.add('active');
+      }, 10);
+      
+      popup.dataset.callback = callback ? callback.name : '';
+      return new Promise((resolve) => {
+        popup.dataset.resolve = resolve;
+      });
+    }
+
+    function closePopup(result) {
+      const popup = document.getElementById('custom-popup');
+      popup.classList.remove('active');
+      
+      setTimeout(() => {
+        popup.style.display = 'none';
+        const resolve = popup.dataset.resolve;
+        if (resolve) {
+          window[resolve](result);
+        }
+      }, 300);
+    }
+
     document.getElementById("show-password").addEventListener("change", function () {
       const passwordInput = document.getElementById("password");
       passwordInput.type = this.checked ? "text" : "password";
     });
 
-    document.getElementById('signin-form').addEventListener('submit', function(event) {
+    document.getElementById('signin-form').addEventListener('submit', async function(event) {
       event.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      fetch('http://localhost/jmab/final-jmab/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      .then(response => response.json())
-      .then(data => {
+      try {
+        const response = await fetch('http://localhost/jmab/final-jmab/api/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
         if (data.success && data.user) {
           localStorage.setItem('authToken', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
@@ -156,16 +194,15 @@
           } else if (data.user.roles === 'customer') {
             window.location.href = 'home.html';
           } else {
-            alert('Unknown role: ' + data.user.roles);
+            await showPopup('Unknown role: ' + data.user.roles);
           }
         } else {
-          alert("Login failed: " + (data.errors ? data.errors[0] : "Invalid credentials"));
+          await showPopup("Login failed: " + (data.errors ? data.errors[0] : "Invalid credentials"));
         }
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error:', error);
-        alert("An error occurred. Please try again.");
-      });
+        await showPopup("An error occurred. Please try again.");
+      }
     });
 
     const forgotPasswordLink = document.getElementById('forgot-password-link');
@@ -182,80 +219,72 @@
       if (event.target === resetPasswordModal) resetPasswordModal.style.display = 'none';
     });
 
-    document.getElementById('forgot-password-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const email = document.getElementById('forgot-email').value.trim();
-    console.log('Sending email:', email);
+    document.getElementById('forgot-password-form').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+      console.log('Sending email:', email);
 
-    if (!email) {
-        alert('Please enter an email address.');
+      if (!email) {
+        await showPopup('Please enter an email address.');
         return;
-    }
+      }
 
-    fetch('http://localhost/jmab/final-jmab/api/users/forgotPassword', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
+      try {
+        const response = await fetch('http://localhost/jmab/final-jmab/api/users/forgotPassword', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await response.json();
         console.log('Forgot Password API Response:', data);
         if (data.success) {
-            alert('A reset code has been sent to your email.');
-            forgotPasswordModal.style.display = 'none';
-            resetPasswordModal.style.display = 'flex';
-            document.getElementById('reset-password-form').dataset.email = email;
+          await showPopup('A reset code has been sent to your email.');
+          forgotPasswordModal.style.display = 'none';
+          resetPasswordModal.style.display = 'flex';
+          document.getElementById('reset-password-form').dataset.email = email;
         } else {
-            alert('Error: ' + (data.errors ? data.errors[0] : 'Could not send reset code.'));
+          await showPopup('Error: ' + (data.errors ? data.errors[0] : 'Could not send reset code.'));
         }
-    })
-    .catch(error => {
+      } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        await showPopup('An error occurred. Please try again.');
+      }
     });
-});
 
-document.getElementById('reset-password-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    const email = this.dataset.email;
-    const resetCode = document.getElementById('reset-code').value.trim();
-    const newPassword = document.getElementById('new-password').value;
+    document.getElementById('reset-password-form').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const email = this.dataset.email;
+      const resetCode = document.getElementById('reset-code').value.trim();
+      const newPassword = document.getElementById('new-password').value;
 
-    if (resetCode.length !== 6 || !/^\d{6}$/.test(resetCode)) {
-        alert('Please enter a valid 6-digit code.');
+      if (resetCode.length !== 6 || !/^\d{6}$/.test(resetCode)) {
+        await showPopup('Please enter a valid 6-digit code.');
         return;
-    }
-    if (newPassword.length < 6) {
-        alert('New password must be at least 6 characters long.');
+      }
+      if (newPassword.length < 6) {
+        await showPopup('New password must be at least 6 characters long.');
         return;
-    }
+      }
 
-    fetch('http://localhost/jmab/final-jmab/api/users/resetPassword', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, reset_code: resetCode, new_password: newPassword })
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
+      try {
+        const response = await fetch('http://localhost/jmab/final-jmab/api/users/resetPassword', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, reset_code: resetCode, new_password: newPassword })
+        });
+        const data = await response.json();
         console.log('Reset Password API Response:', data);
         if (data.success) {
-            alert('Password reset successfully! You can now sign in with your new password.');
-            resetPasswordModal.style.display = 'none';
+          await showPopup('Password reset successfully! You can now sign in with your new password.');
+          resetPasswordModal.style.display = 'none';
         } else {
-            alert('Error: ' + (data.errors ? data.errors[0] : 'Invalid or expired reset code.'));
+          await showPopup('Error: ' + (data.errors ? data.errors[0] : 'Invalid or expired reset code.'));
         }
-    })
-    .catch(error => {
+      } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        await showPopup('An error occurred. Please try again.');
+      }
     });
-});
   </script>
 </body>
 </html>

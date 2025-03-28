@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     initializeRating();
+    initializeCustomAlert();
 });
 
 function initializeRating() {
@@ -61,6 +62,22 @@ function initializeRating() {
     if (ratingModal) {
         ratingModal.style.display = 'none';
     }
+}
+
+function initializeCustomAlert() {
+    const alertPopup = document.getElementById('customAlertPopup');
+    const alertOkButton = document.getElementById('customAlertOk');
+    
+    alertOkButton.addEventListener('click', function() {
+        alertPopup.style.display = 'none';
+    });
+
+    // Override the default alert function
+    window.alert = function(message) {
+        const alertMessage = document.getElementById('customAlertMessage');
+        alertMessage.textContent = message;
+        alertPopup.style.display = 'flex';
+    };
 }
 
 let onRatingSubmittedCallback = null;
@@ -131,9 +148,9 @@ async function submitRating() {
             alert('Thank you for your rating!');
             modal.style.display = 'none';
             if (onRatingSubmittedCallback) {
-                onRatingSubmittedCallback(); // Update button immediately
+                onRatingSubmittedCallback();
             }
-            fetchUserOrders(); // Refresh orders
+            fetchUserOrders();
         } else {
             alert(`Failed to submit rating: ${data.errors ? data.errors.join(', ') : 'Unknown error'}`);
         }

@@ -13,10 +13,12 @@
 </head>
 <body>
   <nav class="navbar">
-    <div class="logo-container">
-      <img src="../imahe/j-mab.png" alt="J-MAB Logo">
-      <span>J-MAB</span>
-    </div> 
+    <a href="./home.html" class="logo-link">
+      <div class="logo-container">
+        <img src="../imahe/j-mab.png" alt="J-MAB Logo">
+        <span>J-MAB</span>
+      </div>
+    </a>
 
     <div class="nav-links">
       <a id="hehe" href="./home.html">HOME</a>
@@ -142,7 +144,7 @@
 
 <div id="ratingModal" class="popup">
   <div class="popup-content">
-      <span class="close">&times;</span>
+      <span class="close">×</span>
       <h3>Rate Product</h3>
       <p>Please rate your experience:</p>
       <div class="star-rating">
@@ -154,6 +156,16 @@
       </div>
       <button id="submitRating" class="popup-btn confirm">Submit Rating</button>
   </div>
+</div>
+
+<!-- Custom Alert Popup -->
+<div id="customAlertPopup" class="popup">
+    <div class="popup-content">
+        <p id="customAlertMessage"></p>
+        <div class="popup-buttons">
+            <button id="customAlertOk" class="popup-btn confirm">OK</button>
+        </div>
+    </div>
 </div>
 
   <script src="../JS/orderDisplay.js"></script>

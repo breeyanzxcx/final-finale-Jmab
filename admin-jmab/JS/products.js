@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', (event) => {
-    // Define section variables
     const tireSection = document.querySelector('.tire-section');
     const batterySection = document.querySelector('.Battery-section');
     const lubricantSection = document.querySelector('.Lubricant-section');
@@ -17,14 +16,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
     batteryButton.addEventListener('click', () => filterProducts('Batteries'));
     allButton.addEventListener('click', () => filterProducts('All'));
 
-    // Product Form Elements
     const form = document.getElementById('createProductForm');
     const categorySelect = document.getElementById('category');
     const productFormContainer = document.getElementById('productFormContainer');
     const addProductButton = document.getElementById('addProductButton');
     const cancelButton = document.getElementById('cancelButton');
     
-    // Variants elements
     const variantsContainer = document.getElementById('variantsContainer');
     const addVariantButton = document.getElementById('addVariantButton');
     const variantSelectorContainer = document.createElement('div');
@@ -47,7 +44,60 @@ document.addEventListener('DOMContentLoaded', (event) => {
     let isEditing = false;
     let currentProductId = null;
 
-    // Show form smoothly
+    // Custom Modal Functions
+    function showCustomModal(title, message, onConfirm = null) {
+        const modal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalClose = document.querySelector('.modal-close');
+
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.style.display = 'flex';
+
+        // If no confirmation callback, hide Cancel button and make Confirm close the modal
+        if (!onConfirm) {
+            modalCancel.style.display = 'none';
+            modalConfirm.textContent = 'OK';
+            const newConfirmBtn = modalConfirm.cloneNode(true);
+            modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+            document.getElementById('modalConfirm').addEventListener('click', hideCustomModal);
+        } else {
+            modalCancel.style.display = 'inline-block';
+            modalConfirm.textContent = 'Confirm';
+            const newConfirmBtn = modalConfirm.cloneNode(true);
+            modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+            document.getElementById('modalConfirm').addEventListener('click', function() {
+                onConfirm();
+                hideCustomModal();
+            });
+        }
+
+        modalCancel.addEventListener('click', hideCustomModal);
+        modalClose.addEventListener('click', hideCustomModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) hideCustomModal();
+        });
+    }
+
+    function hideCustomModal() {
+        const modal = document.getElementById('customModal');
+        modal.style.display = 'none';
+    }
+
+    // Authentication check
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
+        return;
+    }
+
     addProductButton.addEventListener('click', function() {
         resetForm();
         document.querySelector('input[type="submit"]').value = "Create Product";
@@ -55,14 +105,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
         setTimeout(() => productFormContainer.style.opacity = '1', 10);
     });
 
-    // Hide form smoothly
     cancelButton.addEventListener('click', function() {
         productFormContainer.style.opacity = '0';
         setTimeout(() => productFormContainer.style.display = 'none', 200);
         resetForm();
     });
 
-    // Add variant button functionality
     if (addVariantButton) {
         addVariantButton.addEventListener('click', function() {
             addVariantRow();
@@ -72,7 +120,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    // Function to add a variant row to the form
+    document.getElementById('logout').addEventListener('click', function (e) {
+        e.preventDefault();
+        showCustomModal('Logout Confirmation', 'Are you sure you want to log out?', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
+    });
+
     function addVariantRow(variantData = null) {
         const variantRow = document.createElement('div');
         variantRow.className = 'variant-row';
@@ -109,7 +165,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 try {
                     const token = localStorage.getItem('authToken');
                     if (!token) {
-                        alert('Please log in first.');
+                        showCustomModal('Authentication Required', 'Please log in first.');
                         return;
                     }
 
@@ -133,19 +189,19 @@ document.addEventListener('DOMContentLoaded', (event) => {
                             variantSelect.value = variantSelect.options[0].value;
                         }
                         displaySelectedVariant();
-                        alert('Variant removed successfully!');
+                        showCustomModal('Success', 'Variant removed successfully!');
                         if (isEditing && currentProductId) {
-                            editProduct(currentProductId); // Refresh variant list
+                            editProduct(currentProductId);
                         } else {
-                            loadProducts(); // Refresh product list if not editing
+                            loadProducts();
                         }
                     } else {
-                        alert('Error deleting variant: ' + (result.errors ? result.errors.join('\n') : 'Unknown error'));
+                        showCustomModal('Error', 'Error deleting variant: ' + (result.errors ? result.errors.join('\n') : 'Unknown error'));
                     }
                     removeButton.disabled = false;
                 } catch (error) {
                     console.error('Error deleting variant:', error);
-                    alert('An error occurred while deleting the variant: ' + error.message);
+                    showCustomModal('Error', 'An error occurred while deleting the variant: ' + error.message);
                     removeButton.disabled = false;
                 }
             } else {
@@ -159,7 +215,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    // Function to update the variant selector dropdown
     function updateVariantSelector() {
         const variantRows = variantsContainer.querySelectorAll('.variant-row');
         variantSelect.innerHTML = '';
@@ -184,7 +239,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
-    // Function to display the selected variant
     function displaySelectedVariant() {
         const variantRows = variantsContainer.querySelectorAll('.variant-row');
         const selectedVariantId = variantSelect.value;
@@ -198,10 +252,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
-    // Event listener for variant selector
     variantSelect.addEventListener('change', displaySelectedVariant);
 
-    // Function to collect variant data from the form
     function collectVariantsData() {
         const variantRows = variantsContainer.querySelectorAll('.variant-row');
         const variantsData = [];
@@ -223,7 +275,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         return variantsData;
     }
 
-    // Product form submission
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
     
@@ -232,14 +283,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
         productData.variants = collectVariantsData();
     
         if (productData.variants.length === 0) {
-            alert('Please add at least one variant.');
+            showCustomModal('Validation Error', 'Please add at least one variant.');
             return;
         }
     
         try {
             const token = localStorage.getItem('authToken');
             if (!token) {
-                alert('Please log in first.');
+                showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+                    function() {
+                        window.location.href = '../J-Mab/HTML/sign-in.php';
+                    }
+                );
                 return;
             }
     
@@ -293,33 +348,38 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const result = await response.json();
     
             if (result.success) {
-                alert(isEditing ? 'Product updated successfully!' : 'Product created successfully!');
+                showCustomModal('Success', isEditing ? 'Product updated successfully!' : 'Product created successfully!');
                 form.reset();
                 productFormContainer.style.opacity = '0';
                 setTimeout(() => productFormContainer.style.display = 'none', 200);
                 resetForm();
                 loadProducts();
             } else {
-                alert('Error: ' + (result.errors ? result.errors.join('\n') : 'Unknown error'));
+                showCustomModal('Error', 'Error: ' + (result.errors ? result.errors.join('\n') : 'Unknown error'));
             }
         } catch (error) {
             console.error('Error:', error);
-            alert(`An error occurred: ${error.message}`);
-        }
-    });
-
-    // Logout function
-    document.getElementById('logout').addEventListener('click', function (e) {
-        e.preventDefault();
-        const isConfirmed = confirm("Are you sure you want to log out?");
-        if (isConfirmed) {
-            window.location.href = '../J-Mab/HTML/sign-in.php';
+            showCustomModal('Error', `An error occurred: ${error.message}`);
         }
     });
 
     async function loadProducts() {
         try {
-            const response = await fetch('http://localhost/jmab/final-jmab/api/products');
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+                    function() {
+                        window.location.href = '../J-Mab/HTML/sign-in.php';
+                    }
+                );
+                return;
+            }
+
+            const response = await fetch('http://localhost/jmab/final-jmab/api/products', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
@@ -424,7 +484,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         console.log('Delete Product ID:', productId);
                         if (!productId) {
                             console.error('Delete button missing product ID');
-                            alert('Cannot delete: Product ID is missing');
+                            showCustomModal('Error', 'Cannot delete: Product ID is missing');
                             return;
                         }
                         deleteProduct(productId);
@@ -433,11 +493,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
     
                 tireSection.style.opacity = '1';
             } else {
-                alert('Error loading products.');
+                showCustomModal('Error', 'Error loading products.');
             }
         } catch (error) {
             console.error('Error fetching products:', error);
-            alert(`An error occurred while fetching products: ${error.message}`);
+            showCustomModal('Error', `An error occurred while fetching products: ${error.message}`);
         }
     }
 
@@ -445,7 +505,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) {
-                alert('Please log in first.');
+                showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+                    function() {
+                        window.location.href = '../J-Mab/HTML/sign-in.php';
+                    }
+                );
                 return;
             }
     
@@ -479,7 +543,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) {
-                alert('Please log in first.');
+                showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+                    function() {
+                        window.location.href = '../J-Mab/HTML/sign-in.php';
+                    }
+                );
                 return;
             }
            
@@ -509,7 +577,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 document.getElementById('image_url').value = product.image_url || '';
                 document.getElementById('brand').value = product.brand || '';
         
-                variantsContainer.innerHTML = ''; // Clear existing variants
+                variantsContainer.innerHTML = '';
                 if (product.variants && Array.isArray(product.variants)) {
                     product.variants.forEach(variant => {
                         console.log('Loading variant:', variant);
@@ -537,54 +605,58 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 setTimeout(() => productFormContainer.style.opacity = '1', 10);
                 productFormContainer.scrollIntoView({ behavior: 'smooth' });
             } else {
-                alert('Error: ' + (data.message || 'Failed to fetch product details'));
+                showCustomModal('Error', 'Error: ' + (data.message || 'Failed to fetch product details'));
             }
         } catch (error) {
             console.error('Error fetching product details:', error.message);
-            alert(`An error occurred while fetching product details: ${error.message}`);
+            showCustomModal('Error', `An error occurred while fetching product details: ${error.message}`);
         }
     }
     
     async function deleteProduct(productId) {
         if (!productId) {
             console.error('Cannot delete: Product ID is undefined or empty');
-            alert('Cannot delete: Invalid product ID');
+            showCustomModal('Error', 'Cannot delete: Invalid product ID');
             return;
         }
         
-        if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
-            return;
-        }
+        showCustomModal('Delete Product', 'Are you sure you want to delete this product? This action cannot be undone.', 
+            async function() {
+                try {
+                    const token = localStorage.getItem('authToken');
+                    if (!token) {
+                        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+                            function() {
+                                window.location.href = '../J-Mab/HTML/sign-in.php';
+                            }
+                        );
+                        return;
+                    }
     
-        try {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                alert('Please log in first.');
-                return;
-            }
+                    console.log(`Attempting to delete product with ID: ${productId}`);
+                    const response = await fetch(`http://localhost/jmab/final-jmab/api/products/${productId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
     
-            console.log(`Attempting to delete product with ID: ${productId}`);
-            const response = await fetch(`http://localhost/jmab/final-jmab/api/products/${productId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
+                    const result = await response.json();
+                    console.log('Delete API Response:', result);
+    
+                    if (result.success) {
+                        showCustomModal('Success', 'Product deleted successfully!');
+                        loadProducts(); 
+                    } else {
+                        console.error('Delete Error:', result.message || result.errors); 
+                        showCustomModal('Error', 'Error: ' + (result.errors ? result.errors.join('\n') : result.message || 'Unknown error')); 
+                    }
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                    showCustomModal('Error', 'An error occurred while deleting the product.');
                 }
-            });
-    
-            const result = await response.json();
-            console.log('Delete API Response:', result);
-    
-            if (result.success) {
-                alert('Product deleted successfully!');
-                loadProducts(); 
-            } else {
-                console.error('Delete Error:', result.message || result.errors); 
-                alert('Error: ' + (result.errors ? result.errors.join('\n') : result.message || 'Unknown error')); 
             }
-        } catch (error) {
-            console.error('Error deleting product:', error);
-            alert('An error occurred while deleting the product.');
-        }
+        );
     }
 
     function resetForm() {
@@ -665,7 +737,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 noResultsMessage.style.textAlign = 'center';
                 noResultsMessage.style.padding = '20px';
                 noResultsMessage.style.color = 'gray';
-                document.querySelector('.products-container').appendChild(noResultsMessage);
+                document.querySelector('.products-container')?.appendChild(noResultsMessage);
             } else {
                 noResultsMessage.style.display = 'block';
             }

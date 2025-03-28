@@ -1,10 +1,9 @@
-// Global variables
 let currentOrderId = null;
 let currentNewStatus = null;
 let currentUserId = null;
 let currentReferenceNumber = null;
 let currentProductDetails = null;
-let groupedOrders = {}; // Made global to access in updateOrderStatus
+let groupedOrders = {};
 
 function showConfirmationModal(message, orderId, newStatus, userId, referenceNumber, productDetails) {
     const confirmationModal = document.getElementById("confirmationModal");
@@ -31,6 +30,49 @@ function hideConfirmationModal() {
     } else {
         console.error("Confirmation modal element not found.");
     }
+}
+
+// Custom Modal Functions
+function showCustomModal(title, message, onConfirm = null) {
+    const modal = document.getElementById('customModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalClose = document.querySelector('.modal-close');
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.style.display = 'flex';
+
+    // If no confirmation callback, hide Cancel button and make Confirm close the modal
+    if (!onConfirm) {
+        modalCancel.style.display = 'none';
+        modalConfirm.textContent = 'OK';
+        const newConfirmBtn = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+        document.getElementById('modalConfirm').addEventListener('click', hideCustomModal);
+    } else {
+        modalCancel.style.display = 'inline-block';
+        modalConfirm.textContent = 'Confirm';
+        const newConfirmBtn = modalConfirm.cloneNode(true);
+        modalConfirm.parentNode.replaceChild(newConfirmBtn, modalConfirm);
+        document.getElementById('modalConfirm').addEventListener('click', function() {
+            onConfirm();
+            hideCustomModal();
+        });
+    }
+
+    modalCancel.addEventListener('click', hideCustomModal);
+    modalClose.addEventListener('click', hideCustomModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) hideCustomModal();
+    });
+}
+
+function hideCustomModal() {
+    const modal = document.getElementById('customModal');
+    modal.style.display = 'none';
 }
 
 // Event listeners for confirmation buttons
@@ -60,7 +102,6 @@ if (confirmYes) {
                     currentProductDetails
                 );
             }
-            // Reset variables after action is initiated
             currentOrderId = null;
             currentNewStatus = null;
             currentUserId = null;
@@ -68,7 +109,7 @@ if (confirmYes) {
             currentProductDetails = null;
         } else {
             console.warn("Confirmation attempted without valid order data.");
-            alert("Error: Order data is missing. Please try again.");
+            showCustomModal('Error', 'Order data is missing. Please try again.');
         }
     });
 }
@@ -144,7 +185,7 @@ function showReasonsModal(orderId, newStatus, userId, referenceNumber, productDe
         const selectedReason = document.querySelector('input[name="cancelOrFailReason"]:checked');
 
         if (!selectedReason) {
-            alert("Please select a reason.");
+            showCustomModal('Validation Error', 'Please select a reason.');
             return;
         }
 
@@ -161,13 +202,25 @@ document.addEventListener("DOMContentLoaded", function () {
     if (confirmationModal) confirmationModal.style.display = "none";
     if (reasonsModal) reasonsModal.style.display = "none";
 
+    const authToken = localStorage.getItem("authToken");
+    if (!authToken) {
+        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
+        return;
+    }
+
     fetchOrders();
 
     document.getElementById("logout").addEventListener("click", function (e) {
         e.preventDefault();
-        if (confirm("Are you sure you want to log out?")) {
-            window.location.href = "../J-Mab/HTML/sign-in.php";
-        }
+        showCustomModal('Logout Confirmation', 'Are you sure you want to log out?', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
     });
 
     const nameInput = document.getElementById("name");
@@ -181,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const createProductForm = document.getElementById("createProductForm");
     if (createProductForm) {
-        createProductForm.addEventListener("submit", function (e) {
+        createProductForm.addEventListener("submit", async function (e) {
             e.preventDefault();
 
             const productData = {
@@ -193,29 +246,29 @@ document.addEventListener("DOMContentLoaded", function () {
                 brand: document.getElementById("brand").value,
             };
 
-            fetch("http://localhost/jmab/final-jmab/api/products", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                },
-                body: JSON.stringify(productData),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
-                        console.log("Product created:", data);
-                        alert("Product added successfully!");
-                        createProductForm.reset();
-                    } else {
-                        console.error("Failed to create product:", data.message);
-                        alert("Failed to add product: " + data.message);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error creating product:", error);
-                    alert("An error occurred while creating the product.");
+            try {
+                const response = await fetch("http://localhost/jmab/final-jmab/api/products", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${authToken}`,
+                    },
+                    body: JSON.stringify(productData),
                 });
+
+                const data = await response.json();
+                if (data.success) {
+                    console.log("Product created:", data);
+                    showCustomModal('Success', 'Product added successfully!');
+                    createProductForm.reset();
+                } else {
+                    console.error("Failed to create product:", data.message);
+                    showCustomModal('Error', 'Failed to add product: ' + data.message);
+                }
+            } catch (error) {
+                console.error("Error creating product:", error);
+                showCustomModal('Error', 'An error occurred while creating the product.');
+            }
         });
     }
 });
@@ -223,8 +276,11 @@ document.addEventListener("DOMContentLoaded", function () {
 async function fetchOrders() {
     const authToken = localStorage.getItem("authToken");
     if (!authToken) {
-        alert("Unauthorized access. Please log in.");
-        window.location.href = "../HTML/sign-in.php";
+        showCustomModal('Unauthorized Access', 'Please log in to continue.', 
+            function() {
+                window.location.href = '../J-Mab/HTML/sign-in.php';
+            }
+        );
         return;
     }
 
@@ -247,9 +303,11 @@ async function fetchOrders() {
             displayOrders(data.orders);
         } else {
             console.error("Failed to fetch orders:", data.message);
+            showCustomModal('Error', 'Failed to fetch orders: ' + data.message);
         }
     } catch (error) {
         console.error("Error fetching orders:", error);
+        showCustomModal('Error', 'An error occurred while fetching orders: ' + error.message);
     }
 }
 
@@ -262,7 +320,7 @@ function displayOrders(orders) {
     }
 
     ordersTableBody.innerHTML = "";
-    groupedOrders = {}; // Reset and repopulate
+    groupedOrders = {};
 
     orders.forEach((order) => {
         if (!groupedOrders[order.reference_number]) {
@@ -393,7 +451,6 @@ async function updateOrderStatus(orderId, newStatus, userId, referenceNumber, pr
     console.log("Updating order status:", { orderId, newStatus, userId, referenceNumber, productDetails, reason });
 
     try {
-        // Update order status
         const updateResponse = await fetch(`http://localhost/jmab/final-jmab/api/orders/${orderId}`, {
             method: "PUT",
             headers: {
@@ -420,7 +477,6 @@ async function updateOrderStatus(orderId, newStatus, userId, referenceNumber, pr
                 default: notificationTitle = "Order Status Update"; break;
             }
 
-            // Send notification
             const notificationData = {
                 user_id: userId,
                 title: notificationTitle,
@@ -445,12 +501,11 @@ async function updateOrderStatus(orderId, newStatus, userId, referenceNumber, pr
                 console.error("Failed to send notification:", notificationResult.message);
             }
 
-            // Generate receipt if status is "delivered"
             if (newStatus.toLowerCase() === "delivered") {
                 const order = groupedOrders[referenceNumber];
                 if (!order) {
                     console.error("Order not found in groupedOrders:", referenceNumber);
-                    alert("Order updated, but receipt could not be generated due to missing order data.");
+                    showCustomModal('Warning', 'Order updated, but receipt could not be generated due to missing order data.');
                 } else {
                     const receiptData = {
                         order_id: orderId,
@@ -458,7 +513,7 @@ async function updateOrderStatus(orderId, newStatus, userId, referenceNumber, pr
                         order_reference: referenceNumber,
                         total_amount: order.total_price,
                         payment_method: order.payment_method,
-                        payment_status: "completed" // Changed to "completed" to reflect payment finalization
+                        payment_status: "completed"
                     };
 
                     const receiptResponse = await fetch("http://localhost/jmab/final-jmab/api/receipts/order", {
@@ -477,19 +532,19 @@ async function updateOrderStatus(orderId, newStatus, userId, referenceNumber, pr
                         console.log(`Receipt created for order ${orderId}`);
                     } else {
                         console.error("Failed to create receipt:", receiptResult.message);
-                        alert(`Order updated, but failed to create receipt: ${receiptResult.message}`);
+                        showCustomModal('Warning', `Order updated, but failed to create receipt: ${receiptResult.message}`);
                     }
                 }
             }
 
-            alert(`Order ${orderId} updated to ${newStatus}`);
+            showCustomModal('Success', `Order ${orderId} updated to ${newStatus}`);
             fetchOrders();
             localStorage.setItem("orderUpdated", "true");
         } else {
-            alert(`Failed to update order: ${updateData.errors ? updateData.errors.join(", ") : updateData.message}`);
+            showCustomModal('Error', `Failed to update order: ${updateData.errors ? updateData.errors.join(", ") : updateData.message}`);
         }
     } catch (error) {
         console.error("Error updating order, sending notification, or creating receipt:", error);
-        alert("An error occurred while processing the order.");
+        showCustomModal('Error', 'An error occurred while processing the order: ' + error.message);
     }
 }

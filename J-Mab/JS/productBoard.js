@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Product ID:', productId);
     
     setupCartPopup();
+    initializeCustomPopup(); // Initialize the custom popup
 
     if (productId) {
         try {
@@ -44,6 +45,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.history.back();
     });
 });
+
+function initializeCustomPopup() {
+    const popup = document.createElement('div');
+    popup.id = 'customPopup';
+    popup.className = 'popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h3>Notification</h3>
+            <p id="customPopupMessage"></p>
+            <div class="popup-buttons">
+                <button id="customPopupOk" class="popup-btn confirm">OK</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+
+    const okButton = document.getElementById('customPopupOk');
+    okButton.addEventListener('click', () => {
+        popup.style.display = 'none';
+    });
+
+    // Override default alert
+    window.alert = function(message) {
+        const popupMessage = document.getElementById('customPopupMessage');
+        popupMessage.textContent = message;
+        popup.style.display = 'flex';
+    };
+}
 
 function setupCartPopup() {
     const popupOverlay = document.createElement('div');
@@ -163,7 +192,6 @@ function handleProductVariants(product) {
         updateButtonStates(parseInt(product.stock) || 0);
         fetchAndDisplayVariantRating(null);
     }
-
 }
 
 async function fetchAndDisplayVariantRating(variantId) {

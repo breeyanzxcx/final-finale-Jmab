@@ -14,6 +14,33 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.appendChild(confirmationDialog);
 
+    // Initialize custom popup for alerts
+    const customPopup = document.createElement('div');
+    customPopup.id = 'customPopup';
+    customPopup.className = 'popup';
+    customPopup.innerHTML = `
+        <div class="popup-content">
+            <h3>Notification</h3>
+            <p id="customPopupMessage"></p>
+            <div class="popup-buttons">
+                <button id="customPopupOk" class="popup-btn confirm">OK</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(customPopup);
+
+    const customPopupOk = document.getElementById('customPopupOk');
+    customPopupOk.addEventListener('click', () => {
+        customPopup.style.display = 'none';
+    });
+
+    // Override default alert with custom popup
+    window.alert = function(message) {
+        const popupMessage = document.getElementById('customPopupMessage');
+        popupMessage.textContent = message;
+        customPopup.style.display = 'flex';
+    };
+
     fetchUserCart();
 
     const checkoutButton = document.querySelector(".checkout-btn");
@@ -23,12 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const cartItems = document.querySelectorAll(".cart-item");
 
             if (cartItems.length === 0) {
-                showNotificationPopup("Your cart is empty. Please add items before proceeding to checkout.");
+                alert("Your cart is empty. Please add items before proceeding to checkout.");
                 return;
             }
 
             if (selectedItems.length === 0) {
-                showNotificationPopup("Please select at least one item to proceed to checkout.");
+                alert("Please select a product to checkout.");
                 return;
             }
             
@@ -70,9 +97,8 @@ async function fetchUserCart() {
     const authToken = localStorage.getItem("authToken");
 
     if (!userId || !authToken) {
-        showNotificationPopup("Please log in to proceed with checkout.", () => {
-            window.location.href = "../HTML/sign-in.php";
-        });
+        alert("Please log in to proceed with checkout.");
+        window.location.href = "../HTML/sign-in.php";
         return;
     }
 
@@ -248,7 +274,7 @@ async function removeFromCart(cartId) {
                 showSuccessMessage("Item removed successfully!");
             } catch (error) {
                 console.error("Error removing item:", error);
-                showNotificationPopup("Failed to remove item. Please try again.");
+                alert("Failed to remove item. Please try again.");
             }
         }
     );
@@ -276,19 +302,19 @@ async function removeSelectedItems() {
         if (allSuccess) {
             showSuccessMessage("Selected items removed successfully!");
         } else {
-            showNotificationPopup("Some items could not be removed. Please try again.");
+            alert("Some items could not be removed. Please try again.");
         }
         fetchUserCart();
     } catch (error) {
         console.error("Error removing selected items:", error);
-        showNotificationPopup("An error occurred while removing the items.");
+        alert("An error occurred while removing the items.");
     }
 }
 
 function showDeleteSelectedConfirmation() {
     const selectedItems = document.querySelectorAll(".item-checkbox:checked");
     if (selectedItems.length === 0) {
-        showNotificationPopup("No items selected for deletion.");
+        alert("No items selected for deletion.");
         return;
     }
 
@@ -354,7 +380,7 @@ async function updateQuantity(cartId, quantity) {
         fetchUserCart();
     } catch (error) {
         console.error("Error updating quantity:", error);
-        showNotificationPopup("Quantity exceeds available stock.");
+        alert("Quantity exceeds available stock.");
     }
 }
 

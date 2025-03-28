@@ -96,15 +96,16 @@
   position: absolute;
   top: 100%;
   right: 0;
-  width: 300px; /* Fixed width */
-  max-height: 300px; /* Fixed height */
+  width: 300px;
+  max-height: 300px;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   z-index: 1100;
-  display: none; /* Hidden by default */
-  overflow-y: auto; /* Enable vertical scrolling */
+  display: none;
+  overflow-y: auto;
   font-family: 'Poppins', sans-serif;
+  margin-top: 10px;
 }
 
 .notification-dropdown h4 {

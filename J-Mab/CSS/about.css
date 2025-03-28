@@ -42,7 +42,19 @@ a {
   gap: 10px;
   padding-left: 30px;
   transition: transform 0.3s ease;
+}
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navbar .logo-link:hover .logo-container {
+  transform: scale(1.05);
+}
+
+.navbar .logo-link::after {
+  content: none;
 }
 
 .navbar .logo-container:hover {

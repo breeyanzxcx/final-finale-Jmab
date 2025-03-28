@@ -51,11 +51,19 @@ body {
   gap: 10px;
   padding-left: 30px;
   transition: transform 0.3s ease;
-
 }
 
-.navbar .logo-container:hover {
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navbar .logo-link:hover .logo-container {
   transform: scale(1.05);
+}
+
+.navbar .logo-link::after {
+  content: none;
 }
 
 .navbar .logo-container img {
@@ -87,12 +95,10 @@ body {
 }
 
 .navbar a:hover, .navbar a.active {
-
   color: #FFD700;
 }
 
 .navbar a::after {
-
   content: '';
   position: absolute;
   width: 0;
@@ -151,7 +157,7 @@ body {
   margin-right: 30px;
 }
 
-.action-icons a{
+.action-icons a {
   margin-top: 10px;
   margin-bottom: 3px;
 }
