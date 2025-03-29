@@ -427,12 +427,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         const maxPrice = Math.max(...prices);
                         
                         if (minPrice === maxPrice) {
-                            priceDisplay = `₱${minPrice}`;
+                            priceDisplay = `₱${minPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                         } else {
-                            priceDisplay = `₱${minPrice} - ₱${maxPrice}`;
+                            priceDisplay = `₱${minPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} - ₱${maxPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                         }
                     } else {
-                        priceDisplay = `₱${product.price}`;
+                        priceDisplay = `₱${parseFloat(product.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                     }
     
                     const outOfStockOverlay = isOutOfStock

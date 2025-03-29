@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const price = parseFloat(order.total_price) || 0;
                     transactionsHTML += `
                         <li class="order-item" data-order-id="${order.order_id}">
-                            <span>Order ID: ${order.order_id} - ₱${price.toFixed(2)} - ${order.created_at}</span>
+                            <span>Order ID: ${order.order_id} - ₱${price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} - ${order.created_at}</span>
                             <button class="view-order-details-btn" data-order-id="${order.order_id}">View Details</button>
                         </li>
                     `;
@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function () {
             orderDetailsHTML += `<div class="order-details-container">`;
             orderDetails.forEach(detail => {
                 const price = detail.variant_price !== undefined 
-                    ? parseFloat(detail.variant_price).toFixed(2) 
+                    ? parseFloat(detail.variant_price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
                     : "N/A"; 
                 orderDetailsHTML += `
                     <div class="order-detail-item">

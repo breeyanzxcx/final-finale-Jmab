@@ -771,6 +771,77 @@
                 opacity: 1;
             }
         }
+
+        .search-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+        
+        #orderSearch {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        #orderSearch:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        .search-sort-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .search-container {
+            flex: 1;
+        }
+        
+        #orderSearch {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        #orderSearch:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        .sort-container {
+            flex: 0 0 auto;
+        }
+        
+        #sortOrders {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        #sortOrders:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
     </style>
 </head>
 
@@ -789,7 +860,6 @@
             <li><a href="/JMAB/admin-jmab/message.html"><i class="fas fa-envelope"></i><span>Message</span></a></li>
             <li><a href="/JMAB/admin-jmab/Users.html"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
             <li><a href="/JMAB/admin-jmab/receipts.html"><i class="fas fa-receipt"></i><span>Receipts</span></a></li>
-            <li><a href="/JMAB/admin-jmab/profile.html"><i class="fas fa-id-card"></i><span>Profile</span></a></li>
         </ul>
         <div class="logout-container">
             <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i><span> Logout</span></a>
@@ -839,20 +909,32 @@
             </div>
         </div>
         <h1>CONFIRM ORDERS</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Reference Number</th>
-                    <th>Customer Name</th>
-                    <th>Total Price</th>
-                    <th>Payment Method</th>
-                    <th>Product Details</th>
-                    <th>Order Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="orders-table-body"></tbody>
-        </table>
+    <div class="search-sort-container">
+        <div class="search-container">
+            <input type="text" id="orderSearch" placeholder="Search by Reference, Name, or City..." />
+        </div>
+        <div class="sort-container">
+            <select id="sortOrders">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+            </select>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Reference Number</th>
+                <th>Customer Name</th>
+                <th>Total Price</th>
+                <th>Payment Method</th>
+                <th>Product Details</th>
+                <th>Order Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="orders-table-body"></tbody>
+    </table>
+</main>
 
         <div id="reasonsModal" class="modal">
             <div class="modal-content">
