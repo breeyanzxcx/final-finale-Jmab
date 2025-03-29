@@ -4,6 +4,8 @@ let currentUserId = null;
 let currentReferenceNumber = null;
 let currentProductDetails = null;
 let groupedOrders = {};
+let allOrders = [] 
+let currentSort = "newest";
 
 function showConfirmationModal(message, orderId, newStatus, userId, referenceNumber, productDetails) {
     const confirmationModal = document.getElementById("confirmationModal");
@@ -214,6 +216,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchOrders();
 
+    // Search event listener
+    const searchInput = document.getElementById("orderSearch");
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            filterAndSortOrders(this.value.trim().toLowerCase(), currentSort);
+        });
+    }
+
+    // Sort event listener
+    const sortSelect = document.getElementById("sortOrders");
+    if (sortSelect) {
+        sortSelect.addEventListener("change", function () {
+            currentSort = this.value;
+            filterAndSortOrders(searchInput ? searchInput.value.trim().toLowerCase() : "", currentSort);
+        });
+    }
+
     document.getElementById("logout").addEventListener("click", function (e) {
         e.preventDefault();
         showCustomModal('Logout Confirmation', 'Are you sure you want to log out?', 
@@ -300,7 +319,8 @@ async function fetchOrders() {
         const data = await response.json();
         console.log("API Response:", data);
         if (data.success) {
-            displayOrders(data.orders);
+            allOrders = data.orders; // Store all orders for filtering and sorting
+            filterAndSortOrders("", currentSort); // Initial display with default sort
         } else {
             console.error("Failed to fetch orders:", data.message);
             showCustomModal('Error', 'Failed to fetch orders: ' + data.message);
@@ -341,6 +361,8 @@ function displayOrders(orders) {
                 product_details: productDetails,
                 order_id: order.order_id,
                 reference_number: order.reference_number,
+                city: order.city || "N/A",
+                created_at: order.created_at || ""
             };
         }
     });
@@ -370,6 +392,16 @@ function displayOrders(orders) {
             }
         }
 
+        const formattedCreatedAt = order.created_at 
+            ? new Date(order.created_at).toLocaleString('en-PH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            : "N/A";
+
         row.innerHTML = `
             <td>${reference_number}</td>
             <td>${order.first_name} ${order.last_name}</td>
@@ -378,12 +410,31 @@ function displayOrders(orders) {
             <td>${formattedProductDetails}</td>
             <td><span class="status-label ${statusClass}">${order.status}</span></td>
             <td>
-                ${getStatusActions(order.status, order.order_id, order.user_id, reference_number, formattedProductDetails)}
+                ${getStatusActions(order.status, order.order_id, order.user_id, reference_number, formattedProductDetails, order.payment_method)}
             </td>
         `;
 
         ordersTableBody.appendChild(row);
     });
+}
+
+function filterAndSortOrders(searchTerm, sortOrder) {
+    // Filter orders
+    let filteredOrders = allOrders.filter((order) => {
+        const referenceMatch = order.reference_number.toLowerCase().includes(searchTerm);
+        const nameMatch = `${order.first_name} ${order.last_name}`.toLowerCase().includes(searchTerm);
+        const cityMatch = (order.city || "N/A").toLowerCase().includes(searchTerm);
+        return referenceMatch || nameMatch || cityMatch;
+    });
+
+    // Sort orders by created_at
+    filteredOrders.sort((a, b) => {
+        const dateA = new Date(a.created_at || "1970-01-01"); 
+        const dateB = new Date(b.created_at || "1970-01-01");
+        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+
+    displayOrders(filteredOrders);
 }
 
 function parseProductDetailsString(detailsString) {
@@ -406,9 +457,13 @@ function parseProductDetailsString(detailsString) {
     return formattedDetails;
 }
 
-function getStatusActions(status, orderId, userId, referenceNumber, productDetails) {
+function getStatusActions(status, orderId, userId, referenceNumber, productDetails, paymentMethod) {
     let actions = "";
     const escapedProductDetails = productDetails.replace(/'/g, "\\'");
+
+    if (status === "pending" && paymentMethod.toLowerCase() === "gcash") {
+        return '<span>Awaiting Payment</span>';
+    }
 
     if (status === "pending") {
         actions = `
@@ -429,8 +484,10 @@ function getStatusActions(status, orderId, userId, referenceNumber, productDetai
             <button class="retry-delivery-btn" onclick="console.log('Retry Delivery clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to mark this order as Out for Delivery?', ${orderId}, 'out for delivery', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Out for Delivery Again</button>
             <button class="cancel-btn" onclick="console.log('Cancel clicked for order ${orderId}'); showConfirmationModal('Are you sure you want to cancel this order?', ${orderId}, 'cancelled', ${userId}, '${referenceNumber}', '${escapedProductDetails}')">Cancel</button>
         `;
-    } else if (status === "cancelled" || status === "delivered") {
-        actions = `<span>No actions</span>`;
+    } else if (status === "cancelled") {
+        actions = `<span>Failed</span>`;
+    } else if (status === "delivered") {
+        actions = `<span>Completed</span>`;
     }
 
     return actions;
@@ -537,8 +594,8 @@ async function updateOrderStatus(orderId, newStatus, userId, referenceNumber, pr
                 }
             }
 
-            showCustomModal('Success', `Order ${orderId} updated to ${newStatus}`);
-            fetchOrders();
+            alert(`Order ${orderId} updated to ${newStatus}`);
+            fetchOrders(); // Refresh all orders after update
             localStorage.setItem("orderUpdated", "true");
         } else {
             showCustomModal('Error', `Failed to update order: ${updateData.errors ? updateData.errors.join(", ") : updateData.message}`);

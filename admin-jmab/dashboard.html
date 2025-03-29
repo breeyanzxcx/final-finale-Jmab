@@ -7,628 +7,609 @@
     <link rel="icon" type="image/x-icon" href="../images/J-mab Logo.png">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            text-decoration: none;
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        :root {
-            --primary: #02254B;
-            --accent: #FFD700;
-            --bg-light: #F5F5F5;
-            --bg-dark: #DCD7C9;
-            --text-dark: #333;
-            --text-light: #fff;
-            --danger: #dc3545;
-            --danger-hover: #c82333;
-            --primary-btn: #007bff;
-            --primary-btn-hover: #0056b3;
-            --transition: all 0.3s ease;
-            --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            --sidebar-width: 240px;
-        }
-        
-        body {
-            display: flex;
-            background-color: var(--bg-dark);
-        }
-        
-        #sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: var(--sidebar-width);
-            height: 100%;
-            background: var(--primary);
-            transition: var(--transition);
-            color: var(--text-light); 
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            padding: 0 15px;
-        }
-        
-        #sidebar .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start; 
-            padding: 20px;
-            gap: 5px; 
-        }
-        
-        #sidebar .logo-container img {
-            width: 60px; 
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        #sidebar .admin-text {
-            font-weight: 600;
-            font-size: 30px;
-            color: var(--accent);
-            letter-spacing: 0.5px;
-            white-space: nowrap; 
-        }
-        
-        #sidebar hr {
-            border: none;
-            height: 2px;
-            background: var(--accent);
-            margin: 15px 0;
-            opacity: 0.5;
-            margin-bottom: 50px;
-        }
-        
-        #sidebar .side-menu {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
-        }
-        
-        #sidebar .side-menu li {
-            position: relative;
-            margin: 8px 0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        #sidebar .side-menu li a {
-            display: flex;
-            align-items: center;
-            font-size: 16px;
-            padding: 14px 20px;
-            color: var(--text-light);
-            transition: var(--transition);
-            border-radius: 10px;
-            font-weight: 500;
-        }
-        
-        #sidebar .side-menu li a i {
-            margin-right: 15px;
-            width: 25px;
-            text-align: center;
-            transition: transform 0.3s ease;
-            font-size: 18px;
-        }
-        
-        #sidebar .side-menu li a:hover,
-        #sidebar .side-menu li a.active {
-            background-color: rgba(21, 219, 160, 0.2);
-            color: var(--accent);
-            transform: translateX(5px);
-        }
-        
-        #sidebar .side-menu li a:hover i,
-        #sidebar .side-menu li a.active i {
-            transform: scale(1.1);
-            color: var(--accent);
-        }
-        
-        #sidebar .logout-container {
-            position: absolute;
-            bottom: 30px;
-            width: calc(100% - 30px);
-        }
-        
-        #sidebar .logout-container a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(255,0,0,0.1);
-            color: #ff4d4d;
-            padding: 14px;
-            border-radius: 10px;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-        
-        #sidebar .logout-container a i {
-            margin-right: 10px;
-        }
-        
-        #sidebar .logout-container a:hover {
-            background-color: rgba(255,0,0,0.2);
-            transform: translateY(-3px);
-        }
-        
-        main {
-            margin-left: var(--sidebar-width);
-            padding: 30px;
-            min-height: 100vh;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            width: calc(100% - var(--sidebar-width));
-        }
-        
-        h1 {
-            margin-bottom: 25px;
-            font-size: 32px;
-            color: var(--primary);
-            font-weight: 600;
-            position: relative;
-            padding-bottom: 10px;
-        }
-        
-        h1:after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            height: 4px;
-            width: 60px;
-            background-color: var(--accent);
-            border-radius: 2px;
-        }
-        
-        .boxes {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .TotalSales, .TotalCustomers {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 10px;
-            color: white;
-            justify-content: space-between;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            text-align: center;
-        }
-        
-        .sales-info, .customers-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            flex: 1;
-        }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    * {
+        text-decoration: none;
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    :root {
+        --primary: #02254B;
+        --accent: #FFD700;
+        --bg-light: #F5F5F5;
+        --bg-dark: #DCD7C9;
+        --text-dark: #333;
+        --text-light: #fff;
+        --danger: #dc3545;
+        --danger-hover: #c82333;
+        --primary-btn: #007bff;
+        --primary-btn-hover: #0056b3;
+        --transition: all 0.3s ease;
+        --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        --sidebar-width: 240px;
+    }
+    
+    body {
+        display: flex;
+        background-color: var(--bg-dark);
+    }
+    
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--sidebar-width);
+        height: 100%;
+        background: var(--primary);
+        transition: var(--transition);
+        color: var(--text-light); 
+        box-shadow: var(--shadow);
+        z-index: 1000;
+        padding: 0 15px;
+    }
+    
+    #sidebar .logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start; 
+        padding: 20px;
+        gap: 5px; 
+    }
+    
+    #sidebar .logo-container img {
+        width: 60px; 
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+    
+    #sidebar .admin-text {
+        font-weight: 600;
+        font-size: 30px;
+        color: var(--accent);
+        letter-spacing: 0.5px;
+        white-space: nowrap; 
+    }
+    
+    #sidebar hr {
+        border: none;
+        height: 2px;
+        background: var(--accent);
+        margin: 15px 0;
+        opacity: 0.5;
+        margin-bottom: 50px;
+    }
+    
+    #sidebar .side-menu {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    
+    #sidebar .side-menu li {
+        position: relative;
+        margin: 8px 0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    #sidebar .side-menu li a {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        padding: 14px 20px;
+        color: var(--text-light);
+        transition: var(--transition);
+        border-radius: 10px;
+        font-weight: 500;
+    }
+    
+    #sidebar .side-menu li a i {
+        margin-right: 15px;
+        width: 25px;
+        text-align: center;
+        transition: transform 0.3s ease;
+        font-size: 18px;
+    }
+    
+    #sidebar .side-menu li a:hover,
+    #sidebar .side-menu li a.active {
+        background-color: rgba(21, 219, 160, 0.2);
+        color: var(--accent);
+        transform: translateX(5px);
+    }
+    
+    #sidebar .side-menu li a:hover i,
+    #sidebar .side-menu li a.active i {
+        transform: scale(1.1);
+        color: var(--accent);
+    }
+    
+    #sidebar .logout-container {
+        position: absolute;
+        bottom: 30px;
+        width: calc(100% - 30px);
+    }
+    
+    #sidebar .logout-container a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255,0,0,0.1);
+        color: #ff4d4d;
+        padding: 14px;
+        border-radius: 10px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+    
+    #sidebar .logout-container a i {
+        margin-right: 10px;
+    }
+    
+    #sidebar .logout-container a:hover {
+        background-color: rgba(255,0,0,0.2);
+        transform: translateY(-3px);
+    }
+    
+    main {
+        margin-left: var(--sidebar-width);
+        padding: 30px;
+        min-height: 100vh;
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+        width: calc(100% - var(--sidebar-width));
+    }
+    
+    h1 {
+        margin-bottom: 25px;
+        font-size: 32px;
+        color: var(--primary);
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 10px;
+    }
+    
+    h1:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 4px;
+        width: 60px;
+        background-color: var(--accent);
+        border-radius: 2px;
+    }
+    
+    .boxes {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .TotalSales, .TotalCustomers {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 10px;
+        color: white;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+    
+    .sales-header, .customers-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+    
+    .sales-info, .customers-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-        .icon {
-            font-size: 30px;
-            margin-right: 15px;
-        }
+    .icon {
+        font-size: 30px;
+    }
 
-        .sales-counter, .customers-counter {
-            font-size: 28px;
-        }
+    .sales-counter, .customers-counter {
+        font-size: 28px;
+    }
 
-        .sales-text, .customers-text {
-            font-size: 16px;
-            font-weight: normal;
-        }
+    .sales-text, .customers-text {
+        font-size: 16px;
+        font-weight: normal;
+    }
+    
+    .sales-chart-container, .customers-chart-container {
+        width: 100%;
+        height: 200px;
+        margin-top: 15px;
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: var(--shadow);
+    }
 
-        .TotalSales {
-            background: linear-gradient(45deg, #ff4d4d, #d32f2f);
-        }
-        
-        .TotalCustomers {
-            background: linear-gradient(45deg, #4d79ff, #002b80);
-        }
-        
-        .TotalSales:hover, .TotalCustomers:hover {
-            transform: translateY(-5px);
-            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .orders-container {
-            width: 100%;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-        }
+    .TotalSales {
+        color: black;
+        background: transparent;
+        border: 1px solid rgb(183, 180, 180);
+    }
+    
+    .TotalCustomers {
+        color: black;
+        background: transparent;
+        border: 1px solid rgb(183, 180, 180);
+    }
+    
+    .TotalSales:hover, .TotalCustomers:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .orders-container {
+        width: 100%;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        overflow-x: auto;
+    }
 
-        .orders-container th {
-            text-align: start;
-            padding: 10px;
-            background: var(--primary);
-            color: white;
-        }
-        
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .status {
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: black;
-            text-align: center;
-            display: inline-block;
-            font-size: 14px;
-            font-weight: 500;
-        }
+    .orders-container th {
+      text-align: start;
+      padding: 10px;
+      background: var(--primary);
+      color: white;
+    }
+    
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+    
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        vertical-align: top;
+    }
+    
+    .status {
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: black;
+        display: inline-block; 
+        font-size: 14px;
+        font-weight: 500;
+    }
 
-        .pending {
-            background: #ffc107;
-        }
+.pending {
+    background: #ffc107;
+}
 
-        .processing {
-            background: #007bff;
-        }
+.processing {
+    background: #007bff;
+}
 
-        .out-for-delivery {
-            background: rgb(74, 127, 114);
-        }
+.out-for-delivery {
+    background: rgb(74, 127, 114);
+}
 
-        .delivered {
-            background: #28a745;
-        }
+.delivered {
+    background: #28a745;
+}
 
-        .failed-delivery {
-            background: #dc3545;
-        }
+.failed-delivery {
+    background: #dc3545;
+}
 
-        .cancelled {
-            background: #6c757d;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+.cancelled {
+    background:#dc3545;
+}
+    
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
 
-        .notification-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-            z-index: 1100;
-        }
+.notification-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    z-index: 1100;
+}
 
-        .notification-icon {
-            position: relative;
-            font-size: 24px;
-            color: #02254B;
-            padding: 8px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+.notification-icon {
+    position: relative;
+    font-size: 24px;
+    color: #02254B;
+    padding: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
 
-        .notification-icon:hover {
-            background-color: rgba(255, 255, 255, 1);
-            transform: scale(1.05);
-        }
+.notification-icon:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+}
 
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ff4d4d;
-            color: white;
-            font-size: 12px;
-            border-radius: 50%;
-            padding: 3px 6px;
-            min-width: 16px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            animation: pulse 1.5s infinite;
-        }
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4d4d;
+    color: white;
+    font-size: 12px;
+    border-radius: 50%;
+    padding: 3px 6px;
+    min-width: 16px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    animation: pulse 1.5s infinite;
+}
 
-        .notification-dropdown {
-            display: none;
-            position: absolute;
-            top: 45px;
-            right: 0;
-            width: 300px;
-            max-height: 400px;
-            overflow-y: auto;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 0;
-            z-index: 1200;
-            overflow-x: hidden;
-        }
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    top: 45px;
+    right: 0;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 0;
+    z-index: 1200;
+    overflow-x: hidden;
+}
 
-        .notification-dropdown h4 {
-            margin: 0;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            font-size: 16px;
-            color: #02254B;
-            background-color: #f8f9fa;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
+.notification-dropdown h4 {
+    margin: 0;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+    color: #02254B;
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
 
-        .notification-dropdown ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+.notification-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-        .notification-dropdown ul li {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-            transition: background-color 0.2s;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            max-width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.notification-dropdown ul li {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .notification-dropdown ul li .notification-content {
-            flex-grow: 1;
-            max-width: calc(100% - 40px);
-        }
+.notification-dropdown ul li .notification-content {
+    flex-grow: 1;
+    max-width: calc(100% - 40px);
+}
 
-        .notification-dropdown ul li .trash-icon {
-            font-size: 16px;
-            color: var(--danger);
-            cursor: pointer;
-            padding: 5px;
-            transition: var(--transition);
-        }
+.notification-dropdown ul li .trash-icon {
+    font-size: 16px;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 5px;
+    transition: var(--transition);
+}
 
-        .notification-dropdown ul li .trash-icon:hover {
-            color: var(--danger-hover);
-            transform: scale(1.1);
-        }
+.notification-dropdown ul li .trash-icon:hover {
+    color: var(--danger-hover);
+    transform: scale(1.1);
+}
 
-        .notification-dropdown ul li:hover {
-            background-color: #f5f5f5;
-        }
+.notification-dropdown ul li:hover {
+    background-color: #f5f5f5;
+}
 
-        .notification-dropdown ul li:last-child {
-            border-bottom: none;
-        }
+.notification-dropdown ul li:last-child {
+    border-bottom: none;
+}
 
-        .notification-dropdown ul li div {
-            position: relative;
-            padding-left: 5px;
-            max-width: 100%;
-        }
+.notification-dropdown ul li div {
+    position: relative;
+    padding-left: 5px;
+    max-width: 100%;
+}
 
-        .notification-dropdown ul li div.unread-notification {
-            border-left: 3px solid #15DBa0;
-            background-color: rgba(21, 219, 160, 0.05);
-        }
+.notification-dropdown ul li div.unread-notification {
+    border-left: 3px solid #15DBa0;
+    background-color: rgba(21, 219, 160, 0.05);
+}
 
-        .notification-dropdown ul li strong {
-            display: block;
-            margin-bottom: 5px;
-            color: #02254B;
-            word-wrap: break-word;
-        }
+.notification-dropdown ul li strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #02254B;
+    word-wrap: break-word;
+}
 
-        .notification-dropdown ul li p {
-            margin: 0 0 5px 0;
-            color: #666;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+.notification-dropdown ul li p {
+    margin: 0 0 5px 0;
+    color: #666;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-        .notification-dropdown ul li small {
-            display: block;
-            color: #999;
-            font-size: 11px;
-            text-align: right;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+.notification-dropdown ul li small {
+    display: block;
+    color: #999;
+    font-size: 11px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-        .notification-empty {
-            padding: 20px;
-            text-align: center;
-            color: #666;
-        }
+.notification-empty {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
 
-        .help-bubble {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1500;
-        }
+.help-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1500;
+}
 
-        .help-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            background-color: var(--accent);
-            color: var(--text-light);
-            font-size: 30px;
-            font-weight: bold;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
+.help-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: var(--accent);
+    color: var(--text-light);
+    font-size: 30px;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
 
-        .help-icon:hover {
-            transform: scale(1
+.help-icon:hover {
+    transform: scale(1.1);
+    background-color: #12c591;
+}
 
-.1);
-            background-color: #12c591;
-        }
+.contact-popup {
+    display: none;
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    width: 300px;
+    max-height: 215px; 
+    overflow-y: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    color: var(--text-dark);
+    border: 1px solid var(--bg-dark);
+}
 
-        .contact-popup {
-            display: none;
-            position: absolute;
-            bottom: 60px;
-            right: 0;
-            width: 300px;
-            max-height: 215px;
-            overflow-y: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            color: var(--text-dark);
-            border: 1px solid var(--bg-dark);
-        }
+.contact-popup h3 {
+    margin: 0 0 15px 0;
+    color: var(--primary);
+    font-size: 18px;
+    text-align: center;
+}
 
-        .contact-popup h3 {
-            margin: 0 0 15px 0;
-            color: var(--primary);
-            font-size: 18px;
-            text-align: center;
-        }
+.contact-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
 
-        .contact-info p {
-            margin: 5px 0;
-            font-size: 14px;
-            line-height: 1.4;
-        }
+.contact-info p strong {
+    color: var(--primary);
+}
 
-        .contact-info p strong {
-            color: var(--primary);
-        }
+th:nth-child(1), td:nth-child(1) { /* Name */
+    width: 25%;
+}
 
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
+th:nth-child(2), td:nth-child(2) { /* Date */
+    width: 25%;
+}
 
-        .modal-content {
-            background-color: white;
-            border-radius: 10px;
-            width: 400px;
-            max-width: 90%;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            animation: slideIn 0.3s ease-out;
-        }
+th:nth-child(3), td:nth-child(3) { /* Status */
+    width: 20%;
+}
 
-        .modal-header {
-            padding: 15px 20px;
-            background-color: var(--primary);
-            color: var(--text-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+th:nth-child(4), td:nth-child(4) { /* Items */
+    width: 20%;
+    text-align: center; 
+    padding-right: 20px
+}
 
-        .modal-header h3 {
-            margin: 0;
-            font-size: 18px;
-        }
+td:nth-child(4) {
+    text-align: center; 
+}
 
-        .modal-close {
-            cursor: pointer;
-            font-size: 24px;
-            line-height: 1;
-            transition: var(--transition);
-        }
+th.status-header {
+    text-align:center !important; 
+    background: var(--primary);
+    color: white;
+}
 
-        .modal-close:hover {
-            color: var(--accent);
-        }
+.status-header {
+    text-align: right; 
+    right: auto;
+}
 
-        .modal-body {
-            padding: 20px;
-            color: var(--text-dark);
-        }
+.items-cell {
+    max-width: 300px; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
 
-        .modal-footer {
-            padding: 15px 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            background-color: var(--bg-light);
-        }
+.items-cell:hover .items-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
 
-        .modal-btn {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .cancel-btn {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .cancel-btn:hover {
-            background-color: var(--danger-hover);
-        }
-
-        .confirm-btn {
-            background-color: var(--primary-btn);
-            color: white;
-        }
-
-        .confirm-btn:hover {
-            background-color: var(--primary-btn-hover);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-    </style>
+.items-tooltip {
+    visibility: hidden;
+    width: 300px;
+    background-color: #333;
+    color: white;
+    text-align: left;
+    padding: 10px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 100%;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: normal;
+    word-wrap: break-word;
+}
+</style>
 </head>
 
 <body>
@@ -643,8 +624,9 @@
             <li><a href="/JMAB/admin-jmab/products.html"><i class="fas fa-box"></i><span>Products</span></a></li>
             <li><a href="/JMAB/admin-jmab/orderConfirm.html"><i class="fas fa-shopping-cart"></i><span>Orders</span></a></li>
             <li><a href="/JMAB/admin-jmab/customerTransaction.html"><i class="fas fa-user-circle"></i><span>Customers</span></a></li>
-            <li><a href="/JMAB/admin-jmab/message.html"><i class="fas fa-envelope"></i><span>Message Customer</span></a></li>
+            <li><a href="/JMAB/admin-jmab/message.html"><i class="fas fa-envelope"></i><span>Message</span></a></li>
             <li><a href="/JMAB/admin-jmab/Users.html"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
+            <li><a href="/JMAB/admin-jmab/receipts.html"><i class="fas fa-receipt"></i><span>Receipts</span></a></li>
             <li><a href="/JMAB/admin-jmab/profile.html"><i class="fas fa-id-card"></i><span>Profile</span></a></li>
         </ul>
         <div class="logout-container">
@@ -680,11 +662,13 @@
                 </div>
             </div>
         </div>
+        
         <div class="notification-container">
             <div class="notification-icon" id="notificationIcon">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge" id="notificationBadge">0</span>
             </div>
+            
             <div class="notification-dropdown" id="notificationDropdown">
                 <h4>Notifications <span id="notificationConnectionStatus" class="status-disconnected">Disconnected</span></h4>
                 <ul id="notificationList">
@@ -692,24 +676,41 @@
                 </ul>
             </div>
         </div>
+        
         <div id="dashboard-content" class="content-section">
             <h1>DASHBOARD</h1>
             <div class="boxes">
                 <div class="TotalSales">
-                    <i class="fa-solid fa-chart-line icon"></i>
-                    <div class="sales-info">
-                        <span class="sales-counter">0</span>
-                        <span class="sales-text">Sales</span>
+                    <div class="sales-header">
+                        <div class="sales-info">
+                            <i class="fa-solid fa-chart-line icon"></i>
+                            <div>
+                                <span class="sales-counter">0</span>
+                                <span class="sales-text">Sales</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sales-chart-container">
+                        <canvas id="salesChart"></canvas>
                     </div>
                 </div>
+                
                 <div class="TotalCustomers">
-                    <i class="fa-solid fa-user icon"></i>
-                    <div class="customers-info">
-                        <span class="customers-counter">0</span>
-                        <span class="customers-text">Customers</span>
+                    <div class="customers-header">
+                        <div class="customers-info">
+                            <i class="fa-solid fa-user icon"></i>
+                            <div>
+                                <span class="customers-counter">0</span>
+                                <span class="customers-text">Customers</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="customers-chart-container">
+                        <canvas id="customersChart"></canvas>
                     </div>
                 </div>
             </div>
+            
             <div class="orders-container">
                 <h2>Recent Orders</h2>
                 <table>
@@ -717,37 +718,21 @@
                         <tr>
                             <th>Name</th>
                             <th>Date Order</th>
-                            <th>Status</th>
+                            <th>Items</th> 
+                            <th class="status-header">Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td></td><td></td></tr>
-                        <tr><td></td><td></td></tr>
-                        <tr><td></td><td></td></tr>
+                        <!-- Populated by JavaScript -->
                     </tbody>
                 </table>
             </div>
-        </div>
     </main>
-
-    <!-- Custom Modal Popup -->
-    <div id="customModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle"></h3>
-                <span class="modal-close">×</span>
-            </div>
-            <div class="modal-body">
-                <p id="modalMessage"></p>
-            </div>
-            <div class="modal-footer">
-                <button id="modalCancel" class="modal-btn cancel-btn">Cancel</button>
-                <button id="modalConfirm" class="modal-btn confirm-btn">Confirm</button>
-            </div>
-        </div>
-    </div>
-
+    
     <script src="JS/dashboard.js"></script>
     <script src="../J-Mab/JS/websocketManager.js"></script>
+    <script>
+        
+    </script>
 </body>
-</html> 
+</html>

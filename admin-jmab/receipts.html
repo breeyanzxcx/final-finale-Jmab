@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J-Mab Admin - Receipts</title>
+    <link rel="icon" type="image/x-icon" href="../images/J-mab Logo.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            text-decoration: none;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #02254B;
+            --accent: #FFD700;
+            --bg-light: #F5F5F5;
+            --bg-dark: #DCD7C9;
+            --text-dark: #333;
+            --text-light: #fff;
+            --danger: #dc3545;
+            --danger-hover: #c82333;
+            --primary-btn: #007bff;
+            --primary-btn-hover: #0056b3;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            --sidebar-width: 240px;
+        }
+        
+        body {
+            display: flex;
+            background-color: var(--bg-dark);
+        }
+        
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background: var(--primary);
+            transition: var(--transition);
+            color: var(--text-light); 
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 0 15px;
+        }
+        
+        #sidebar .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; 
+            padding: 20px;
+            gap: 5px; 
+        }
+        
+        #sidebar .logo-container img {
+            width: 60px; 
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        #sidebar .admin-text {
+            font-weight: 600;
+            font-size: 30px;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+            white-space: nowrap; 
+        }
+        
+        #sidebar hr {
+            border: none;
+            height: 2px;
+            background: var(--accent);
+            margin: 15px 0;
+            opacity: 0.5;
+            margin-bottom: 50px;
+        }
+        
+        #sidebar .side-menu {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        
+        #sidebar .side-menu li {
+            position: relative;
+            margin: 8px 0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #sidebar .side-menu li a {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            padding: 14px 20px;
+            color: var(--text-light);
+            transition: var(--transition);
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        
+        #sidebar .side-menu li a i {
+            margin-right: 15px;
+            width: 25px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+        
+        #sidebar .side-menu li a:hover,
+        #sidebar .side-menu li a.active {
+            background-color: rgba(21, 219, 160, 0.2);
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        #sidebar .side-menu li a:hover i,
+        #sidebar .side-menu li a.active i {
+            transform: scale(1.1);
+            color: var(--accent);
+        }
+        
+        #sidebar .logout-container {
+            position: absolute;
+            bottom: 30px;
+            width: calc(100% - 30px);
+        }
+        
+        #sidebar .logout-container a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255,0,0,0.1);
+            color: #ff4d4d;
+            padding: 14px;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        #sidebar .logout-container a i {
+            margin-right: 10px;
+        }
+        
+        #sidebar .logout-container a:hover {
+            background-color: rgba(255,0,0,0.2);
+            transform: translateY(-3px);
+        }
+        
+        main {
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            min-height: 100vh;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            width: calc(100% - var(--sidebar-width));
+        }
+        
+        h1 {
+            margin-bottom: 25px;
+            font-size: 32px;
+            color: var(--primary);
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        h1:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 4px;
+            width: 60px;
+            background-color: var(--accent);
+            border-radius: 2px;
+        }
+        
+        .receipts-container {
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        .receipts-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        th {
+            text-align: left;
+            background: var(--primary);
+            color: white;
+        }
+
+        .view-receipt-btn {
+            padding: 5px 10px;
+            background-color: var(--primary-btn);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .view-receipt-btn:hover {
+            background-color: var(--primary-btn-hover);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: var(--text-light);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .close {
+            color: var(--text-light);
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close:hover,
+        .close:focus {
+            color: var(--accent);
+        }
+
+        .receipt-details {
+            padding: 20px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .receipt-details p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .receipt-details strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .items-section {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .items-section p {
+            margin: 5px 0;
+        }
+
+        .items-section .item-name {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .total-section {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 10px 15px;
+            width: 100%;
+        }
+        
+        .search-icon {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        #searchInput {
+            flex: 1;
+            border: none;
+            padding: 8px 0;
+            outline: none;
+            font-size: 16px;
+            color: var(--text-dark);
+        }
+        
+        #searchFilter {
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .notification-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            z-index: 1100;
+        }
+        
+        .notification-icon {
+            position: relative;
+            font-size: 24px;
+            color: #02254B;
+            padding: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .notification-icon:hover {
+            background-color: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4d4d;
+            color: white;
+            font-size: 12px;
+            border-radius: 50%;
+            padding: 3px 6px;
+            min-width: 16px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .notification-dropdown {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 0;
+            z-index: 1200;
+            overflow-x: hidden;
+        }
+        
+        .notification-dropdown h4 {
+            margin: 0;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+            color: #02254B;
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        .notification-dropdown ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .notification-dropdown ul li {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .notification-dropdown ul li .notification-content {
+            flex-grow: 1;
+            max-width: calc(100% - 40px);
+        }
+        
+        .notification-dropdown ul li .trash-icon {
+            font-size: 16px;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 5px;
+            transition: var(--transition);
+        }
+        
+        .notification-dropdown ul li .trash-icon:hover {
+            color: var(--danger-hover);
+            transform: scale(1.1);
+        }
+        
+        .notification-dropdown ul li:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .notification-dropdown ul li:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-dropdown ul li div {
+            position: relative;
+            padding-left: 5px;
+            max-width: 100%;
+        }
+        
+        .notification-dropdown ul li div.unread-notification {
+            border-left: 3px solid #15DBa0;
+            background-color: rgba(21, 219, 160, 0.05);
+        }
+        
+        .notification-dropdown ul li strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #02254B;
+            word-wrap: break-word;
+        }
+        
+        .notification-dropdown ul li p {
+            margin: 0 0 5px 0;
+            color: #666;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .notification-dropdown ul li small {
+            display: block;
+            color: #999;
+            font-size: 11px;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .notification-empty {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .help-bubble {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1500;
+        }
+        
+        .help-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background-color: var(--accent);
+            color: var(--text-light);
+            font-size: 30px;
+            font-weight: bold;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .help-icon:hover {
+            transform: scale(1.1);
+            background-color: #12c591;
+        }
+        
+        .contact-popup {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            width: 300px;
+            max-height: 215px; 
+            overflow-y: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            color: var(--text-dark);
+            border: 1px solid var(--bg-dark);
+        }
+        
+        .contact-popup h3 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .contact-info p {
+            margin: 5px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .contact-info p strong {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <section id="sidebar">
+        <div class="logo-container">
+            <img src="../images/ICONS.png" class="logo" alt="Logo">
+            <p class="admin-text">J-MAB</p>
+        </div>
+        <hr>
+        <ul class="side-menu">
+            <li><a href="/JMAB/admin-jmab/dashboard.html"><i class="fas fa-gauge"></i><span>Dashboard</span></a></li>
+            <li><a href="/JMAB/admin-jmab/products.html"><i class="fas fa-box"></i><span>Products</span></a></li>
+            <li><a href="/JMAB/admin-jmab/orderConfirm.html"><i class="fas fa-shopping-cart"></i><span>Orders</span></a></li>
+            <li><a href="/JMAB/admin-jmab/customerTransaction.html"><i class="fas fa-user-circle"></i><span>Customers</span></a></li>
+            <li><a href="/JMAB/admin-jmab/message.html"><i class="fas fa-envelope"></i><span>Message</span></a></li>
+            <li><a href="/JMAB/admin-jmab/Users.html"><i class="fas fa-user-circle"></i><span>Users</span></a></li>
+            <li><a href="/JMAB/admin-jmab/receipts.html" class="active"><i class="fas fa-receipt"></i><span>Receipts</span></a></li>
+            <li><a href="/JMAB/admin-jmab/profile.html"><i class="fas fa-id-card"></i><span>Profile</span></a></li>
+        </ul>
+        <div class="logout-container">
+            <a href="#" id="logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+        </div>
+    </section>
+
+    <main>
+        <div class="help-bubble" id="helpBubble">
+            <span class="help-icon">?</span>
+            <div class="contact-popup" id="contactPopup">
+                <h3>Developer Contacts</h3>
+                <div class="contact-info">
+                    <p><strong>Aaron Abad</strong></p>
+                    <p>Email: Aaron.abad@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Benedict Nacor</strong></p>
+                    <p>Email: Benedict.nacor@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Marvin Recepcion</strong></p>
+                    <p>Email: Marvin.recepcion@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Brian Rosario</strong></p>
+                    <p>Email: Brian.rosario@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                    <br>
+                    <p><strong>Christian Tenorio</strong></p>
+                    <p>Email: Christian.tenorio@gmail.com</p>
+                    <p>Phone: 09123456789</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-container">
+            <div class="notification-icon" id="notificationIcon">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </div>
+            
+            <div class="notification-dropdown" id="notificationDropdown">
+                <h4>Notifications <span id="notificationConnectionStatus" class="status-disconnected">Disconnected</span></h4>
+                <ul id="notificationList">
+                    <li class="notification-empty">Loading notifications...</li>
+                </ul>
+            </div>
+        </div>
+
+        <h1>RECEIPTS</h1>
+        <div class="receipts-container">
+            <h2>All Receipts</h2>
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search receipts...">
+                    <select id="searchFilter">
+                        <option value="all">All</option>
+                        <option value="name">Customer Name</option>
+                        <option value="reference">Order Reference</option>
+                    </select>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer Name</th>
+                        <th>Total Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="receiptsTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal for Receipt Details -->
+        <div id="receiptModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><img src="../images/ICONS.png" class="logo" alt="J-MAB Logo"> Receipt Details</h2>
+                    <span class="close">×</span>
+                </div>
+                <div class="receipt-details" id="receiptDetails">
+                    <!-- Receipt details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../admin-jmab/JS/dashboard.js"></script>
+    <script src="../J-Mab/JS/websocketManager.js"></script>
+    <script>
+        let allReceipts = [];
+    
+        function getToken() {
+            return localStorage.getItem('authToken');
+        }
+        
+        async function fetchReceipts() {
+            const token = getToken();
+            if (!token) {
+                console.error('No authentication token found. Please log in.');
+                window.location.href = '/JMAB/admin-jmab/login.html';
+                return [];
+            }
+        
+            try {
+                const response = await fetch('http://localhost/jmab/final-jmab/api/receipts', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+        
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Network response was not ok: ${response.status} - ${errorText}`);
+                }
+        
+                const data = await response.json();
+                console.log('API Response:', data);
+                const receipts = Array.isArray(data) ? data : data.success ? data.receipts : [];
+                allReceipts = receipts; // Store receipts globally
+                return receipts;
+            } catch (error) {
+                console.error('Error fetching receipts:', error);
+                return [];
+            }
+        }
+        
+        function populateTable(receipts) {
+            const tableBody = document.getElementById('receiptsTableBody');
+            tableBody.innerHTML = '';
+    
+            if (receipts.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5">No receipts found or error fetching data</td></tr>';
+                return;
+            }
+    
+            receipts.forEach(receipt => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${receipt.order_reference}</td>
+                    <td>${receipt.bill_to?.name || 'N/A'}</td>
+                    <td>$${parseFloat(receipt.total_amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td><button class="view-receipt-btn" data-id="${receipt.receipt_id}">View</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+    
+            addViewButtonListeners(receipts);
+        }
+        
+        function addViewButtonListeners(receipts) {
+            const modal = document.getElementById('receiptModal');
+            const closeBtn = document.getElementsByClassName('close')[0];
+            const receiptDetails = document.getElementById('receiptDetails');
+        
+            document.querySelectorAll('.view-receipt-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const receiptId = this.getAttribute('data-id');
+                    const receipt = receipts.find(r => r.receipt_id === parseInt(receiptId));
+                    
+                    if (receipt) {
+                        receiptDetails.innerHTML = `
+                            <p><strong>Receipt ID:</strong> ${receipt.receipt_id}</p>
+                            <p><strong>Order ID:</strong> ${receipt.order_id}</p>
+                            <p><strong>Customer:</strong> ${receipt.bill_to?.name || 'N/A'}</p>
+                            <p><strong>Order Reference:</strong> ${receipt.order_reference}</p>
+                            <p><strong>Payment Method:</strong> ${receipt.payment_method}</p>
+                            <div class="items-section">
+                                ${receipt.items.map(item => `
+                                    <p class="item-name"><strong>Items:</strong> ${item.product_name || item.description.split('.')[0].trim()}</p>
+                                    <p>Quantity: ${item.quantity}</p>
+                                    <p>Price: $${parseFloat(item.unit_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                                `).join('<hr>')}
+                            </div>
+                            <div class="total-section">
+                                <p><strong>Shipping Address:</strong> ${receipt.ship_to?.address || 'N/A'}</p>
+                                <p><strong>Total Amount:</strong> $${parseFloat(receipt.total_amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                            </div>
+                        `;
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+        
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+            };
+        
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        }
+        
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchFilter = document.getElementById('searchFilter');
+            
+            if (!searchInput || !searchFilter) {
+                console.error('Search elements not found in the DOM');
+                return;
+            }
+            
+            searchInput.addEventListener('input', performSearch);
+            searchFilter.addEventListener('change', performSearch);
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filterType = searchFilter.value;
+                
+                if (!searchTerm.trim()) {
+                    populateTable(allReceipts);
+                    return;
+                }
+                
+                const filteredReceipts = allReceipts.filter(receipt => {
+                    const customerName = (receipt.bill_to?.name || '').toLowerCase();
+                    const orderReference = (receipt.order_reference || '').toLowerCase();
+                    
+                    if (filterType === 'name') {
+                        return customerName.includes(searchTerm);
+                    } else if (filterType === 'reference') {
+                        return orderReference.includes(searchTerm);
+                    } else {
+                        return customerName.includes(searchTerm) || orderReference.includes(searchTerm);
+                    }
+                });
+                
+                populateTable(filteredReceipts);
+            }
+        }
+        
+        async function init() {
+            const receipts = await fetchReceipts();
+            populateTable(receipts);
+            setupSearch(); // Call setupSearch after DOM elements are available
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
