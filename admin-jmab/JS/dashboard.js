@@ -219,7 +219,15 @@ async function fetchOrders() {
 }
 
 function updateSalesCounter(orders) {
-    const totalSales = orders.reduce((sum, order) => sum + (parseInt(order.total_quantity, 10) || 0), 0);
+    const totalSales = orders.reduce((sum, order) => {
+        // Only count orders that aren't failed/cancelled
+        if (order.status && 
+            !['failed', 'canceled', 'cancelled', 'refunded'].includes(order.status.toLowerCase())) {
+            return sum + (parseInt(order.total_quantity, 10) || 0);
+        }
+        return sum;
+    }, 0);
+
     const salesCounter = document.querySelector(".sales-counter");
     if (salesCounter) salesCounter.textContent = totalSales;
 }
@@ -335,6 +343,7 @@ async function updateSalesChart() {
             'Batteries': 0,
             'Oils': 0,
             'Lubricants': 0
+            
         };
 
         data.categories.forEach(category => {
@@ -361,12 +370,14 @@ async function updateSalesChart() {
             salesChart.destroy();
         }
 
-        console.log("Creating new chart with data:", categoryCounts);
+        // Changed from pie chart to bar chart
+        console.log("Creating new bar chart with data:", categoryCounts);
         salesChart = new Chart(ctx, {
-            type: 'pie',
+            type: 'bar',
             data: {
                 labels: Object.keys(categoryCounts),
                 datasets: [{
+                    label: 'Number of Orders',
                     data: Object.values(categoryCounts),
                     backgroundColor: [
                         '#FF6384', // Tires
@@ -377,7 +388,7 @@ async function updateSalesChart() {
                     borderWidth: 1
                 }]
             },
-            options: getPieChartOptions('Sales Distribution by Category')
+            options: getBarChartOptions('Sales Distribution by Category')
         });
         
         console.log("Chart created successfully");
@@ -387,6 +398,76 @@ async function updateSalesChart() {
     }
     
     console.log("=====================================================");
+}
+
+// Add a new function for bar chart options
+function getBarChartOptions(title) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                },
+                title: {
+                    display: true,
+                    text: 'Number of Orders',
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    padding: {top: 0, bottom: 10}
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Product Categories',
+                    font: {
+                        size: 12,
+                        weight: 'bold'
+                    },
+                    padding: {top: 10, bottom: 0}
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            },
+            title: {
+                display: true,
+                text: title,
+                font: { 
+                    size: 16, 
+                    weight: 'bold' 
+                },
+                padding: { 
+                    top: 10, 
+                    bottom: 20 
+                },
+                color: '#02254B'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = Math.round((value / total) * 100);
+                        return `${value} orders (${percentage}%)`;
+                    }
+                },
+                bodyFont: { size: 12 },
+                titleFont: { size: 14, weight: 'bold' }
+            }
+        },
+        animation: {
+            duration: 1000,
+            easing: 'easeOutQuart'
+        }
+    };
 }
 
 function updateCustomersChart(orders) {

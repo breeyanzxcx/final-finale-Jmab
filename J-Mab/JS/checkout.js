@@ -350,7 +350,7 @@ async function checkout(checkoutItems) {
 
         console.log("Sending order data:", JSON.stringify(orderData, null, 2));
 
-        const response = await fetch(`http://localhost/jmab/final-jmab/api/orders/${userId}`, {
+        const response = await fetch(`http://localhost/final-jmab/api/orders/${userId}`, {
             method: "POST",
             headers: { 
                 "Content-Type": "application/json", 
